@@ -16,7 +16,7 @@ O objetivo geral deste trabalho é desenvolver um software capaz de solucionar o
 
 Como objetivos específicos, pretende-se:
 1. Analisar as principais dificuldades enfrentadas por esse público na organização de vendas, atendimentos, recebimentos e despesas.
-2. Identificar quais informações e processos são essenciais para garantir um controle comercial e financeiro mais claro e prático
+2. Identificar quais informações e processos são essenciais para garantir um controle comercial e financeiro mais claro e prático.
 3. Projetar uma solução digital simples e acessível, alinhada à rotina de pequenos negócios.
 4. Avaliar de que forma a centralização dessas informações pode contribuir para reduzir erros, melhorar a organização e apoiar a tomada de decisão no dia a dia.
 
