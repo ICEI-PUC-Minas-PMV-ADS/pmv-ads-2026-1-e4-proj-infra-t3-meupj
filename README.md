@@ -1,25 +1,25 @@
-# TÍTULO DO PROJETO
+# MEUPJ
 
-`CURSO`
+`Análise e Desenvolvimento de Sistemas`
 
-`DISCIPLINA`
+`Desenvolvimento de uma Aplicação Distribuída`
 
-`SEMESTRE`
+`Etapa 4`
 
-Descrever resumidamente, em um ou dois parágrafos, o projeto que está sendo desenvolvido.
+O app reúne, em um só lugar, a organização comercial e financeira do negócio, ajuda o profissional a apresentar, registrar e formalizar vendas e serviços, com emissão de proposta, orçamento, pedido e ordem de serviço, além de personalização visual para transmitir mais profissionalismo (adicionar logo, talvez editar as cores do pdf). Também oferece um controle financeiro prático do caixa, permitindo acompanhar faturamento, recebimentos, valores em aberto ou atrasados, registrar custos e despesas e visualizar gráficos para comparar entradas, saídas e previsões financeiras.
 
 ## Integrantes
 
-* Nome completo do aluno 1
-* Nome completo do aluno 2
-* Nome completo do aluno 3
-* Nome completo do aluno 4
-* Nome completo do aluno 5
-* Nome completo do aluno 6
+* Frederico Furtado Amantino Vieira
+* Guilherme de Andrade Castro Vieira
+* Maria Julia Gonçalves Maia Sales
+* Eric Esteves Martins
+* Amanda Vitor Lopes
+* Bruna Bricio Alvarenga Sampaio
 
 ## Orientador
 
-* Nome completo do professor 1
+* Carolina Stephanie Jerônimo de Almeida
 
 ## Instruções de utilização
 
