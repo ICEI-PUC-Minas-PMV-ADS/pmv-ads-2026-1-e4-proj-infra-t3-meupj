@@ -26,7 +26,7 @@ Este projeto se justifica pela relevância dos pequenos negócios na economia br
 
 Ao mesmo tempo, pesquisas recentes mostram fragilidades na organização financeira desses empreendedores: 61% ainda misturam despesas pessoais e empresariais, apenas 20% utilizam sistemas digitais para controle financeiro e 10% não realizam qualquer tipo de controle. Somado a isso, a inadimplência já atinge um em cada quatro pequenos negócios. Nesse contexto, o projeto se torna relevante por propor uma solução simples e acessível para reduzir a desorganização, melhorar o controle operacional e apoiar uma gestão mais segura e profissional.
 
-**Fontes**:
+> **Fontes**:
 > - [6 em cada 10 donos de EPPs possuem um controle precário da gestão financeira](https://agenciasebrae.com.br/cultura-empreendedora/61-dos-empreendedores-brasileiros-fazem-pagamentos-da-empresa-com-a-conta-pessoal)
 > - [MEIs e EPPs correspondem a 99% do total das empresas nacionais](https://www.gov.br/memp/pt-br/assuntos/noticias/lei-que-cria-ministerio-do-empreendedorismo-e-sancionada-1)
 
