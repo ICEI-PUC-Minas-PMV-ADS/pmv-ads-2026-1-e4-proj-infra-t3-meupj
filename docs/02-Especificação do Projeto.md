@@ -36,17 +36,9 @@ Com base na análise das personas forma identificadas as seguintes histórias de
 | **Carla, a MEI em crescimento**    | registrar os pagamentos recebidos vinculados às propostas              | centralizar as informações comerciais e financeiras no mesmo lugar.      |
 | **Carla, a MEI em crescimento**    | registrar as minhas despesas recorrentes e custos operacionais         | ter controle de quanto meu negócio custa para operar mensalmente.        |
 | **Carla, a MEI em crescimento**    | visualizar um painel (dashboard) com resumos e gráficos de faturamento | entender a real situação financeira do meu negócio para previsibilidade. |
-| **Marcos, o pequeno empreendedor** | de um acesso compartilhado (ou multiusuário simplificado) ao sistema   | que minha esposa/assistente possa me ajudar com registros e cobranças.   |
+| **Marcos, o pequeno empreendedor** | de um acesso compartilhado simplificado ao sistema   | que minha esposa/assistente possa me ajudar com registros e cobranças.   |
 | **Marcos, o pequeno empreendedor** | visualizar rapidamente o fluxo de caixa do dia/semana                  | tomar melhores decisões sobre despesas urgentes e compras de material.   |
 | **Marcos, o pequeno empreendedor** | emitir ordens de serviço claras com status de andamento                | que minha auxiliar possa acompanhar a execução dos trabalhos.            |
-
-> **Links Úteis**:
->
-> - [Histórias de usuários com exemplos e template](https://www.atlassian.com/br/agile/project-management/user-stories)
-> - [Como escrever boas histórias de usuário (User Stories)](https://medium.com/vertice/como-escrever-boas-users-stories-hist%C3%B3rias-de-usu%C3%A1rios-b29c75043fac)
-> - [User Stories: requisitos que humanos entendem](https://www.luiztools.com.br/post/user-stories-descricao-de-requisitos-que-humanos-entendem/)
-> - [Histórias de Usuários: mais exemplos](https://www.reqview.com/doc/user-stories-example.html)
-> - [9 Common User Story Mistakes](https://airfocus.com/blog/user-story-mistakes/)
 
 ## Requisitos
 
