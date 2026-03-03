@@ -36,44 +36,50 @@ A aplicação é voltada principalmente para profissionais autônomos, microempr
 
 Esse público costuma ter uma relação prática com a tecnologia: normalmente usa celular, WhatsApp, e-mail e redes sociais com frequência, mas nem sempre possui familiaridade com sistemas de gestão mais completos. Em alguns casos, há conhecimento básico de planilhas, em outros, o uso de tecnologia é mais limitado e orientado ao dia a dia. Em termos hierárquicos, a decisão costuma ficar concentrada no próprio dono do negócio, embora alguns usuários contem com apoio de assistentes, sócios ou familiares em tarefas administrativas.
 
-**Perfis de usuários**
+### Perfis de usuários
 
-1. Autônomo operacional
+#### 1. Autônomo operacional
+
 É o profissional que trabalha sozinho e concentra toda a operação do negócio. Costuma atender clientes, negociar, executar o serviço e fazer o controle financeiro de forma manual. Tem pouco tempo para tarefas administrativas e precisa de uma solução simples, rápida e fácil de entender.
 
-2. MEI em fase de organização
+#### 2. MEI em fase de organização
+
 É o pequeno empreendedor que já possui demanda recorrente, mas ainda não estruturou bem seus processos. Normalmente já percebe a necessidade de padronizar propostas, registrar serviços e acompanhar pagamentos com mais clareza. Tem familiaridade básica com tecnologia, mas busca praticidade em vez de sistemas complexos.
 
-3. Pequeno prestador com apoio administrativo
+#### 3. Pequeno prestador com apoio administrativo
+
 É o negócio de pequeno porte em que o dono ainda centraliza decisões, mas conta com ajuda de outra pessoa para organizar documentos, cobranças ou despesas. Esse perfil exige uma ferramenta clara e organizada, pois o uso pode ser compartilhado entre pessoas com diferentes níveis de conhecimento digital.
 
-**Personas**
+### Personas
 
-1. João, o autônomo multitarefa
-Idade: 29 anos.
-Atuação: eletricista autônomo.
-Conhecimento prévio: usa celular e aplicativos de mensagem diariamente, mas tem pouca experiência com sistemas de gestão.
-Rotina: registra acordos e pagamentos em conversas e anotações.
-Principal dificuldade: perder controle sobre propostas, serviços combinados e valores pendentes.
-Necessidade: mais organização sem aumentar a complexidade da rotina.
+#### 1. João, o autônomo multitarefa
 
-2. Carla, a MEI em crescimento
-Idade: 37 anos.
-Atuação: designer e prestadora de serviços visuais.
-Conhecimento prévio: usa planilhas simples, e-mail e ferramentas digitais com frequência.
-Rotina: já possui fluxo de clientes, mas sente dificuldade para padronizar documentos e acompanhar recebimentos.
-Principal dificuldade: falta de centralização entre parte comercial e financeira.
-Necessidade: profissionalizar a operação e ter mais previsibilidade financeira.
+- **Idade:** 29 anos  
+- **Atuação:** eletricista autônomo  
+- **Conhecimento prévio:** usa celular e aplicativos de mensagem diariamente, mas tem pouca experiência com sistemas de gestão  
+- **Rotina:** registra acordos e pagamentos em conversas e anotações  
+- **Principal dificuldade:** perder controle sobre propostas, serviços combinados e valores pendentes  
+- **Necessidade:** mais organização sem aumentar a complexidade da rotina  
 
-3. Marcos, o pequeno empreendedor com apoio
-Idade: 44 anos.
-Atuação: manutenção residencial.
-Conhecimento prévio: uso intermediário de tecnologia. Conta com ajuda da esposa na parte administrativa.
-Rotina: ele executa os serviços, enquanto outra pessoa ajuda em cobranças e registros.
-Principal dificuldade: comunicação desorganizada e pouca visibilidade do caixa.
-Necessidade: padronizar processos e facilitar o acompanhamento das informações do negócio.
+#### 2. Carla, a MEI em crescimento
 
-**Stakeholders**
+- **Idade:** 37 anos  
+- **Atuação:** designer e prestadora de serviços visuais  
+- **Conhecimento prévio:** usa planilhas simples, e-mail e ferramentas digitais com frequência  
+- **Rotina:** já possui fluxo de clientes, mas sente dificuldade para padronizar documentos e acompanhar recebimentos  
+- **Principal dificuldade:** falta de centralização entre parte comercial e financeira  
+- **Necessidade:** profissionalizar a operação e ter mais previsibilidade financeira  
+
+#### 3. Marcos, o pequeno empreendedor com apoio
+
+- **Idade:** 44 anos  
+- **Atuação:** manutenção residencial  
+- **Conhecimento prévio:** uso intermediário de tecnologia; conta com ajuda da esposa na parte administrativa  
+- **Rotina:** executa os serviços, enquanto outra pessoa ajuda em cobranças e registros  
+- **Principal dificuldade:** comunicação desorganizada e pouca visibilidade do caixa  
+- **Necessidade:** padronizar processos e facilitar o acompanhamento das informações do negócio  
+
+### Stakeholders
 
 Os principais stakeholders do projeto são o usuário principal (autônomo ou pequeno empreendedor), as pessoas de apoio administrativo que podem auxiliar no controle das informações, os clientes, que recebem propostas e formalizações, e agentes externos como contador, fornecedores e parceiros de serviço, que influenciam a rotina financeira e operacional do negócio.
 
