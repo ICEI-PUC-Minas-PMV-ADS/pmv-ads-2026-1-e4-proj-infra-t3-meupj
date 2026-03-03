@@ -6,7 +6,7 @@
 
 `Etapa 4`
 
-O app reúne, em um só lugar, a organização comercial e financeira do negócio, ajuda o profissional a apresentar, registrar e formalizar vendas e serviços, com emissão de proposta, orçamento, pedido e ordem de serviço, além de personalização visual para transmitir mais profissionalismo (adicionar logo, talvez editar as cores do pdf). Também oferece um controle financeiro prático do caixa, permitindo acompanhar faturamento, recebimentos, valores em aberto ou atrasados, registrar custos e despesas e visualizar gráficos para comparar entradas, saídas e previsões financeiras.
+O app reúne, em um só lugar, a organização comercial e financeira do negócio, ajuda o profissional a apresentar, registrar e formalizar vendas e serviços, com emissão de proposta, orçamento, pedido e ordem de serviço, além de personalização visual para transmitir mais profissionalismo (adicionar logo e editar cores). Também oferece um controle financeiro prático do caixa, permitindo acompanhar faturamento, recebimentos, valores em aberto ou atrasados, registrar custos e despesas e visualizar gráficos para comparar entradas, saídas e previsões financeiras.
 
 ## Integrantes
 
