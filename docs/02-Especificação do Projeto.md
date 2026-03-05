@@ -83,14 +83,13 @@ O projeto está restrito pelos itens apresentados na tabela a seguir.
 | ID  | Restrição                                             |
 | --- | ----------------------------------------------------- |
 | 01  | O projeto deverá ser entregue até o final do semestre |
-| 02  | Não pode ser desenvolvido um módulo de backend        |
-
-Enumere as restrições à sua solução. Lembre-se de que as restrições geralmente limitam a solução candidata.
-
-> **Links Úteis**:
->
-> - [O que são Requisitos Funcionais e Requisitos Não Funcionais?](https://codificar.com.br/requisitos-funcionais-nao-funcionais/)
-> - [O que são requisitos funcionais e requisitos não funcionais?](https://analisederequisitos.com.br/requisitos-funcionais-e-requisitos-nao-funcionais-o-que-sao/)
+| 02  | O backend deverá ser desenvolvido exclusivamente em Node.js, não sendo permitida a adoção de outras linguagens ou runtimes server-side no escopo do projeto.|
+| 03  | O frontend web deverá ser desenvolvido em React, e o aplicativo móvel em React Native, mantendo consistência tecnológica entre as plataformas.|
+| 04  | A aplicação não poderá emitir documentos fiscais oficiais (como NF-e ou NFS-e), ficando restrita à geração de documentos comerciais informais, como propostas, ordens de serviço e recibos.|
+| 05  | O sistema não integrará com sistemas bancários ou gateways de pagamento, limitando-se ao registro manual de recebimentos e despesas pelo próprio usuário.|
+| 06  | A solução deverá ser desenvolvida com tecnologias acessíveis à equipe do projeto, sem dependência de licenças pagas de frameworks, plataformas ou ferramentas proprietárias.|
+| 07  | O escopo da aplicação se restringe ao controle comercial e financeiro básico, não contemplando funcionalidades de CRM avançado, gestão de estoque ou módulos contábeis completos.|
+| 08  | A aplicação não realizará envio automático de documentos por e-mail ou WhatsApp de forma nativa — o compartilhamento dependerá de recursos do próprio dispositivo do usuário ou de integrações futuras fora do escopo atual.|
 
 ## Diagrama de Casos de Uso
 
