@@ -44,37 +44,45 @@ Com base na análise das personas forma identificadas as seguintes histórias de
 
 As tabelas que se seguem apresentam os requisitos funcionais e não funcionais que detalham o escopo do projeto. Para determinar a prioridade de requisitos, aplicar uma técnica de priorização de requisitos e detalhar como a técnica foi aplicada.
 
-<strong>Crie no mínimo 12 Requisitos funcionais, 6 não funcionais e 3 restrições</strong>
-<strong>Cada aluno será responsável pela execução completa (back, web e mobile) de pelo menos 2 requisitos que será acompanhado pelo professor</strong>
 
 ### Requisitos Funcionais
 
 | ID     | Descrição do Requisito                  | Prioridade | Responsável |
 | ------ | --------------------------------------- | ---------- | ----------- |
-| RF-001 | Permitir que o usuário cadastre tarefas | ALTA       | Pedro       |
-| RF-002 | Emitir um relatório de tarefas no mês   | MÉDIA      | João        |
+| RF-001 | O sistema deve permitir que o usuário crie uma conta informando nome, CPF/CNPJ, telefone, email, endereço e senha | ALTA       | Amanda       |
+| RF-002 | O sistema deve permitir que o usuário edite os dados de sua conta  | ALTA      | Amanda        |
+| RF-003 | O sistema deve permitir que o usuário exclua a sua conta, removendo os dados vinculados após confirmação | ALTA       | Amanda       |
+| RF-004 | O sistema deve permitir que o usuário cadastre clientes com nome, CPF/CNPJ, telefone, email e endereço   | ALTA      | Bruna        |
+| RF-005 | O sistema deve permitir que o usuário edite os dados de um cliente | ALTA       | Bruna       |
+| RF-006 | O sistema deve permitir que o usuário exclua um cliente, desde que não haja documentos ativos vinculados   | ALTA      | Bruna        |
+| RF-007 | O sistema deve permitir que o usuário busque e filtre clientes cadastrados por nome, CPF/CNPJ, telefone, email e endereço | MÉDIA       | Bruna       |
+| RF-008 | O sistema deve permitir que o usuário crie pedidos com um ou mais serviços vinculado a um cliente, definindo quantidade, valor unitário e desconto  | ALTA      | Eric        |
+| RF-009 | O sistema deve permitir que o usuário edite os dados de um pedido | ALTA       | Eric       |
+| RF-010 | O sistema deve permitir que o usuário exclua um pedido | ALTA      | Eric        |
+| RF-011 | O sistema deve permitir que o usuário busque e filtre pedidos por cliente e nome de serviços | MÉDIA       | Frederico       |
+| RF-012 | o sistema deve permitir que o usuário cadastre serviços, informando nome, descrição, valor unitário e unidade de medida  | ALTA     | Frederico        |
+| RF-013 | O sistema deve permitir que o usuário edite os dados de um serviço | ALTA       | Frederico      |
+| RF-014 | o sistema deve permitir que o usuário exclua um serviço, desde que não esteja vinculado a um pedido ativo   | ALTA      | Guilherme        |
+| RF-015 | O sistema deve permitir que o usuário busque e filtre serviços por nome, descrição e valor  | MÉDIA       | Guilherme       |
+| RF-016 | O sistema deve exibir um painel com a receita recebida, receita a receber e receita em atraso   | MÉDIA      | Guilherme        |
+| RF-017 | O sistema deve apresentar um gráfico de receitas com os valores de receitas recebida, receitas a receber e receitas em atraso | BAIXA       | Maria Julia       |
+| RF-018 | O sistema deve exibir um painel com os custos pagos, os custos previstos e os custos em atraso  | MÉDIA      | Maria Julia        |
+| RF-019 | O sistema deve apresentar um gráfico de custos com os valores de custos pagos, os custos previstos e os custos em atraso | BAIXA      | Maria Julia      |
+| RF-020 | O sistema deve permitir gerar um recibo a partir de um pagameno registrado de um pedido, contendos os dados do usuário, dados do cliente, descrição dos serviços pretados, valor pago, data e forma de pagamento | MÉDIA | Amanda        |
+| RF-021 | O sistema deve permitir criar um contrato de serviço vinculado a um cliente e a um pedido, com os dados do usuário, dados do cliente, descrição dos serviços, valor, data a ser relaziado o serviço, método de pagamento e espaço para assinatura do usuário e cliente | MÉDIA  | Eric       |
+| RF-022 | O sistema deve permitir que o usuário inicie uma chamada telefônica para um cliente diretamente através do aplicativo mobile  | ALTA      | Frederico       |
 
 ### Requisitos não Funcionais
 
 | ID      | Descrição do Requisito                                            | Prioridade |
 | ------- | ----------------------------------------------------------------- | ---------- |
-| RNF-001 | O sistema deve ser responsivo para rodar em um dispositivos móvel | MÉDIA      |
-| RNF-002 | Deve processar requisições do usuário em no máximo 3s             | BAIXA      |
+| RNF-001 | As senhas dos usuários devem ser criptografadas utilizando algoritmo de hash seguro (bcrypt) antes de serem armazenadas no banco de dados, garantindo que nenhuma senha seja salva em texto puro | ALTA      |
+| RNF-002 | Toda comunicação entre o aplicativo e o servidor deve ser realizada por meio de HTTPS, com autenticação das requisições via token JWT, garantindo que apenas usuários autenticados acessem os dados da aplicação            | ALTA      |
+| RNF-003 | A interface deve ser simples e intuitiva, permitindo que o usuário realize as principais tarefas da aplicação sem necessidade de treinamento prévio ou conhecimento técnico avançado | ALTA      |
+| RNF-004 | O aplicativo mobile deve funcionar corretamente nos sistemas operacionais Android e iOS, mantendo comportamento e aparência consistentes entre as duas plataformas          | MÉDIA     |
+| RNF-005 | A versão web da aplicação deve funcionar corretamente nos principais navegadores modernos, incluindo Google Chrome, Mozilla Firefox, Safari e Microsoft Edge, em suas versões mais recentes | MÉDIA      |
+| RNF-006 | As telas e operações principais da aplicação devem apresentar tempo de resposta inferior a 3 segundos em condições normais de uso e conectividade | ALTA      |
 
-Com base nas Histórias de Usuário, enumere os requisitos da sua solução. Classifique esses requisitos em dois grupos:
-
-- [Requisitos Funcionais
-  (RF)](https://pt.wikipedia.org/wiki/Requisito_funcional):
-  correspondem a uma funcionalidade que deve estar presente na
-  plataforma (ex: cadastro de usuário).
-- [Requisitos Não Funcionais
-  (RNF)](https://pt.wikipedia.org/wiki/Requisito_n%C3%A3o_funcional):
-  correspondem a uma característica técnica, seja de usabilidade,
-  desempenho, confiabilidade, segurança ou outro (ex: suporte a
-  dispositivos iOS e Android).
-  Lembre-se que cada requisito deve corresponder à uma e somente uma
-  característica alvo da sua solução. Além disso, certifique-se de que
-  todos os aspectos capturados nas Histórias de Usuário foram cobertos.
 
 ## Restrições
 
