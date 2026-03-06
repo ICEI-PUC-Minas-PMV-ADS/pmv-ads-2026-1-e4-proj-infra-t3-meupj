@@ -29,16 +29,16 @@ Com base na análise das personas forma identificadas as seguintes histórias de
 
 | EU COMO... `PERSONA`               | QUERO/PRECISO ... `FUNCIONALIDADE`                                     | PARA ... `MOTIVO/VALOR`                                                  |
 | ---------------------------------- | ---------------------------------------------------------------------- | ------------------------------------------------------------------------ |
-| **João, o autônomo multitarefa**   | registrar os serviços combinados de forma rápida                       | não perder o controle do que foi acordado com o cliente.                 |
-| **João, o autônomo multitarefa**   | anotar os valores pendentes de recebimento                             | saber exatamente quem está me devendo e poder cobrar.                    |
-| **João, o autônomo multitarefa**   | gerar e enviar propostas de serviço de forma digital                   | agilizar o fechamento de negócios sem complicação.                       |
-| **Carla, a MEI em crescimento**    | criar propostas padronizadas com a minha marca (identidade visual)     | transmitir uma imagem mais profissional aos meus clientes.               |
-| **Carla, a MEI em crescimento**    | registrar os pagamentos recebidos vinculados às propostas              | centralizar as informações comerciais e financeiras no mesmo lugar.      |
-| **Carla, a MEI em crescimento**    | registrar as minhas despesas recorrentes e custos operacionais         | ter controle de quanto meu negócio custa para operar mensalmente.        |
-| **Carla, a MEI em crescimento**    | visualizar um painel (dashboard) com resumos e gráficos de faturamento | entender a real situação financeira do meu negócio para previsibilidade. |
-| **Marcos, o pequeno empreendedor** | de um acesso compartilhado simplificado ao sistema   | que minha esposa/assistente possa me ajudar com registros e cobranças.   |
-| **Marcos, o pequeno empreendedor** | visualizar rapidamente o fluxo de caixa do dia/semana                  | tomar melhores decisões sobre despesas urgentes e compras de material.   |
-| **Marcos, o pequeno empreendedor** | emitir ordens de serviço claras com status de andamento                | que minha auxiliar possa acompanhar a execução dos trabalhos.            |
+| **João**   | Registrar os serviços combinados de forma rápida                       | Não perder o controle do que foi acordado com o cliente.                 |
+| **João**   | Anotar os valores pendentes de recebimento                             | Saber exatamente quem está me devendo e poder cobrar.                    |
+| **João**   | Gerar e enviar propostas de serviço de forma digital                   | Agilizar o fechamento de negócios sem complicação.                       |
+| **Carla**    | Criar propostas padronizadas com a minha marca (identidade visual)     | Transmitir uma imagem mais profissional aos meus clientes.               |
+| **Carla**    | Registrar os pagamentos recebidos vinculados às propostas              | Centralizar as informações comerciais e financeiras no mesmo lugar.      |
+| **Carla**    | Registrar as minhas despesas recorrentes e custos operacionais         | Ter controle de quanto meu negócio custa para operar mensalmente.        |
+| **Carla**    | Visualizar um painel (dashboard) com resumos e gráficos de faturamento | Entender a real situação financeira do meu negócio para previsibilidade. |
+| **Marcos** | De um acesso compartilhado simplificado ao sistema   | Que minha esposa/assistente possa me ajudar com registros e cobranças.   |
+| **Marcos** | Visualizar rapidamente o fluxo de caixa do dia/semana                  | Tomar melhores decisões sobre despesas urgentes e compras de material.   |
+| **Marcos** | Emitir ordens de serviço claras com status de andamento                | Que minha auxiliar possa acompanhar a execução dos trabalhos.            |
 
 ## Requisitos
 
