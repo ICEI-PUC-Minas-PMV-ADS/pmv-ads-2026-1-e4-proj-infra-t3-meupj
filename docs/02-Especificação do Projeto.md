@@ -8,20 +8,10 @@ Apresente uma visão geral do que será abordado nesta parte do documento, enume
 
 ## Personas
 
-Pedro Paulo tem 26 anos, é arquiteto recém-formado e autônomo. Pensa em se desenvolver profissionalmente através de um mestrado fora do país, pois adora viajar, é solteiro e sempre quis fazer um intercâmbio. Está buscando uma agência que o ajude a encontrar universidades na Europa que aceitem alunos estrangeiros.
+![Persona 1](https://github.com/user-attachments/assets/37c2c65e-a8a5-4fd0-91f6-79e3073bfbb1)
+![Persona 2](https://github.com/user-attachments/assets/0acb5cc0-9f7d-422c-9351-a76bfd621b65)
+![Persona 3](https://github.com/user-attachments/assets/2aad9fbd-10af-4228-9e1d-76457c33acb6)
 
-Enumere e detalhe as personas da sua solução. Para tanto, baseie-se tanto nos documentos disponibilizados na disciplina e/ou nos seguintes links:
-
-> **Links Úteis**:
->
-> - [Rock Content](https://rockcontent.com/blog/personas/)
-> - [Hotmart](https://blog.hotmart.com/pt-br/como-criar-persona-negocio/)
-> - [O que é persona?](https://resultadosdigitais.com.br/blog/persona-o-que-e/)
-> - [Persona x Público-alvo](https://flammo.com.br/blog/persona-e-publico-alvo-qual-a-diferenca/)
-> - [Mapa de Empatia](https://resultadosdigitais.com.br/blog/mapa-da-empatia/)
-> - [Mapa de Stalkeholders](https://www.racecomunicacao.com.br/blog/como-fazer-o-mapeamento-de-stakeholders/)
->
-> Lembre-se que você deve ser enumerar e descrever precisamente e personalizada todos os clientes ideais que sua solução almeja.
 
 ## Histórias de Usuários
 
@@ -29,16 +19,16 @@ Com base na análise das personas forma identificadas as seguintes histórias de
 
 | EU COMO... `PERSONA`               | QUERO/PRECISO ... `FUNCIONALIDADE`                                     | PARA ... `MOTIVO/VALOR`                                                  |
 | ---------------------------------- | ---------------------------------------------------------------------- | ------------------------------------------------------------------------ |
-| **João**   | Registrar os serviços combinados de forma rápida                       | Não perder o controle do que foi acordado com o cliente.                 |
-| **João**   | Anotar os valores pendentes de recebimento                             | Saber exatamente quem está me devendo e poder cobrar.                    |
-| **João**   | Gerar e enviar propostas de serviço de forma digital                   | Agilizar o fechamento de negócios sem complicação.                       |
-| **Carla**    | Criar propostas padronizadas com a minha marca (identidade visual)     | Transmitir uma imagem mais profissional aos meus clientes.               |
-| **Carla**    | Registrar os pagamentos recebidos vinculados às propostas              | Centralizar as informações comerciais e financeiras no mesmo lugar.      |
-| **Carla**    | Registrar as minhas despesas recorrentes e custos operacionais         | Ter controle de quanto meu negócio custa para operar mensalmente.        |
-| **Carla**    | Visualizar um painel (dashboard) com resumos e gráficos de faturamento | Entender a real situação financeira do meu negócio para previsibilidade. |
-| **Marcos** | De um acesso compartilhado simplificado ao sistema   | Que minha esposa/assistente possa me ajudar com registros e cobranças.   |
-| **Marcos** | Visualizar rapidamente o fluxo de caixa do dia/semana                  | Tomar melhores decisões sobre despesas urgentes e compras de material.   |
-| **Marcos** | Emitir ordens de serviço claras com status de andamento                | Que minha auxiliar possa acompanhar a execução dos trabalhos.            |
+| **João Pereira Santos**   | Registrar os serviços combinados de forma rápida                       | Não perder o controle do que foi acordado com o cliente.                 |
+| **João Pereira Santos**   | Anotar os valores pendentes de recebimento                             | Saber exatamente quem está me devendo e poder cobrar.                    |
+| **João Pereira Santos**   | Gerar e enviar propostas de serviço de forma digital                   | Agilizar o fechamento de negócios sem complicação.                       |
+| **Carla Mendes Oliveira**    | Criar propostas padronizadas com a minha marca (identidade visual)     | Transmitir uma imagem mais profissional aos meus clientes.               |
+| **Carla Mendes Oliveira**    | Registrar os pagamentos recebidos vinculados às propostas              | Centralizar as informações comerciais e financeiras no mesmo lugar.      |
+| **Carla Mendes Oliveira**    | Registrar as minhas despesas recorrentes e custos operacionais         | Ter controle de quanto meu negócio custa para operar mensalmente.        |
+| **Carla Mendes Oliveira**    | Visualizar um painel (dashboard) com resumos e gráficos de faturamento | Entender a real situação financeira do meu negócio para previsibilidade. |
+| **Marcos Ribeiro Costa** | De um acesso compartilhado simplificado ao sistema   | Que minha esposa/assistente possa me ajudar com registros e cobranças.   |
+| **Marcos Ribeiro Costa** | Visualizar rapidamente o fluxo de caixa do dia/semana                  | Tomar melhores decisões sobre despesas urgentes e compras de material.   |
+| **Marcos Ribeiro Costa** | Emitir ordens de serviço claras com status de andamento                | Que minha auxiliar possa acompanhar a execução dos trabalhos.            |
 
 ## Requisitos
 
