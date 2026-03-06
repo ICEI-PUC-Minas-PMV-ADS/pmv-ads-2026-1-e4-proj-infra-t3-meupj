@@ -113,22 +113,97 @@ As referências abaixo irão auxiliá-lo na geração do artefato “Diagrama de
 > - [Astah](https://astah.net/)
 > - [Diagrams](https://app.diagrams.net/)
 
-# Gerenciamento de Projeto
+# Gerenciamento de Tempo
 
-De acordo com o PMBoK v6 as dez áreas que constituem os pilares para gerenciar projetos, e que caracterizam a multidisciplinaridade envolvida, são: Integração, Escopo, Cronograma (Tempo), Custos, Qualidade, Recursos, Comunicações, Riscos, Aquisições, Partes Interessadas. Para desenvolver projetos um profissional deve se preocupar em gerenciar todas essas dez áreas. Elas se complementam e se relacionam, de tal forma que não se deve apenas examinar uma área de forma estanque. É preciso considerar, por exemplo, que as áreas de Escopo, Cronograma e Custos estão muito relacionadas. Assim, se eu amplio o escopo de um projeto eu posso afetar seu cronograma e seus custos.
+O gerenciamento de tempo tem como objetivo planejar, organizar e controlar as atividades necessárias para o desenvolvimento do projeto dentro do prazo estabelecido.
 
-## Gerenciamento de Tempo
+Para facilitar esse controle, o projeto foi dividido em cinco etapas principais, cada uma contemplando atividades específicas relacionadas ao planejamento, modelagem, desenvolvimento e finalização do sistema.
 
-Com diagramas bem organizados que permitem gerenciar o tempo nos projetos, o gerente de projetos agenda e coordena tarefas dentro de um projeto para estimar o tempo necessário de conclusão.
+Essa divisão permite acompanhar o progresso do projeto, identificar possíveis atrasos e garantir que o desenvolvimento avance de forma organizado.
 
-![Diagrama de rede simplificado notação francesa (método francês)](img/02-diagrama-rede-simplificado.png)
+## Cronograma do Projeto
 
-O gráfico de Gantt ou diagrama de Gantt também é uma ferramenta visual utilizada para controlar e gerenciar o cronograma de atividades de um projeto. Com ele, é possível listar tudo que precisa ser feito para colocar o projeto em prática, dividir em atividades e estimar o tempo necessário para executá-las.
+| Etapa | Período |
+|------|------|
+| Etapa 1 | 09/02/2026 a 08/03/2026 |
+| Etapa 2 | 10/03/2026 a 12/04/2026 |
+| Etapa 3 | 13/04/2026 a 10/05/2026 |
+| Etapa 4 | 11/05/2026 a 31/05/2026 |
+| Etapa 5 | 01/06/2026 a 21/06/2026 |
 
-![Gráfico de Gantt](img/02-grafico-gantt.png)
+## Planejamento das Atividades
 
-## Gerenciamento de Equipe
+| Etapa | Atividade | Início | Fim |
+|------|------|------|------|
+| Etapa 1 | Levantamento de requisitos | 09/02/2026 | 16/02/2026 |
+| Etapa 1 | Definição do escopo do sistema | 17/02/2026 | 22/02/2026 |
+| Etapa 1 | Planejamento do projeto | 23/02/2026 | 02/03/2026 |
+| Etapa 1 | Elaboração da documentação inicial | 03/03/2026 | 08/03/2026 |
+| Etapa 2 | Modelagem do sistema | 10/03/2026 | 20/03/2026 |
+| Etapa 2 | Modelagem do banco de dados | 21/03/2026 | 30/03/2026 |
+| Etapa 2 | Protótipo das interfaces | 31/03/2026 | 12/04/2026 |
+| Etapa 3 | Estruturação do backend (API) | 13/04/2026 | 25/04/2026 |
+| Etapa 3 | Implementação das regras de negócio | 26/04/2026 | 10/05/2026 |
+| Etapa 4 | Desenvolvimento do frontend web | 11/05/2026 | 22/05/2026 |
+| Etapa 4 | Desenvolvimento do aplicativo mobile | 23/05/2026 | 31/05/2026 |
+| Etapa 5 | Integração dos sistemas | 01/06/2026 | 10/06/2026 |
+| Etapa 5 | Testes do sistema | 11/06/2026 | 16/06/2026 |
+| Etapa 5 | Ajustes finais e documentação | 17/06/2026 | 21/06/2026 |
 
-O gerenciamento adequado de tarefas contribuirá para que o projeto alcance altos níveis de produtividade. Por isso, é fundamental que ocorra a gestão de tarefas e de pessoas, de modo que os times envolvidos no projeto possam ser facilmente gerenciados.
+## Gráfico de Gantt Simplificado
 
-![Simple Project Timeline](img/02-project-timeline.png)
+| Etapa | Fev | Mar | Abr | Mai | Jun |
+|------|------|------|------|------|------|
+| Planejamento | █████ |  |  |  |  |
+| Modelagem |  | █████ |  |  |  |
+| Backend |  |  | █████ |  |  |
+| Frontend / Mobile |  |  |  | █████ |  |
+| Integração e Testes |  |  |  |  | █████ |
+
+---
+
+# Gerenciamento de Equipe
+
+O projeto será desenvolvido por uma equipe composta por seis integrantes. Todos os membros participarão das atividades de planejamento, desenvolvimento e validação do sistema.
+
+Considerando que os integrantes possuem níveis de experiência entre júnior e pleno, as atividades serão distribuídas de forma equilibrada para incentivar a colaboração e o aprendizado coletivo.
+
+A equipe será responsável pelo desenvolvimento das diferentes camadas da aplicação distribuída, incluindo:
+
+- Interface web
+- API backend
+- Aplicação mobile
+- Banco de dados
+- Integração entre os componentes
+
+## Estrutura da Equipe
+
+| Área | Responsabilidades |
+|------|------|
+| Backend | Desenvolvimento da API e regras de negócio |
+| Frontend Web | Desenvolvimento da interface web utilizando React |
+| Mobile | Desenvolvimento do aplicativo utilizando React Native |
+| Banco de Dados | Modelagem e gerenciamento do PostgreSQL |
+| Integração | Comunicação entre os componentes do sistema |
+| Testes | Validação das funcionalidades e qualidade do sistema |
+
+---
+
+# Ferramentas de Gerenciamento do Projeto
+
+| Ferramenta | Finalidade |
+|------|------|
+| GitHub | Controle de versão do código |
+| Git | Versionamento do código |
+| Figma | Prototipação das interfaces |
+| Trello / Jira | Organização das tarefas |
+| Visual Studio Code | Desenvolvimento do código |
+| PostgreSQL | Gerenciamento do banco de dados |
+
+---
+
+# Considerações Finais
+
+A adoção de práticas de gerenciamento de projeto contribui para estruturar o desenvolvimento do sistema de forma organizada, permitindo que as atividades sejam distribuídas entre os integrantes da equipe e executadas dentro do prazo estabelecido.
+
+Além disso, a utilização de uma arquitetura distribuída possibilita maior modularidade no desenvolvimento do sistema, permitindo que diferentes componentes sejam desenvolvidos e integrados de forma eficiente.
