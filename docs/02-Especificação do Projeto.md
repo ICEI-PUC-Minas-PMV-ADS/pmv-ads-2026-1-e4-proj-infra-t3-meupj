@@ -44,8 +44,6 @@ Com base na análise das personas forma identificadas as seguintes histórias de
 
 As tabelas que se seguem apresentam os requisitos funcionais e não funcionais que detalham o escopo do projeto. Para determinar a prioridade de requisitos, aplicar uma técnica de priorização de requisitos e detalhar como a técnica foi aplicada.
 
-<strong>Crie no mínimo 12 Requisitos funcionais, 6 não funcionais e 3 restrições</strong>
-<strong>Cada aluno será responsável pela execução completa (back, web e mobile) de pelo menos 2 requisitos que será acompanhado pelo professor</strong>
 
 ### Requisitos Funcionais
 
@@ -78,23 +76,13 @@ As tabelas que se seguem apresentam os requisitos funcionais e não funcionais q
 
 | ID      | Descrição do Requisito                                            | Prioridade |
 | ------- | ----------------------------------------------------------------- | ---------- |
-| RNF-001 | O sistema deve ser responsivo para rodar em um dispositivos móvel | MÉDIA      |
-| RNF-002 | Deve processar requisições do usuário em no máximo 3s             | BAIXA      |
+| RNF-001 | As senhas dos usuários devem ser criptografadas utilizando algoritmo de hash seguro (bcrypt) antes de serem armazenadas no banco de dados, garantindo que nenhuma senha seja salva em texto puro | ALTA      |
+| RNF-002 | Toda comunicação entre o aplicativo e o servidor deve ser realizada por meio de HTTPS, com autenticação das requisições via token JWT, garantindo que apenas usuários autenticados acessem os dados da aplicação            | ALTA      |
+| RNF-003 | A interface deve ser simples e intuitiva, permitindo que o usuário realize as principais tarefas da aplicação sem necessidade de treinamento prévio ou conhecimento técnico avançado | ALTA      |
+| RNF-004 | O aplicativo mobile deve funcionar corretamente nos sistemas operacionais Android e iOS, mantendo comportamento e aparência consistentes entre as duas plataformas          | MÉDIA     |
+| RNF-005 | A versão web da aplicação deve funcionar corretamente nos principais navegadores modernos, incluindo Google Chrome, Mozilla Firefox, Safari e Microsoft Edge, em suas versões mais recentes | MÉDIA      |
+| RNF-006 | As telas e operações principais da aplicação devem apresentar tempo de resposta inferior a 3 segundos em condições normais de uso e conectividade | ALTA      |
 
-Com base nas Histórias de Usuário, enumere os requisitos da sua solução. Classifique esses requisitos em dois grupos:
-
-- [Requisitos Funcionais
-  (RF)](https://pt.wikipedia.org/wiki/Requisito_funcional):
-  correspondem a uma funcionalidade que deve estar presente na
-  plataforma (ex: cadastro de usuário).
-- [Requisitos Não Funcionais
-  (RNF)](https://pt.wikipedia.org/wiki/Requisito_n%C3%A3o_funcional):
-  correspondem a uma característica técnica, seja de usabilidade,
-  desempenho, confiabilidade, segurança ou outro (ex: suporte a
-  dispositivos iOS e Android).
-  Lembre-se que cada requisito deve corresponder à uma e somente uma
-  característica alvo da sua solução. Além disso, certifique-se de que
-  todos os aspectos capturados nas Histórias de Usuário foram cobertos.
 
 ## Restrições
 
