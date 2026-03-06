@@ -196,7 +196,7 @@ A equipe será responsável pelo desenvolvimento das diferentes camadas da aplic
 | GitHub | Controle de versão do código |
 | Git | Versionamento do código |
 | Figma | Prototipação das interfaces |
-| Trello / Jira | Organização das tarefas |
+| Linear | Organização das tarefas |
 | Visual Studio Code | Desenvolvimento do código |
 | PostgreSQL | Gerenciamento do banco de dados |
 
