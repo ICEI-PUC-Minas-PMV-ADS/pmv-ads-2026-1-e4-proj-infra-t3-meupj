@@ -20,12 +20,19 @@ Coletar e documentar todos os requisitos necessários para o desenvolvimento do 
 
 ### Responsáveis
 
-- **Analista de Requisitos**: Nome do analista
-- **Gerente de Projeto**: Nome do gerente
+- **Documentação de Contexto**: Frederico
+- **Especificação do Projeto: Personas**: Amanda
+- **Especificação do Projeto: Histórias de Usuários**: Frederico
+- **Especificação do Projeto: Requisitos Funcionais e não funcionais**: Maria Julia
+- **Especificação do Projeto: Restrições**: Eric
+- **Especificação do Projeto: Diagrama de Casos de Uso**: Bruna
+- **Especificação do Projeto: Matriz de rastreabilidade**: Amanda
+- **Especificação do Projeto: Gerenciamento de Projeto**: Guilherme
+
 
 ### Prazo
 
-- **Data de conclusão**: YYYY-MM-DD
+- **Data de conclusão**: 08/03/2026
 
 ---
 
