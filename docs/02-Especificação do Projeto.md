@@ -91,17 +91,58 @@ O projeto está restrito pelos itens apresentados na tabela a seguir.
 
 ## Diagrama de Casos de Uso
 
-O diagrama de casos de uso é o próximo passo após a elicitação de requisitos, que utiliza um modelo gráfico e uma tabela com as descrições sucintas dos casos de uso e dos atores. Ele contempla a fronteira do sistema e o detalhamento dos requisitos funcionais com a indicação dos atores, casos de uso e seus relacionamentos.
+O diagrama de casos de uso representa de forma visual, as principais funcionalidades oferecidas pelo sistema e como elas se relacionam com os atores que interagem com a aplicação. A modelagem foi construída com base nas personas, histórias de usuário e requisitos funcionais definidos anteriormente.
 
-As referências abaixo irão auxiliá-lo na geração do artefato “Diagrama de Casos de Uso”.
+No contexto deste projeto, o ator principal é o **Usuário**, que representa o profissional autônomo, microempreendedor individual (MEI) ou pequeno prestador de serviço que utiliza o sistema para organizar sua rotina comercial e financeira.
 
-> **Links Úteis**:
->
-> - [Criando Casos de Uso](https://www.ibm.com/docs/pt-br/elm/6.0?topic=requirements-creating-use-cases)
-> - [Como Criar Diagrama de Caso de Uso: Tutorial Passo a Passo](https://gitmind.com/pt/fazer-diagrama-de-caso-uso.html/)
-> - [Lucidchart](https://www.lucidchart.com/)
-> - [Astah](https://astah.net/)
-> - [Diagrams](https://app.diagrams.net/)
+Também foi considerado o ator **Apoio administrativo**, que representa uma pessoa auxiliar, como assistente, sócio ou familiar, que pode colaborar em atividades operacionais, como cadastro de informações, acompanhamento de pedidos, organização de registros e apoio na gestão financeira básica.
+
+O diagrama contempla as funcionalidades essenciais do sistema, incluindo o gerenciamento da conta do usuário, cadastro de clientes e serviços, controle de pedidos, emissão de documentos comerciais, registro de pagamentos e visualização de informações financeiras do negócio.
+
+### Atores Identificados
+
+| Ator | Descrição |
+|-----|-----|
+| Usuário | Profissional autônomo, MEI ou pequeno prestador de serviço que utiliza o sistema para organizar clientes, serviços, pedidos, recebimentos e informações financeiras do negócio. |
+| Apoio administrativo | Pessoa que auxilia o usuário principal nas rotinas administrativas, como cadastro de informações, acompanhamento de pedidos e organização financeira básica. |
+
+---
+
+### Casos de Uso Identificados
+
+| Caso de Uso | Descrição |
+|-----|-----|
+| Manter conta de usuário | Permite criar, editar e excluir a conta do usuário no sistema. |
+| Manter clientes | Permite cadastrar, editar e excluir clientes. |
+| Buscar e filtrar clientes | Permite localizar clientes cadastrados utilizando critérios como nome ou CPF/CNPJ. |
+| Manter serviços | Permite cadastrar, editar e excluir serviços oferecidos pelo usuário. |
+| Buscar e filtrar serviços | Permite localizar serviços cadastrados no sistema. |
+| Manter pedidos | Permite criar, editar e excluir pedidos vinculados a clientes e serviços. |
+| Buscar e filtrar pedidos | Permite localizar pedidos por cliente ou serviço. |
+| Registrar pagamento | Permite registrar pagamentos recebidos referentes aos pedidos realizados. |
+| Gerar recibo | Permite emitir um recibo a partir de um pagamento registrado. |
+| Gerar contrato de serviço | Permite gerar um contrato de prestação de serviço vinculado a um cliente e a um pedido. |
+| Visualizar painel financeiro | Permite visualizar um resumo financeiro contendo valores recebidos, a receber e em atraso. |
+| Visualizar gráficos financeiros | Permite visualizar gráficos comparativos de receitas e custos do negócio. |
+| Iniciar chamada para cliente | Permite realizar chamada telefônica diretamente para um cliente pelo aplicativo mobile. |
+
+---
+
+### Relacionamentos entre Casos de Uso
+
+Alguns casos de uso possuem dependência lógica entre si. O caso de uso **Gerar recibo**, por exemplo, depende da existência de um pagamento previamente registrado no sistema. Dessa forma, o recibo é gerado a partir das informações do pagamento vinculado a um pedido.
+
+Os casos de uso de **busca e filtragem** estão associados às funcionalidades de consulta dos módulos de clientes, serviços e pedidos, permitindo que o usuário encontre informações de forma rápida e organizada dentro do sistema.
+
+---
+
+### Diagrama de Casos de Uso
+
+A figura a seguir apresenta o diagrama de casos de uso da aplicação, evidenciando os atores e as principais funcionalidades do sistema.
+
+![Diagrama de Casos de Uso](img/diagrama-casos-de-uso.png)
+
+> O diagrama ilustra as interações entre os atores **Usuário** e **Apoio administrativo** com as funcionalidades principais do sistema de organização comercial e financeira.
 
 # Gerenciamento de Tempo
 
