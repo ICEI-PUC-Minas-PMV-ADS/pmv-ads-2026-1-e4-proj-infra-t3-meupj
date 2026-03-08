@@ -26,7 +26,6 @@ Coletar e documentar todos os requisitos necessários para o desenvolvimento do 
 - **Especificação do Projeto: Requisitos Funcionais e não funcionais**: Maria Julia
 - **Especificação do Projeto: Restrições**: Eric
 - **Especificação do Projeto: Diagrama de Casos de Uso**: Bruna
-- **Especificação do Projeto: Matriz de rastreabilidade**: Amanda
 - **Especificação do Projeto: Gerenciamento de Projeto**: Guilherme
 
 
