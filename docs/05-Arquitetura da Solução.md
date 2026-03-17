@@ -15,84 +15,151 @@ Definição de como o software é estruturado em termos dos componentes que faze
 Este documento descreve a estrutura e o esquema do banco de dados não relacional utilizado por nosso projeto, baseado em MongoDB. O MongoDB é um banco de dados NoSQL que armazena dados em documentos JSON (ou BSON, internamente), permitindo uma estrutura flexível e escalável para armazenar e consultar dados.
 
 ## Esquema do Banco de Dados
-### Coleção: users
-Armazena as informações dos usuários do sistema.
-
-Estrutura do Documento
-
-```Json
+### Coleção: usuarios
+ 
+Armazena os dados de autenticação e o perfil do negócio do usuário.
+ 
+**Estrutura do Documento**
+ 
+```json
 {
-    "_id": "ObjectId('5f7e1bbf9b2a4f1a9c38b9a1')",
-    "name": "John Doe",
-    "email": "john.doe@example.com",
+    "_id": "ObjectId('6751a1b2c3d4e5f6a7b8c9d1')",
+    "nome": "Carlos Mota",
+    "email": "carlos@motaservicos.com.br",
     "passwordHash": "hash_da_senha",
-    "roles": ["admin", "user"],
-    "createdAt": "2024-08-29T10:00:00Z",
-    "updatedAt": "2024-08-29T12:00:00Z"
+    "perfil": {
+        "nomeNegocio": "Mota Serviços ME",
+        "documento": "12.345.678/0001-99",
+        "telefone": "31 99999-1234",
+        "emailComercial": "contato@motaservicos.com.br",
+        "logoUrl": "https://storage.exemplo.com/logos/mota.png",
+        "corTema": "#1A7A3E",
+        "rodapePadrao": "Agradecemos a preferência. Dúvidas: contato@motaservicos.com.br",
+        "endereco": {
+            "cep": "30130-110",
+            "logradouro": "Av. Afonso Pena",
+            "numero": "1500",
+            "complemento": "Sala 302",
+            "bairro": "Centro",
+            "cidade": "Belo Horizonte",
+            "estado": "MG"
+        }
+    },
+    "createdAt": "2026-01-10T09:00:00Z",
+    "updatedAt": "2026-03-01T14:30:00Z"
 }
 ```
-
+ 
 #### Descrição dos Campos
 > - <strong>_id:</strong> Identificador único do usuário gerado automaticamente pelo MongoDB.
-> - <strong>name:</strong> Nome completo do usuário.
-> - <strong>email:</strong> Endereço de email do usuário.
+> - <strong>nome:</strong> Nome completo do usuário.
+> - <strong>email:</strong> Endereço de e-mail de acesso.
 > - <strong>passwordHash:</strong> Hash da senha do usuário.
-> - <strong>roles:</strong> Lista de papéis atribuídos ao usuário (por exemplo, admin, user).
-> - <strong>createdAt:</strong> Data e hora de criação do usuário.
+> - <strong>perfil:</strong> Objeto embutido com os dados do negócio do usuário.
+> - <strong>perfil.nomeNegocio:</strong> Nome fantasia ou razão social do negócio.
+> - <strong>perfil.documento:</strong> CPF ou CNPJ do prestador.
+> - <strong>perfil.telefone:</strong> Telefone comercial.
+> - <strong>perfil.emailComercial:</strong> E-mail exibido nos documentos gerados.
+> - <strong>perfil.logoUrl:</strong> URL da logo utilizada nos documentos gerados.
+> - <strong>perfil.corTema:</strong> Cor hexadecimal utilizada no cabeçalho e destaques dos documentos. Exemplo: `#5B5BFF`.
+> - <strong>perfil.rodapePadrao:</strong> Texto exibido no rodapé de todos os documentos emitidos.
+> - <strong>perfil.endereco:</strong> Objeto com o endereço comercial utilizado nos documentos.
+> - <strong>perfil.endereco.cep:</strong> CEP do endereço comercial.
+> - <strong>perfil.endereco.logradouro:</strong> Logradouro do endereço.
+> - <strong>perfil.endereco.numero:</strong> Número do endereço.
+> - <strong>perfil.endereco.complemento:</strong> Complemento do endereço.
+> - <strong>perfil.endereco.bairro:</strong> Bairro.
+> - <strong>perfil.endereco.cidade:</strong> Cidade.
+> - <strong>perfil.endereco.estado:</strong> UF com 2 caracteres. Exemplo: `MG`.
+> - <strong>createdAt:</strong> Data e hora de criação do documento.
 > - <strong>updatedAt:</strong> Data e hora da última atualização dos dados do usuário.
 
-### Coleção: products
-Armazena as informações dos produtos disponíveis no sistema.
-
-```Json
+### Coleção: clientes
+ 
+Armazena os clientes cadastrados pelo usuário. O endereço é embutido diretamente no documento pois um cliente possui um único endereço no escopo do MVP.
+ 
+**Estrutura do Documento**
+ 
+```json
 {
-    "_id": "ObjectId('5f7e1ccf9b2a4f1a9c38b9a2')",
-    "name": "Produto Exemplo",
-    "description": "Descrição detalhada do produto.",
-    "price": 99.99,
-    "category": "Categoria Exemplo",
-    "stock": 100,
-    "createdAt": "2024-08-29T10:30:00Z",
-    "updatedAt": "2024-08-29T11:30:00Z"
+    "_id": "ObjectId('6751a1b2c3d4e5f6a7b8c9d2')",
+    "usuarioId": "ObjectId('6751a1b2c3d4e5f6a7b8c9d1')",
+    "nome": "João Ferreira",
+    "tipoPessoa": "fisica",
+    "documento": "123.456.789-00",
+    "email": "joao@email.com",
+    "telefone": "31 98888-5678",
+    "origem": "indicacao",
+    "aniversario": "1985-07-22",
+    "anotacoes": "Cliente pontual. Prefere contato por WhatsApp.",
+    "endereco": {
+        "cep": "31270-080",
+        "logradouro": "Rua das Flores",
+        "numero": "42",
+        "complemento": "Apto 5",
+        "bairro": "Santa Efigênia",
+        "cidade": "Belo Horizonte",
+        "estado": "MG"
+    },
+    "createdAt": "2026-01-15T10:00:00Z",
+    "updatedAt": "2026-02-20T09:00:00Z"
 }
 ```
-
+ 
 #### Descrição dos Campos
-> - <strong>_id:</strong> Identificador único do usuário gerado automaticamente pelo MongoDB.
-> - <strong>name:</strong> Nome completo do usuário.
-> - <strong>email:</strong> Endereço de email do usuário.
-> - <strong>passwordHash:</strong> Hash da senha do usuário.
-> - <strong>roles:</strong> Lista de papéis atribuídos ao usuário (por exemplo, admin, user).
-> - <strong>createdAt:</strong> Data e hora de criação do usuário.
-> - <strong>updatedAt:</strong> Data e hora da última atualização dos dados do usuário.
+> - <strong>_id:</strong> Identificador único do cliente gerado automaticamente pelo MongoDB.
+> - <strong>usuarioId:</strong> Referência ao `_id` do usuário dono do cadastro. Todos os dados pertencem a este usuário.
+> - <strong>nome:</strong> Nome completo (pessoa física) ou razão social (pessoa jurídica).
+> - <strong>tipoPessoa:</strong> Tipo do cliente. Valores possíveis: `fisica`, `juridica`. Default: `fisica`.
+> - <strong>documento:</strong> CPF para pessoa física ou CNPJ para pessoa jurídica.
+> - <strong>email:</strong> E-mail de contato do cliente.
+> - <strong>telefone:</strong> Telefone principal com DDD.
+> - <strong>origem:</strong> Campo livre indicando como o usuário conseguiu esse cliente.
+> - <strong>aniversario:</strong> Data de aniversário no formato `YYYY-MM-DD`.
+> - <strong>anotacoes:</strong> Notas internas sobre o cliente. Não visível ao cliente.
+> - <strong>endereco:</strong> Objeto com o endereço do cliente.
+> - <strong>endereco.cep:</strong> CEP.
+> - <strong>endereco.logradouro:</strong> Logradouro.
+> - <strong>endereco.numero:</strong> Número.
+> - <strong>endereco.complemento:</strong> Complemento.
+> - <strong>endereco.bairro:</strong> Bairro.
+> - <strong>endereco.cidade:</strong> Cidade.
+> - <strong>endereco.estado:</strong> UF com 2 caracteres.
+> - <strong>createdAt:</strong> Data e hora de criação do documento.
+> - <strong>updatedAt:</strong> Data e hora da última atualização dos dados do cliente.
 
-### Coleção: products
-Armazena as informações dos produtos disponíveis no sistema.
-
-Estrutura do Documento
-
-```Json
+### Coleção: catalogo
+ 
+Armazena os produtos e serviços do usuário em uma coleção unificada. O campo `tipo` distingue os dois. O campo `custoUnitario` é relevante apenas para `tipo: "produto"` e é utilizado para cálculo de margem de lucro.
+ 
+**Estrutura do Documento**
+ 
+```json
 {
-    "_id": "ObjectId('5f7e1ccf9b2a4f1a9c38b9a2')",
-    "name": "Produto Exemplo",
-    "description": "Descrição detalhada do produto.",
-    "price": 99.99,
-    "category": "Categoria Exemplo",
-    "stock": 100,
-    "createdAt": "2024-08-29T10:30:00Z",
-    "updatedAt": "2024-08-29T11:30:00Z"
+    "_id": "ObjectId('6751a1b2c3d4e5f6a7b8c9d3')",
+    "usuarioId": "ObjectId('6751a1b2c3d4e5f6a7b8c9d1')",
+    "tipo": "servico",
+    "nome": "Consultoria em TI",
+    "descricao": "Análise e suporte técnico presencial ou remoto.",
+    "precoUnitario": 200.00,
+    "unidadeMedida": "h",
+    "custoUnitario": null,
+    "createdAt": "2026-01-12T08:00:00Z",
+    "updatedAt": "2026-02-01T11:00:00Z"
 }
 ```
-
+ 
 #### Descrição dos Campos
-> - <strong>_id:</strong> Identificador único do produto gerado automaticamente pelo MongoDB.
-> - <strong>name:</strong> Nome do produto.
-> - <strong>description:</strong> Descrição detalhada do produto.
-> - <strong>price:</strong> Preço do produto.
-> - <strong>category:</strong> Categoria à qual o produto pertence.
-> - <strong>stock:</strong> Quantidade de produtos em estoque.
-> - <strong>createdAt:</strong> Data e hora de criação do produto.
-> - <strong>updatedAt:</strong> Data e hora da última atualização dos dados do produto.
+> - <strong>_id:</strong> Identificador único do item gerado automaticamente pelo MongoDB.
+> - <strong>usuarioId:</strong> Referência ao `_id` do usuário dono do item.
+> - <strong>tipo:</strong> Tipo do item no catálogo. Valores possíveis: `produto`, `servico`.
+> - <strong>nome:</strong> Nome do produto ou serviço.
+> - <strong>descricao:</strong> Descrição detalhada do produto ou serviço. Campo opcional.
+> - <strong>precoUnitario:</strong> Preço de venda por unidade de medida. Default: `0`.
+> - <strong>unidadeMedida:</strong> Unidade de medida do item. Valores possíveis: `un`, `dz`, `h`, `dias`, `semanas`, `meses`, `m`, `m2`, `kg`, `cx`, `kit`, `pc`. Default: `un`.
+> - <strong>custoUnitario:</strong> Custo por unidade para o prestador. Utilizado para calcular a margem de lucro. Relevante apenas para `tipo: "produto"`. Pode ser `null`.
+> - <strong>createdAt:</strong> Data e hora de criação do documento.
+> - <strong>updatedAt:</strong> Data e hora da última atualização dos dados do item.
 
 ### Coleção: orders
 Armazena as informações dos pedidos feitos pelos usuários.
