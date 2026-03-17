@@ -161,40 +161,149 @@ Armazena os produtos e serviços do usuário em uma coleção unificada. O campo
 > - <strong>createdAt:</strong> Data e hora de criação do documento.
 > - <strong>updatedAt:</strong> Data e hora da última atualização dos dados do item.
 
-### Coleção: orders
-Armazena as informações dos pedidos feitos pelos usuários.
-
-Estrutura do Documento
-
-```Json
+### Coleção: pedidos
+ 
+Coleção central do sistema. Armazena os pedidos realizados para os clientes do usuário. Os itens do pedido são embutidos no array `itens[]` pois sempre são lidos em conjunto com o pedido e não possuem existência independente. Cada item guarda um snapshot dos dados do catálogo no momento da inserção, garantindo que alterações futuras no catálogo não afetem pedidos já criados. O campo `total` é desnormalizado e calculado pela aplicação sempre que `itens`, `desconto` ou taxas forem alterados.
+ 
+**Estrutura do Documento**
+ 
+```json
 {
-    "_id": "ObjectId('5f7e1ddf9b2a4f1a9c38b9a3')",
-    "userId": "ObjectId('5f7e1bbf9b2a4f1a9c38b9a1')",
-    "products": [
+    "_id": "ObjectId('6751a1b2c3d4e5f6a7b8c9d5')",
+    "usuarioId": "ObjectId('6751a1b2c3d4e5f6a7b8c9d1')",
+    "clienteId": "ObjectId('6751a1b2c3d4e5f6a7b8c9d2')",
+    "numero": "PED-0004-2026",
+    "referencia": "Reforma elétrica - bloco B",
+    "status": "em_andamento",
+    "meiosPagamento": ["pix", "transferencia_bancaria"],
+    "itens": [
         {
-            "productId": "ObjectId('5f7e1ccf9b2a4f1a9c38b9a2')",
-            "quantity": 2,
-            "price": 99.99
+            "_id": "ObjectId('6751a1b2c3d4e5f6a7b8c9e1')",
+            "catalogoId": "ObjectId('6751a1b2c3d4e5f6a7b8c9d3')",
+            "tipo": "servico",
+            "nome": "Consultoria em TI",
+            "descricao": "Análise e suporte técnico presencial ou remoto.",
+            "precoUnitario": 200.00,
+            "unidadeMedida": "h",
+            "quantidade": 4,
+            "subtotal": 800.00,
+            "ordem": 0
+        },
+        {
+            "_id": "ObjectId('6751a1b2c3d4e5f6a7b8c9e2')",
+            "catalogoId": "ObjectId('6751a1b2c3d4e5f6a7b8c9d4')",
+            "tipo": "produto",
+            "nome": "Cabo HDMI 2m",
+            "descricao": "Cabo HDMI de alta velocidade, 2 metros.",
+            "precoUnitario": 45.00,
+            "unidadeMedida": "un",
+            "quantidade": 2,
+            "subtotal": 90.00,
+            "ordem": 1
         }
     ],
-    "totalPrice": 199.98,
-    "status": "pending",
-    "createdAt": "2024-08-29T11:00:00Z",
-    "updatedAt": "2024-08-29T11:30:00Z"
+    "desconto": 50.00,
+    "taxas": 0.00,
+    "total": 840.00,
+    "condicoesPagamento": "50% na aprovação, 50% na entrega",
+    "garantia": "90 dias para defeitos de instalação",
+    "informacoesAdicionais": "Serviço realizado em horário comercial.",
+    "anotacoes": "Cliente solicitou nota fiscal.",
+    "createdAt": "2026-03-14T09:00:00Z",
+    "updatedAt": "2026-03-14T15:30:00Z"
 }
 ```
-
+ 
 #### Descrição dos Campos
 > - <strong>_id:</strong> Identificador único do pedido gerado automaticamente pelo MongoDB.
-> - <strong>userId:</strong> Referência ao identificador do usuário que fez o pedido.
-> - <strong>products:</strong> Lista de produtos incluídos no pedido, cada um com:
-> - <strong>productId:</strong> Identificador do produto.
-> - <strong>quantity:</strong> Quantidade do produto pedido.
-> - <strong>price:</strong> Preço unitário do produto no momento do pedido.
-> - <strong>totalPrice:</strong> Preço total do pedido (soma de todos os itens).
-> - <strong>status:</strong> Status atual do pedido (por exemplo, pending, shipped, delivered).
-> - <strong>createdAt:</strong> Data e hora de criação do pedido.
+> - <strong>usuarioId:</strong> Referência ao `_id` do usuário dono do pedido.
+> - <strong>clienteId:</strong> Referência ao `_id` do cliente vinculado ao pedido. Pode ser `null`.
+> - <strong>numero:</strong> Número sequencial do pedido no formato `PED-{DATA:HORA(ISO 8601)}`.
+> - <strong>referencia:</strong> Campo livre de identificação interna do pedido.
+> - <strong>status:</strong> Status atual do pedido. Valores possíveis: `rascunho`, `aguardando_aprovacao`, `em_andamento`, `concluido`, `garantia`, `cancelado`. Default: `rascunho`.
+> - <strong>meiosPagamento:</strong> Array com os meios de pagamento aceitos no pedido. Valores possíveis: `pix`, `dinheiro`, `cartao_credito`, `cartao_debito`, `transferencia_bancaria`, `boleto`.
+> - <strong>itens:</strong> Array com os itens incluídos no pedido. Embutido no documento com snapshot dos dados do catálogo.
+> - <strong>itens[]._id:</strong> Identificador único do item dentro do pedido.
+> - <strong>itens[].catalogoId:</strong> Referência soft ao item do catálogo original. Sem FK rígida: O item do pedido sobrevive caso o catálogo seja excluído.
+> - <strong>itens[].tipo:</strong> Snapshot do tipo do item no momento da venda. Valores possíveis: `produto`, `servico`.
+> - <strong>itens[].nome:</strong> Snapshot do nome do item no momento da venda.
+> - <strong>itens[].descricao:</strong> Snapshot da descrição do item no momento da venda.
+> - <strong>itens[].precoUnitario:</strong> Snapshot do preço unitário no momento da venda.
+> - <strong>itens[].unidadeMedida:</strong> Snapshot da unidade de medida no momento da venda.
+> - <strong>itens[].quantidade:</strong> Quantidade do item no pedido. Default: `1`.
+> - <strong>itens[].subtotal:</strong> Resultado de `precoUnitario × quantidade`.
+> - <strong>itens[].ordem:</strong> Posição do item na exibição do pedido. Default: `0`.
+> - <strong>desconto:</strong> Valor absoluto do desconto aplicado ao pedido. Default: `0`.
+> - <strong>taxas:</strong> Taxas aplicadas. Default: `0`.
+> - <strong>total:</strong> Total do pedido desnormalizado, calculado pela aplicação como `SUM(itens[].subtotal) - desconto + taxas`.
+> - <strong>condicoesPagamento:</strong> Condições de pagamento acordadas (texto livre).
+> - <strong>garantia:</strong> Prazo e condições de garantia (texto livre).
+> - <strong>informacoesAdicionais:</strong> Informações visíveis ao cliente.
+> - <strong>anotacoes:</strong> Notas internas. Não visível ao cliente.
+> - <strong>createdAt:</strong> Data e hora de criação do documento.
 > - <strong>updatedAt:</strong> Data e hora da última atualização dos dados do pedido.
+
+### Coleção: lancamentos
+ 
+Armazena todas as movimentações financeiras do usuário, receitas e custos, em uma única coleção. O campo `tipo` distingue os dois. Lançamentos podem estar vinculados a um pedido ou ser avulsos para custos gerais do negócio, como aluguel, material e outros.
+ 
+**Estrutura do Documento**
+ 
+```json
+{
+    "_id": "ObjectId('6751a1b2c3d4e5f6a7b8c9d6')",
+    "usuarioId": "ObjectId('6751a1b2c3d4e5f6a7b8c9d1')",
+    "tipo": "receita",
+    "status": "confirmado",
+    "valor": 400.00,
+    "dataLancamento": "2026-03-14T00:00:00Z",
+    "dataVencimento": null,
+    "pedidoId": "ObjectId('6751a1b2c3d4e5f6a7b8c9d5')",
+    "clienteId": "ObjectId('6751a1b2c3d4e5f6a7b8c9d2')",
+    "categoria": null,
+    "meioPagamento": "pix",
+    "referencia": "parcela 1/2",
+    "anotacoes": null,
+    "createdAt": "2026-03-14T16:00:00Z",
+    "updatedAt": "2026-03-14T16:00:00Z"
+}
+```
+ 
+```json
+{
+    "_id": "ObjectId('6751a1b2c3d4e5f6a7b8c9d7')",
+    "usuarioId": "ObjectId('6751a1b2c3d4e5f6a7b8c9d1')",
+    "tipo": "custo",
+    "status": "confirmado",
+    "valor": 350.00,
+    "dataLancamento": "2026-03-01T00:00:00Z",
+    "dataVencimento": "2026-03-01T00:00:00Z",
+    "pedidoId": null,
+    "clienteId": null,
+    "categoria": "aluguel",
+    "meioPagamento": "transferencia_bancaria",
+    "referencia": "Aluguel do escritório — março/2026",
+    "anotacoes": null,
+    "createdAt": "2026-03-01T10:00:00Z",
+    "updatedAt": "2026-03-01T10:00:00Z"
+}
+```
+ 
+#### Descrição dos Campos
+> - <strong>_id:</strong> Identificador único do lançamento gerado automaticamente pelo MongoDB.
+> - <strong>usuarioId:</strong> Referência ao `_id` do usuário dono do lançamento.
+> - <strong>tipo:</strong> Tipo da movimentação financeira. Valores possíveis: `receita`, `custo`.
+> - <strong>status:</strong> Status do lançamento. Para receitas: `confirmado` (recebido), `pendente` (a receber), `atrasado` (em atraso). Para custos: `confirmado` (pago), `pendente` (previsto), `atrasado` (em atraso).
+> - <strong>valor:</strong> Valor monetário da movimentação.
+> - <strong>dataLancamento:</strong> Data da movimentação. Default: data atual.
+> - <strong>dataVencimento:</strong> Data de vencimento. Relevante para lançamentos com status `pendente` e `atrasado`. Pode ser `null`.
+> - <strong>pedidoId:</strong> Referência ao `_id` do pedido vinculado. `null` para lançamentos avulsos não relacionados a um pedido.
+> - <strong>categoria:</strong> Categoria do lançamento (texto livre). Exemplo: `aluguel`, `material`, `outros`.
+> - <strong>meioPagamento:</strong> Meio de pagamento utilizado. Valores possíveis: `pix`, `dinheiro`, `cartao_credito`, `cartao_debito`, `transferencia_bancaria`, `boleto`, `fiado`.
+> - <strong>referencia:</strong> Descrição da movimentação. Exemplo: `"parcela 1/2"`, `"sinal 50%"`.
+> - <strong>anotacoes:</strong> Notas internas do lançamento.
+> - <strong>createdAt:</strong> Data e hora de criação do documento.
+> - <strong>updatedAt:</strong> Data e hora da última atualização dos dados do lançamento.
 
 ### Boas Práticas
 
