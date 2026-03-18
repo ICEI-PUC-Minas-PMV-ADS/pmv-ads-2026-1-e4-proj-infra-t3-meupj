@@ -46,21 +46,24 @@ As tabelas que se seguem apresentam os requisitos funcionais e não funcionais q
 | RF-005 | O sistema deve permitir que o usuário edite os dados de um cliente | ALTA       | Bruna       |
 | RF-006 | O sistema deve permitir que o usuário exclua um cliente, desde que não haja documentos ativos vinculados   | ALTA      | Bruna        |
 | RF-007 | O sistema deve permitir que o usuário busque e filtre clientes cadastrados por nome, CPF/CNPJ, telefone, email e endereço | MÉDIA       | Bruna       |
-| RF-008 | O sistema deve permitir que o usuário crie pedidos com um ou mais serviços vinculado a um cliente, definindo quantidade, valor unitário e desconto  | ALTA      | Eric        |
+| RF-008 | O sistema deve permitir que o usuário crie pedidos com um ou mais serviços/produtos vinculado a um cliente, definindo quantidade, valor unitário e desconto  | ALTA      | Eric        |
 | RF-009 | O sistema deve permitir que o usuário edite os dados de um pedido | ALTA       | Eric       |
 | RF-010 | O sistema deve permitir que o usuário exclua um pedido | ALTA      | Eric        |
-| RF-011 | O sistema deve permitir que o usuário busque e filtre pedidos por cliente e nome de serviços | MÉDIA       | Frederico       |
-| RF-012 | o sistema deve permitir que o usuário cadastre serviços, informando nome, descrição, valor unitário e unidade de medida  | ALTA     | Frederico        |
-| RF-013 | O sistema deve permitir que o usuário edite os dados de um serviço | ALTA       | Frederico      |
-| RF-014 | o sistema deve permitir que o usuário exclua um serviço, desde que não esteja vinculado a um pedido ativo   | ALTA      | Guilherme        |
-| RF-015 | O sistema deve permitir que o usuário busque e filtre serviços por nome, descrição e valor  | MÉDIA       | Guilherme       |
+| RF-011 | O sistema deve permitir que o usuário busque e filtre pedidos por cliente e nome de serviço/produto | MÉDIA       | Frederico       |
+| RF-012 | o sistema deve permitir que o usuário cadastre serviços/produtos, informando nome, descrição, valor unitário e unidade de medida  | ALTA     | Frederico        |
+| RF-013 | O sistema deve permitir que o usuário edite os dados de um serviço/produto | ALTA       | Frederico      |
+| RF-014 | o sistema deve permitir que o usuário exclua um serviço/produto, desde que não esteja vinculado a um pedido ativo   | ALTA      | Guilherme        |
+| RF-015 | O sistema deve permitir que o usuário busque e filtre serviços/produtos por nome, descrição e valor  | MÉDIA       | Guilherme       |
 | RF-016 | O sistema deve exibir um painel com a receita recebida, receita a receber e receita em atraso   | MÉDIA      | Guilherme        |
-| RF-017 | O sistema deve apresentar um gráfico de receitas com os valores de receitas recebida, receitas a receber e receitas em atraso | BAIXA       | Maria Julia       |
+| RF-017 | O sistema deve apresentar um gráfico de resultado com os valores calculados a partir da diferença entre receitas e custos | BAIXA       | Maria Julia       |
 | RF-018 | O sistema deve exibir um painel com os custos pagos, os custos previstos e os custos em atraso  | MÉDIA      | Maria Julia        |
-| RF-019 | O sistema deve apresentar um gráfico de custos com os valores de custos pagos, os custos previstos e os custos em atraso | BAIXA      | Maria Julia      |
-| RF-020 | O sistema deve permitir gerar um recibo a partir de um pagameno registrado de um pedido, contendos os dados do usuário, dados do cliente, descrição dos serviços pretados, valor pago, data e forma de pagamento | MÉDIA | Amanda        |
-| RF-021 | O sistema deve permitir criar um contrato de serviço vinculado a um cliente e a um pedido, com os dados do usuário, dados do cliente, descrição dos serviços, valor, data a ser relaziado o serviço, método de pagamento e espaço para assinatura do usuário e cliente | MÉDIA  | Eric       |
+| RF-019 | O sistema deve permitir gerar um recibo a partir de um pagamento registrado de um pedido, contendo os dados do usuário, dados do cliente, descrição dos serviços prestados, valor pago, data e forma de pagamento | MÉDIA | Amanda        |
+| RF-020 | O sistema deve permitir gerar um orçamento a partir de um pedido criado, contendo os dados do usuário, dados do cliente, descrição dos serviços, valor estimado, data prevista para execução e método de pagamento | MÉDIA  | Eric       |
+| RF-021 | O sistema deve permitir gerar uma ordem de serviço a partir de um pedido confirmado, contendo os dados do usuário, dados do cliente, descrição dos serviços, status do serviço, data de execução e responsável pela execução | MÉDIA  | Eric       |
 | RF-022 | O sistema deve permitir que o usuário inicie uma chamada telefônica para um cliente diretamente através do aplicativo mobile  | ALTA      | Frederico       |
+| RF-023 | O sistema deve permitir que o usuário envie mensagens de texto (SMS ou WhatsApp) para um cliente diretamente através do aplicativo mobile| ALTA      | Frederico       |
+
+
 
 ### Requisitos não Funcionais
 
