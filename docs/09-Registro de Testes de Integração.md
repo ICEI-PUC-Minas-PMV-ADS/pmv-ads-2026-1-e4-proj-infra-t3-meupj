@@ -30,7 +30,7 @@ Para começar a escrever testes de integração em um projeto backend utilizando
     dotnet add reference ../src/MyProject.csproj
     ```
 
-4. **Configure um banco de dados para testes**: Se seu projeto interage com um banco de dados, considere usar um banco de dados em memória (como o SQLite in-memory) ou configurar um ambiente de banco de dados separado para os testes.
+4. **Configure um banco de dados para testes**: Se seu projeto interage com um banco de dados, considere usar um banco de dados em memória ou configurar um ambiente de banco de dados separado para os testes.
 
 5. **Organize sua estrutura de diretórios**: Uma estrutura comum de projeto é a seguinte:
 

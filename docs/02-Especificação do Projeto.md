@@ -217,7 +217,7 @@ A equipe será responsável pelo desenvolvimento das diferentes camadas da aplic
 | Backend | Desenvolvimento da API e regras de negócio |
 | Frontend Web | Desenvolvimento da interface web utilizando React |
 | Mobile | Desenvolvimento do aplicativo utilizando React Native |
-| Banco de Dados | Modelagem e gerenciamento do PostgreSQL |
+| Banco de Dados | Modelagem e gerenciamento do MongoDB |
 | Integração | Comunicação entre os componentes do sistema |
 | Testes | Validação das funcionalidades e qualidade do sistema |
 
@@ -232,7 +232,7 @@ A equipe será responsável pelo desenvolvimento das diferentes camadas da aplic
 | Figma | Prototipação das interfaces |
 | Linear | Organização das tarefas |
 | Visual Studio Code | Desenvolvimento do código |
-| PostgreSQL | Gerenciamento do banco de dados |
+| MongoDB | Gerenciamento do banco de dados |
 
 ---
 
