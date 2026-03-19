@@ -2,8 +2,16 @@
 
 ## Contexto
 
-- Este diretório (`/src`) é a raiz do monorepo backend.
-- O projeto segue as issues `MPJ-14` a `MPJ-17` da fundação do backend.
+- Este diretório (`/src`) é a raiz do monorepo.
+
+## Resumo Atual do Projeto
+
+- Monorepo backend com Turborepo e workspaces `pnpm` em `/src`.
+- API principal em `apps/api` com Fastify + TypeScript ESM em modo `strict`.
+- Variáveis de ambiente validadas com `@fastify/env` + TypeBox.
+- Conexão com MongoDB centralizada em `lib/mongo.ts`, com healthcheck e reconexão.
+- Fundação do backend implementada para `MPJ-14` a `MPJ-17`.
+- Checks principais estabelecidos: `pnpm build`, `pnpm lint` e `pnpm test`.
 
 ## Regras Gerais
 
@@ -12,8 +20,18 @@
 - Mantenha a estrutura com Turborepo.
 - Preserve TypeScript em modo `strict`.
 - Preserve ESLint estrito e Prettier.
-- Não criar artefatos do backend fora de `/src`.
+- Não criar artefatos fora de `/src`.
 - Siga os critérios de aceite definidos nas issues do Linear.
+- Sempre verificar `ISSUES.md` antes de iniciar e após concluir qualquer execução.
+- Sempre atualizar `ISSUES.md` ao final da execução:
+  - Seção `ETAPA 2 - MAPEADAS` com status `[x]/[ ]` das issues da Etapa 2.
+  - Seção `ETAPA 2 - NÃO MAPEADAS` com itens objetivos de entregas sem vínculo MPJ explícito.
+
+## Recursos
+
+- Para executar um único projeto no monorepo, use filtro de workspace: `pnpm --filter <projeto> <comando>`.
+- Para a API deste repositório, referência prática: `pnpm --filter @repo/api <comando>`.
+- Quando necessário executar todos os projetos, mantenha o uso do Turborepo pela raiz.
 
 ## Comandos Principais
 
