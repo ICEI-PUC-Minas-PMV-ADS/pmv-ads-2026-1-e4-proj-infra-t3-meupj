@@ -13,18 +13,23 @@ export type BuildAppOptions = {
   mongo?: MongoService;
 };
 
-const resolveLogLevel = (): string => process.env.LOG_LEVEL ?? 'info';
+const resolveInitialLogLevel = (): string => process.env.LOG_LEVEL ?? 'info';
 
 export const buildApp = async (options: BuildAppOptions = {}): Promise<FastifyInstance> => {
   const app = Fastify({
     logger: {
-      level: resolveLogLevel(),
+      level: resolveInitialLogLevel(),
     },
   }).withTypeProvider<TypeBoxTypeProvider>();
 
   app.setValidatorCompiler(TypeBoxValidatorCompiler);
 
   await registerEnv(app, options.envData);
+
+  if (app.env.LOG_LEVEL) {
+    app.log.level = app.env.LOG_LEVEL;
+  }
+
   registerGlobalErrorHandler(app);
   await registerSecurityPlugins(app);
 

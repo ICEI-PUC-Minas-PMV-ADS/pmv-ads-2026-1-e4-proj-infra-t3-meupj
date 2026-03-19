@@ -3,9 +3,9 @@ import helmet from '@fastify/helmet';
 import rateLimit from '@fastify/rate-limit';
 import type { FastifyInstance } from 'fastify';
 
-const parseCorsOrigins = (origins?: string): string[] | true => {
+const parseCorsOrigins = (origins?: string): string[] => {
   if (!origins || origins.trim().length === 0) {
-    return true;
+    return [];
   }
 
   return origins
@@ -17,9 +17,19 @@ const parseCorsOrigins = (origins?: string): string[] | true => {
 export const registerSecurityPlugins = async (app: FastifyInstance): Promise<void> => {
   await app.register(helmet);
 
+  const corsOrigins = parseCorsOrigins(app.env.CORS_ORIGIN);
+
   await app.register(cors, {
-    origin: parseCorsOrigins(app.env.CORS_ORIGIN),
-    credentials: true,
+    origin: corsOrigins.length > 0 ? corsOrigins : false,
+    credentials: corsOrigins.length > 0,
+  });
+
+  app.addHook('onSend', async (_request, reply, payload) => {
+    if (!reply.getHeader('access-control-allow-origin')) {
+      reply.removeHeader('access-control-allow-credentials');
+    }
+
+    return payload;
   });
 
   await app.register(rateLimit, {

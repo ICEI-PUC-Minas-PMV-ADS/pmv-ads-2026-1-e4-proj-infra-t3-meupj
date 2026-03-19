@@ -91,6 +91,100 @@ describe('global error format', () => {
       statusCode: 400,
     });
   });
+
+  it('falls back to 500 when statusCode is invalid', async () => {
+    app = await buildApp({
+      envData: {
+        MONGODB_URI: 'mongodb://localhost:27017/meupj',
+      },
+      mongo: createMongoMock(true),
+    });
+
+    app.get('/_test/error-invalid-status', () => {
+      const error = new Error('forced invalid status') as Error & { statusCode: unknown };
+      error.name = 'InvalidStatusError';
+      error.statusCode = 'abc';
+      throw error;
+    });
+
+    const response = await app.inject({ method: 'GET', url: '/_test/error-invalid-status' });
+
+    expect(response.statusCode).toBe(500);
+    expect(response.json()).toEqual({
+      error: 'InvalidStatusError',
+      message: 'forced invalid status',
+      statusCode: 500,
+    });
+  });
+});
+
+describe('logging config', () => {
+  it('applies LOG_LEVEL from validated env', async () => {
+    app = await buildApp({
+      envData: {
+        LOG_LEVEL: 'trace',
+        MONGODB_URI: 'mongodb://localhost:27017/meupj',
+      },
+      mongo: createMongoMock(true),
+    });
+
+    expect(app.log.level).toBe('trace');
+  });
+});
+
+describe('CORS config', () => {
+  it('does not enable CORS credentials without allowed origins', async () => {
+    app = await buildApp({
+      envData: {
+        CORS_ORIGIN: ' ',
+        MONGODB_URI: 'mongodb://localhost:27017/meupj',
+      },
+      mongo: createMongoMock(true),
+    });
+
+    const response = await app.inject({
+      method: 'GET',
+      url: '/health',
+      headers: {
+        origin: 'https://evil.example',
+      },
+    });
+
+    expect(response.headers['access-control-allow-origin']).toBeUndefined();
+    expect(response.headers['access-control-allow-credentials']).toBeUndefined();
+  });
+
+  it('returns CORS credentials only for configured origins', async () => {
+    app = await buildApp({
+      envData: {
+        CORS_ORIGIN: 'http://localhost:3000,http://localhost:5173',
+        MONGODB_URI: 'mongodb://localhost:27017/meupj',
+      },
+      mongo: createMongoMock(true),
+    });
+
+    const allowed = await app.inject({
+      method: 'GET',
+      url: '/health',
+      headers: {
+        origin: 'http://localhost:5173',
+      },
+    });
+
+    expect(allowed.headers['access-control-allow-origin']).toBe('http://localhost:5173');
+    expect(allowed.headers['access-control-allow-credentials']).toBe('true');
+
+    const blocked = await app.inject({
+      method: 'GET',
+      url: '/health',
+      headers: {
+        origin: 'https://evil.example',
+      },
+    });
+
+    expect(blocked.headers['access-control-allow-origin']).toBeUndefined();
+    expect(blocked.headers['access-control-allow-credentials']).toBeUndefined();
+  });
 });
 
 describe('TypeBox validation', () => {
