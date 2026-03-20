@@ -7,3 +7,5 @@ coverage
 .env.*
 !.env.example
 .e2e
+.DS_Store
+**/.DS_Store

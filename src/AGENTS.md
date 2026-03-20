@@ -48,6 +48,7 @@
   - Roteamento técnico de autenticação Better Auth em `GET|POST /api/auth/*`.
   - Recuperação de sessão autenticada para proteção de endpoints.
   - Endpoint `GET /api/profile` com leitura de perfil do usuário autenticado.
+  - Coleção Bruno (`apps/api/bruno/meupj`) com requests de health, sign-up, sign-in e profile.
   - Variáveis obrigatórias de auth: `BETTER_AUTH_SECRET` e `BETTER_AUTH_URL`.
   - Endpoint de health para status de aplicação e dependências.
   - Segurança/CORS e tratamento global de erros.

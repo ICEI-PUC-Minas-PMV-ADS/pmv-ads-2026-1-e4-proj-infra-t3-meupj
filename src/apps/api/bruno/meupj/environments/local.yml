@@ -1,0 +1,12 @@
+name: local
+variables:
+  - name: baseUrl
+    value: http://localhost:3000
+  - name: email
+    value: pedro@meupj.com
+  - secret: true
+    name: password
+  - name: name
+    value: Pedro
+  - secret: true
+    name: sessionCookie
