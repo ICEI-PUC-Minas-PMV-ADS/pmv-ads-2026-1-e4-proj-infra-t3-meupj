@@ -55,3 +55,5 @@
 - [x] Melhorar aplicação de LOG_LEVEL no bootstrap da API
 - [x] Corrigir normalização de status code no error handler
 - [x] Ajustar script de desenvolvimento removendo --parallel
+- [x] Refinar AGENTS.md para visão geral estrutural do projeto e recursos disponíveis
+- [x] Adicionar regra no AGENTS.md para atualização obrigatória após mudanças relevantes no projeto
