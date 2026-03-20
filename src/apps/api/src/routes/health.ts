@@ -23,7 +23,7 @@ export const registerHealthRoutes = (
   dependencies: HealthDependencies,
 ): void => {
   app.get(
-    '/health',
+    '/api/health',
     {
       schema: {
         response: {

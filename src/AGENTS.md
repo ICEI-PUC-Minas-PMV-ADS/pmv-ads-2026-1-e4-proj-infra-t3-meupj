@@ -16,8 +16,8 @@
 - Fluxo de autenticação por email/senha habilitado com sessão via cookie.
 - Hook pós-cadastro para criação automática e idempotente do perfil de negócio.
 - Model de domínio `profile` com índice único em `authUserId`.
-- Endpoint autenticado `GET /profile` com resposta sanitizada (sem campos internos de auth).
-- Camada base HTTP com CORS, error handler global e endpoint de health (`GET /health`).
+- Endpoint autenticado `GET /api/profile` com resposta sanitizada (sem campos internos de auth).
+- Camada base HTTP com CORS, error handler global e endpoint de health (`GET /api/health`).
 - Base de qualidade com lint, build e testes automatizados (Vitest).
 - Regras de formatação padronizadas no monorepo (`.prettierignore` e `.prettierrc.json`).
 
@@ -47,7 +47,7 @@
   - Servidor Fastify com bootstrap tipado.
   - Roteamento técnico de autenticação Better Auth em `GET|POST /api/auth/*`.
   - Recuperação de sessão autenticada para proteção de endpoints.
-  - Endpoint `GET /profile` com leitura de perfil do usuário autenticado.
+  - Endpoint `GET /api/profile` com leitura de perfil do usuário autenticado.
   - Variáveis obrigatórias de auth: `BETTER_AUTH_SECRET` e `BETTER_AUTH_URL`.
   - Endpoint de health para status de aplicação e dependências.
   - Segurança/CORS e tratamento global de erros.

@@ -177,7 +177,7 @@ describe('health route', () => {
       mongoHealthy: true,
     });
 
-    const response = await app.inject({ method: 'GET', url: '/health' });
+    const response = await app.inject({ method: 'GET', url: '/api/health' });
 
     expect(response.statusCode).toBe(200);
     expect(response.json()).toEqual({ status: 'ok' });
@@ -188,7 +188,7 @@ describe('health route', () => {
       mongoHealthy: false,
     });
 
-    const response = await app.inject({ method: 'GET', url: '/health' });
+    const response = await app.inject({ method: 'GET', url: '/api/health' });
 
     expect(response.statusCode).toBe(503);
     expect(response.json()).toEqual({
@@ -263,7 +263,7 @@ describe('CORS config', () => {
 
     const response = await app.inject({
       method: 'GET',
-      url: '/health',
+      url: '/api/health',
       headers: {
         origin: 'https://evil.example',
       },
@@ -282,7 +282,7 @@ describe('CORS config', () => {
 
     const allowed = await app.inject({
       method: 'GET',
-      url: '/health',
+      url: '/api/health',
       headers: {
         origin: 'http://localhost:5173',
       },
@@ -293,7 +293,7 @@ describe('CORS config', () => {
 
     const blocked = await app.inject({
       method: 'GET',
-      url: '/health',
+      url: '/api/health',
       headers: {
         origin: 'https://evil.example',
       },
@@ -485,7 +485,7 @@ describe('profile route', () => {
       authService,
     });
 
-    const response = await app.inject({ method: 'GET', url: '/profile' });
+    const response = await app.inject({ method: 'GET', url: '/api/profile' });
 
     expect(response.statusCode).toBe(401);
     expect(response.json()).toEqual({
@@ -520,7 +520,7 @@ describe('profile route', () => {
       profileStore,
     });
 
-    const response = await app.inject({ method: 'GET', url: '/profile' });
+    const response = await app.inject({ method: 'GET', url: '/api/profile' });
 
     expect(response.statusCode).toBe(200);
     expect(ensureByAuthUserId).toHaveBeenCalledWith('auth-user-42');

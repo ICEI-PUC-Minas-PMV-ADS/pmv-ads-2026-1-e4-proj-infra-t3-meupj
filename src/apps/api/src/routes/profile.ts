@@ -71,7 +71,7 @@ export const registerProfileRoutes = (
   dependencies: ProfileRouteDependencies,
 ): void => {
   app.get(
-    '/profile',
+    '/api/profile',
     {
       schema: {
         response: {
