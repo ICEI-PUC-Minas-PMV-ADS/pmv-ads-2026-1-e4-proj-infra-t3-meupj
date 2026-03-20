@@ -10,7 +10,6 @@
 - API principal em `apps/api` com Fastify + TypeScript ESM em modo `strict`.
 - Variáveis de ambiente validadas com `@fastify/env` + TypeBox.
 - Conexão com MongoDB centralizada em `lib/mongo.ts`, com healthcheck e reconexão.
-- Fundação do backend implementada para `MPJ-14` a `MPJ-17`.
 - Checks principais estabelecidos: `pnpm build`, `pnpm lint` e `pnpm test`.
 
 ## Regras Gerais
@@ -21,7 +20,7 @@
 - Preserve TypeScript em modo `strict`.
 - Preserve ESLint estrito e Prettier.
 - Não criar artefatos fora de `/src`.
-- Siga os critérios de aceite definidos nas issues do Linear.
+- Siga as descrições e critérios de aceite definidos nas issues do Linear, caso esteja resolvendo uma `ISSUE MAPEADA` em `ISSUES.md`
 - Sempre verificar `ISSUES.md` antes de iniciar e após concluir qualquer execução.
 - Sempre atualizar `ISSUES.md` ao final da execução:
   - Seção `ETAPA 2 - MAPEADAS` com status `[x]/[ ]` das issues da Etapa 2.
