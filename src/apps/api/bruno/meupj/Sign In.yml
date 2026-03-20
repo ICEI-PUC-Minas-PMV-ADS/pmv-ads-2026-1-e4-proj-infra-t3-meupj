@@ -18,6 +18,35 @@ http:
       }
   auth: inherit
 
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        const saveBetterAuthSessionCookie = () => {
+          const setCookieHeader = res.getHeader("set-cookie");
+          const setCookieValues = Array.isArray(setCookieHeader)
+            ? setCookieHeader
+            : setCookieHeader
+              ? [String(setCookieHeader)]
+              : [];
+
+          if (setCookieValues.length === 0) {
+            throw new Error("Missing Set-Cookie header in sign-in response");
+          }
+
+          const sessionCookie = setCookieValues
+            .map((value) => String(value))
+            .map((value) => value.match(/better-auth\.session_token=[^;]+/i)?.[0])
+            .find(Boolean);
+
+          if (!sessionCookie) {
+            throw new Error("better-auth.session_token cookie not found in Set-Cookie header");
+          }
+          bru.setEnvVar("sessionCookie", sessionCookie);
+        };
+
+        saveBetterAuthSessionCookie();
+
 settings:
   encodeUrl: true
   timeout: 0

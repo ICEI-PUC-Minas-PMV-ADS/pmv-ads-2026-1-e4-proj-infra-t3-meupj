@@ -62,3 +62,4 @@
 - [x] Adicionar fallback de indisponibilidade de autenticação retornando 503 no handler técnico de auth
 - [x] Padronizar endpoints de domínio da API para o prefixo `/api/*`
 - [x] Adicionar coleção Bruno no repositório para rastreabilidade de testes da API
+- [x] Criar script sign-in no Bruno para capturar e persistir cookie de sessão

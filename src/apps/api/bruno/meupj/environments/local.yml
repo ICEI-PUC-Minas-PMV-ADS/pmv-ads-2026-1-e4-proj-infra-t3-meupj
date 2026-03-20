@@ -3,10 +3,10 @@ variables:
   - name: baseUrl
     value: http://localhost:3000
   - name: email
-    value: pedro@meupj.com
+    value: lucas@meupj.com
   - secret: true
     name: password
   - name: name
-    value: Pedro
+    value: Lucas
   - secret: true
     name: sessionCookie
