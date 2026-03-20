@@ -60,4 +60,4 @@
 - [x] Fixar versões exatas das dependências atuais nos package.json e no pnpm-lock.yaml
 - [x] Ajustar regra de dependências no AGENTS.md para usar latest apenas em novas adições
 - [x] Adicionar fallback de indisponibilidade de autenticação retornando 503 no handler técnico de auth
-- [x] Padronizar endpoints de domínio da API para o prefixo `/api/*` (`/api/health` e `/api/profile`)
+- [x] Padronizar endpoints de domínio da API para o prefixo `/api/*`
