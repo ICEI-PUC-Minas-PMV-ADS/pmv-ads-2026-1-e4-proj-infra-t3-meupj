@@ -7,7 +7,7 @@
 - [x] MPJ-16 - Configurar conexão com MongoDB
 - [x] MPJ-17 - Criar infraestrutura compartilhada da API
 - [ ] MPJ-18 - Configurar base de testes do backend
-- [ ] MPJ-19 - Configurar serviço de upload de arquivos
+- [x] MPJ-19 - Configurar serviço de upload de arquivos
 - [x] MPJ-20 - Integrar Better Auth com Fastify
 - [x] MPJ-21 - Configurar adapter MongoDB do Better Auth
 - [x] MPJ-22 - Habilitar cadastro e login por email/senha
