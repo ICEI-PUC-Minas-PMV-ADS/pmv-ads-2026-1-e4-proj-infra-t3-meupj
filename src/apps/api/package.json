@@ -11,23 +11,23 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@fastify/cors": "latest",
-    "@fastify/env": "latest",
-    "@fastify/helmet": "latest",
-    "@fastify/rate-limit": "latest",
-    "@fastify/type-provider-typebox": "latest",
-    "@sinclair/typebox": "latest",
-    "env-schema": "latest",
-    "fastify": "latest",
-    "mongodb": "latest"
+    "@fastify/cors": "11.2.0",
+    "@fastify/env": "5.0.3",
+    "@fastify/helmet": "13.0.2",
+    "@fastify/rate-limit": "10.3.0",
+    "@fastify/type-provider-typebox": "6.1.0",
+    "@sinclair/typebox": "0.34.48",
+    "env-schema": "7.0.0",
+    "fastify": "5.8.2",
+    "mongodb": "7.1.0"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
     "@repo/tsconfig": "workspace:*",
-    "@types/node": "latest",
-    "eslint": "latest",
-    "tsx": "latest",
-    "typescript": "latest",
-    "vitest": "latest"
+    "@types/node": "25.5.0",
+    "eslint": "10.0.3",
+    "tsx": "4.21.0",
+    "typescript": "5.9.3",
+    "vitest": "4.1.0"
   }
 }

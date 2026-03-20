@@ -57,3 +57,5 @@
 - [x] Ajustar script de desenvolvimento removendo --parallel
 - [x] Refinar AGENTS.md para visão geral estrutural do projeto e recursos disponíveis
 - [x] Adicionar regra no AGENTS.md para atualização obrigatória após mudanças relevantes no projeto
+- [x] Fixar versões exatas das dependências atuais nos package.json e no pnpm-lock.yaml
+- [x] Ajustar regra de dependências no AGENTS.md para usar latest apenas em novas adições

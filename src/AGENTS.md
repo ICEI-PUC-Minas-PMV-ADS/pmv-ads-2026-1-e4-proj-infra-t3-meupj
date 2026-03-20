@@ -18,7 +18,7 @@
 ## Regras Gerais
 
 - Use `pnpm` como gerenciador padrão.
-- Use sempre dependências em `latest`.
+- Use `latest` ao adicionar novas dependências e, após instalar, fixe a versão resolvida no `package.json`.
 - Mantenha a estrutura com Turborepo.
 - Preserve TypeScript em modo `strict`.
 - Preserve ESLint estrito e Prettier.
