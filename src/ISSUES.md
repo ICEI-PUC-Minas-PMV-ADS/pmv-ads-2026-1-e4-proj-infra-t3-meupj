@@ -8,13 +8,13 @@
 - [x] MPJ-17 - Criar infraestrutura compartilhada da API
 - [ ] MPJ-18 - Configurar base de testes do backend
 - [ ] MPJ-19 - Configurar serviço de upload de arquivos
-- [ ] MPJ-20 - Integrar Better Auth com Fastify
-- [ ] MPJ-21 - Configurar adapter MongoDB do Better Auth
-- [ ] MPJ-22 - Habilitar cadastro e login por email/senha
+- [x] MPJ-20 - Integrar Better Auth com Fastify
+- [x] MPJ-21 - Configurar adapter MongoDB do Better Auth
+- [x] MPJ-22 - Habilitar cadastro e login por email/senha
 - [ ] MPJ-23 - Configurar exclusão de conta autenticada
 - [ ] MPJ-24 - Configurar recuperação e alteração de senha
-- [ ] MPJ-25 - Criar schema e model de perfil do negócio
-- [ ] MPJ-26 - Criar endpoint de leitura do perfil autenticado
+- [x] MPJ-25 - Criar schema e model de perfil do negócio
+- [x] MPJ-26 - Criar endpoint de leitura do perfil autenticado
 - [ ] MPJ-27 - Definir política de exclusão em cascata do domínio
 - [ ] MPJ-28 - Criar endpoint de edição do perfil do negócio
 - [ ] MPJ-29 - Criar schema e índices da collection clientes
@@ -59,3 +59,4 @@
 - [x] Adicionar regra no AGENTS.md para atualização obrigatória após mudanças relevantes no projeto
 - [x] Fixar versões exatas das dependências atuais nos package.json e no pnpm-lock.yaml
 - [x] Ajustar regra de dependências no AGENTS.md para usar latest apenas em novas adições
+- [x] Adicionar fallback de indisponibilidade de autenticação retornando 503 no handler técnico de auth

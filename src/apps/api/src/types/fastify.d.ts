@@ -2,7 +2,7 @@ import type { AppEnv } from '../env.js';
 
 export type AuthenticatedUser = {
   id: string;
-  email: string;
+  email: string | null;
   roles?: string[];
 };
 

@@ -21,6 +21,8 @@ export const AppEnvSchema = Type.Object(
     LOG_LEVEL: Type.Optional(LogLevelSchema),
     MONGODB_URI: Type.String({ minLength: 1 }),
     MONGODB_DB_NAME: Type.Optional(Type.String({ minLength: 1 })),
+    BETTER_AUTH_SECRET: Type.String({ minLength: 32 }),
+    BETTER_AUTH_URL: Type.String({ minLength: 1 }),
     CORS_ORIGIN: Type.Optional(Type.String({ minLength: 1 })),
     RATE_LIMIT_MAX: Type.Optional(Type.Integer({ minimum: 1 })),
     RATE_LIMIT_TIME_WINDOW: Type.Optional(Type.String({ minLength: 1 })),
