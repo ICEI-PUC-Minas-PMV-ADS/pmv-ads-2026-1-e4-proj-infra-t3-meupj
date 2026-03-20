@@ -34,8 +34,8 @@
 - Sempre verificar `ISSUES.md` antes de iniciar e após concluir qualquer execução.
 - Sempre atualizar `AGENTS.md` quando alterações no projeto impactarem a visão geral, arquitetura, recursos disponíveis, comandos principais ou regras deste documento.
 - Sempre atualizar `ISSUES.md` ao final da execução:
-  - Seção `ETAPA () - MAPEADAS` com status `[x]/[ ]` das issues da Etapa 2.
-  - Seção `ETAPA () - NÃO MAPEADAS` com itens objetivos de entregas sem vínculo MPJ explícito.
+  - Seção `ETAPA (): MAPEADAS` com status `[x]/[ ]` das issues da Etapa 2.
+  - Seção `GERAL: NÃO MAPEADAS` com itens objetivos de entregas sem vínculo MPJ explícito.
 
 ## Recursos
 

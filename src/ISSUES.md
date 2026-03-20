@@ -1,6 +1,6 @@
 # ISSUES
 
-## ETAPA 2 - MAPEADAS
+## ETAPA 2: MAPEADAS
 
 - [x] MPJ-14 - Inicializar monorepo com Turborepo
 - [x] MPJ-15 - Configurar projeto Fastify em TypeScript ESM
@@ -48,7 +48,7 @@
 - [ ] MPJ-57 - Documentar contratos da API
 - [ ] MPJ-58 - Revisar readiness da etapa backend
 
-## ETAPA 2 - NÃO MAPEADAS
+## GERAL: NÃO MAPEADAS
 
 - [x] Reforçar testes de tratamento global de erros
 - [x] Reforçar testes de configuração de CORS
