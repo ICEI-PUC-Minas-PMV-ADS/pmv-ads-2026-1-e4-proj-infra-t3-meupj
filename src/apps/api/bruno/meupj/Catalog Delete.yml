@@ -1,0 +1,18 @@
+info:
+  name: Catalog Delete
+  type: http
+  seq: 10
+
+http:
+  method: DELETE
+  url: '{{baseUrl}}/api/catalog/{{catalogItemId}}'
+  headers:
+    - name: Cookie
+      value: sessionCookie
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
