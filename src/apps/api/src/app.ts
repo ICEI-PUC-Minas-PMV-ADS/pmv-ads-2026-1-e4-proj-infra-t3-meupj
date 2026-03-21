@@ -10,6 +10,7 @@ import { createProfileStore, type ProfileStore } from './lib/profile.js';
 import { registerGlobalErrorHandler } from './plugins/error-handler.js';
 import { registerSecurityPlugins } from './plugins/security.js';
 import { registerAuthRoutes } from './routes/auth.js';
+import { registerCatalogRoutes } from './routes/catalog.js';
 import { registerHealthRoutes } from './routes/health.js';
 import { registerProfileRoutes } from './routes/profile.js';
 
@@ -112,6 +113,12 @@ export const buildApp = async (options: BuildAppOptions = {}): Promise<FastifyIn
   registerProfileRoutes(app, {
     authService: selectedAuthService,
     profileStore: selectedProfileStore,
+  });
+
+  registerCatalogRoutes(app, {
+    authService: selectedAuthService,
+    profileStore: selectedProfileStore,
+    catalogStore: selectedCatalogStore,
   });
 
   registerHealthRoutes(app, {
