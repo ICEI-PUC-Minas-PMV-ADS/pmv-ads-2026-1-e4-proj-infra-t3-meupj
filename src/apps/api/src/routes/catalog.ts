@@ -1,6 +1,6 @@
 import { Type, type Static } from '@sinclair/typebox';
 import type { FastifyInstance } from 'fastify';
-import { ObjectId, type WithId } from 'mongodb';
+import { ObjectId, type Document, type WithId } from 'mongodb';
 
 import type { AuthService } from '../lib/auth.js';
 import type { CatalogStore, CatalogItem, CatalogUnitMeasure } from '../lib/catalog.js';
@@ -116,6 +116,12 @@ const NotFoundSchema = Type.Object({
   statusCode: Type.Literal(404),
 });
 
+const ConflictSchema = Type.Object({
+  error: Type.Literal('Conflict'),
+  message: Type.Literal('Catalog item is linked to existing orders'),
+  statusCode: Type.Literal(409),
+});
+
 const UnauthorizedPayload = Object.freeze({
   error: 'Unauthorized',
   message: 'Unauthorized',
@@ -126,6 +132,12 @@ const NotFoundPayload = Object.freeze({
   error: 'NotFound',
   message: 'Catalog item not found',
   statusCode: 404,
+});
+
+const ConflictPayload = Object.freeze({
+  error: 'Conflict',
+  message: 'Catalog item is linked to existing orders',
+  statusCode: 409,
 });
 
 type CatalogCreateBody = Static<typeof CatalogCreateSchema>;
@@ -259,6 +271,63 @@ export const registerCatalogRoutes = (
       }
 
       return reply.status(200).send(toCatalogResponse(updatedItem));
+    },
+  );
+
+  app.delete(
+    '/api/catalog/:itemId',
+    {
+      schema: {
+        params: CatalogParamsSchema,
+        response: {
+          204: Type.Null(),
+          401: UnauthorizedSchema,
+          404: NotFoundSchema,
+          409: ConflictSchema,
+        },
+      },
+    },
+    async (request, reply) => {
+      const session = await dependencies.authService.getSessionFromHeaders(request.headers);
+
+      if (!session) {
+        return reply.status(401).send(UnauthorizedPayload);
+      }
+
+      const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
+      const params = request.params as CatalogParams;
+      const itemObjectId = new ObjectId(params.itemId);
+      const profileId = profile._id.toHexString();
+
+      const collection = dependencies.catalogStore.getCollection();
+      const existingItem = await collection.findOne({
+        _id: itemObjectId,
+        profileId,
+      });
+
+      if (!existingItem) {
+        return reply.status(404).send(NotFoundPayload);
+      }
+// TODO: Validar integração quando a coleção 'orders' for implementada
+      const ordersCollection = collection.db.collection<Document>('orders');
+      const linkedOrder = await ordersCollection.findOne({
+        'items.catalogItemId': params.itemId,
+      });
+
+      if (linkedOrder) {
+        return reply.status(409).send(ConflictPayload);
+      }
+
+      const deleteResult = await collection.deleteOne({
+        _id: itemObjectId,
+        profileId,
+      });
+
+      if (deleteResult.deletedCount === 0) {
+        return reply.status(404).send(NotFoundPayload);
+      }
+
+      return reply.status(204).send();
     },
   );
 };
