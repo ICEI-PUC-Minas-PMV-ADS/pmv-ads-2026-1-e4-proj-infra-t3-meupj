@@ -6,6 +6,10 @@
   "exports": {
     "./node": "./node.mjs"
   },
+  "scripts": {
+    "format": "prettier --write \"*.{json,mjs}\"",
+    "format:check": "prettier --check \"*.{json,mjs}\""
+  },
   "dependencies": {
     "@eslint/js": "10.0.1",
     "eslint": "10.0.3",

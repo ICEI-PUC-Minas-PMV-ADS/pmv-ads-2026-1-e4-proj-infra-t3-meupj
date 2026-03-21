@@ -64,3 +64,4 @@
 - [x] Adicionar coleção Bruno no repositório para rastreabilidade de testes da API
 - [x] Criar script sign-in no Bruno para capturar e persistir cookie de sessão
 - [x] Atualizar descrições das issues abertas da Etapa 2 no Linear com lógica técnica em inglês e padronização de contexto atual
+- [x] Configurar validação de formatação com Prettier no pipeline Turborepo (scripts `format` e `format:check`)

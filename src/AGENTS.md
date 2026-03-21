@@ -18,7 +18,7 @@
 - Model de domínio `profile` com índice único em `authUserId`.
 - Endpoint autenticado `GET /api/profile` com resposta sanitizada (sem campos internos de auth).
 - Camada base HTTP com CORS, error handler global e endpoint de health (`GET /api/health`).
-- Base de qualidade com lint, build e testes automatizados (Vitest).
+- Base de qualidade com lint, build, testes automatizados (Vitest) e validação de formatação (Prettier).
 - Regras de formatação padronizadas no monorepo (`.prettierignore` e `.prettierrc.json`).
 
 ## Regras Gerais
@@ -56,6 +56,7 @@
   - Testes automatizados com Vitest.
 - Recursos operacionais:
   - Scripts de desenvolvimento, build, lint e teste por workspace.
+  - Scripts de formatação e validação de formatação (`format` e `format:check`) por workspace.
   - Execução isolada por filtro: `pnpm --filter <projeto> <comando>`.
   - Referência prática da API: `pnpm --filter @repo/api <comando>`.
   - Execução global via Turborepo a partir da raiz `/src`.
@@ -69,3 +70,5 @@ Execute a partir de `/src`:
 - `pnpm build`
 - `pnpm lint`
 - `pnpm test`
+- `pnpm format`
+- `pnpm format:check`

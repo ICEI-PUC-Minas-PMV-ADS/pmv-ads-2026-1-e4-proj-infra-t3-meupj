@@ -50,11 +50,7 @@ const resolveRequestBody = (
 
   headers.delete('content-length');
 
-  if (
-    typeof body === 'string' ||
-    body instanceof ArrayBuffer ||
-    Buffer.isBuffer(body)
-  ) {
+  if (typeof body === 'string' || body instanceof ArrayBuffer || Buffer.isBuffer(body)) {
     return body;
   }
 

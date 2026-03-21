@@ -40,9 +40,7 @@ const createProfileFixture = (authUserId = 'auth-user-1'): WithId<ProfileDocumen
   updatedAt: new Date('2026-01-01T00:00:00.000Z'),
 });
 
-const createProfileStoreMock = (
-  profile = createProfileFixture(),
-): ProfileStore => ({
+const createProfileStoreMock = (profile = createProfileFixture()): ProfileStore => ({
   ensureIndexes: () => Promise.resolve(undefined),
   getByAuthUserId: () => Promise.resolve(profile),
   ensureByAuthUserId: () => Promise.resolve(profile),

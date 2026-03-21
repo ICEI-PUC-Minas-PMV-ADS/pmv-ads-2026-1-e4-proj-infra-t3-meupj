@@ -187,7 +187,10 @@ const startHealthcheck = (): void => {
         const normalizedError = normalizeError(error);
         runtime.lastError = normalizedError;
         runtime.state = 'degraded';
-        runtime.logger?.error({ err: normalizedError }, 'MongoDB ping failed; entering degraded state');
+        runtime.logger?.error(
+          { err: normalizedError },
+          'MongoDB ping failed; entering degraded state',
+        );
         await closeClient();
         scheduleReconnect();
       }

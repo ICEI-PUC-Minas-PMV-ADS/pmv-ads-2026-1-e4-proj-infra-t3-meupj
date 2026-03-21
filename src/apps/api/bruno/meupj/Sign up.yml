@@ -5,10 +5,10 @@ info:
 
 http:
   method: POST
-  url: "{{baseUrl}}/api/auth/sign-up/email"
+  url: '{{baseUrl}}/api/auth/sign-up/email'
   headers:
     - name: Origin
-      value: "{{baseUrl}}"
+      value: '{{baseUrl}}'
   body:
     type: json
     data: |-

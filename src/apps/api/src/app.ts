@@ -3,11 +3,7 @@ import type { TypeBoxTypeProvider } from '@fastify/type-provider-typebox';
 import Fastify, { type FastifyInstance } from 'fastify';
 
 import { registerEnv, type EnvData } from './env.js';
-import {
-  createAuthService,
-  createUnavailableAuthService,
-  type AuthService,
-} from './lib/auth.js';
+import { createAuthService, createUnavailableAuthService, type AuthService } from './lib/auth.js';
 import { mongoService, type MongoService } from './lib/mongo.js';
 import { createProfileStore, type ProfileStore } from './lib/profile.js';
 import { registerGlobalErrorHandler } from './plugins/error-handler.js';
@@ -65,7 +61,8 @@ export const buildApp = async (options: BuildAppOptions = {}): Promise<FastifyIn
     await selectedMongoService.close();
   });
 
-  const selectedProfileStore = options.profileStore ?? createProfileStore(() => selectedMongoService.getDb());
+  const selectedProfileStore =
+    options.profileStore ?? createProfileStore(() => selectedMongoService.getDb());
 
   try {
     await selectedProfileStore.ensureIndexes();
