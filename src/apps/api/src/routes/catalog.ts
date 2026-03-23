@@ -1,6 +1,6 @@
 import { Type, type Static } from '@sinclair/typebox';
 import type { FastifyInstance } from 'fastify';
-import { ObjectId, type Document, type WithId } from 'mongodb';
+import { ObjectId, type Document, type Filter, type WithId } from 'mongodb';
 
 import type { AuthService } from '../lib/auth.js';
 import type { CatalogStore, CatalogItem, CatalogUnitMeasure } from '../lib/catalog.js';
@@ -23,6 +23,13 @@ type CatalogResponse = {
   costPrice?: number;
   createdAt: string;
   updatedAt: string;
+};
+
+type CatalogListResponse = {
+  data: CatalogResponse[];
+  total: number;
+  page: number;
+  limit: number;
 };
 
 type CatalogUpdateSet = Partial<
@@ -86,6 +93,28 @@ const CatalogParamsSchema = Type.Object(
   },
 );
 
+const CatalogSortBySchema = Type.Union([
+  Type.Literal('name'),
+  Type.Literal('unitPrice'),
+  Type.Literal('createdAt'),
+]);
+
+const CatalogSortOrderSchema = Type.Union([Type.Literal('asc'), Type.Literal('desc')]);
+
+const CatalogListQuerySchema = Type.Object(
+  {
+    page: Type.Optional(Type.Integer({ minimum: 1 })),
+    limit: Type.Optional(Type.Integer({ minimum: 1 })),
+    q: Type.Optional(Type.String()),
+    type: Type.Optional(CatalogTypeSchema),
+    sortBy: Type.Optional(CatalogSortBySchema),
+    sortOrder: Type.Optional(CatalogSortOrderSchema),
+  },
+  {
+    additionalProperties: false,
+  },
+);
+
 const CatalogResponseSchema = Type.Object(
   {
     _id: Type.String(),
@@ -98,6 +127,18 @@ const CatalogResponseSchema = Type.Object(
     costPrice: Type.Optional(Type.Number()),
     createdAt: Type.String({ format: 'date-time' }),
     updatedAt: Type.String({ format: 'date-time' }),
+  },
+  {
+    additionalProperties: false,
+  },
+);
+
+const CatalogListResponseSchema = Type.Object(
+  {
+    data: Type.Array(CatalogResponseSchema),
+    total: Type.Integer({ minimum: 0 }),
+    page: Type.Integer({ minimum: 1 }),
+    limit: Type.Integer({ minimum: 1 }),
   },
   {
     additionalProperties: false,
@@ -143,6 +184,7 @@ const ConflictPayload = Object.freeze({
 type CatalogCreateBody = Static<typeof CatalogCreateSchema>;
 type CatalogUpdateBody = Static<typeof CatalogUpdateSchema>;
 type CatalogParams = Static<typeof CatalogParamsSchema>;
+type CatalogListQuery = Static<typeof CatalogListQuerySchema>;
 
 const toCatalogResponse = (item: WithId<CatalogItem>): CatalogResponse => ({
   _id: item._id.toHexString(),
@@ -161,6 +203,70 @@ export const registerCatalogRoutes = (
   app: FastifyInstance,
   dependencies: CatalogRouteDependencies,
 ): void => {
+  app.get(
+    '/api/catalog',
+    {
+      schema: {
+        querystring: CatalogListQuerySchema,
+        response: {
+          200: CatalogListResponseSchema,
+          401: UnauthorizedSchema,
+        },
+      },
+    },
+    async (request, reply) => {
+      const session = await dependencies.authService.getSessionFromHeaders(request.headers);
+
+      if (!session) {
+        return reply.status(401).send(UnauthorizedPayload);
+      }
+
+      const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
+      const query = request.query as CatalogListQuery;
+
+      const page = query.page ?? 1;
+      const limit = query.limit ?? 20;
+      const sortBy = query.sortBy ?? 'createdAt';
+      const sortOrder = query.sortOrder ?? 'desc';
+      const skip = (page - 1) * limit;
+      const profileId = profile._id.toHexString();
+
+      const filter: Filter<CatalogItem> = {
+        profileId,
+      };
+
+      if (query.type) {
+        filter.type = query.type;
+      }
+
+      if (query.q && query.q.trim().length > 0) {
+        const normalizedQuery = query.q.trim();
+        filter.$or = [
+          { name: { $regex: normalizedQuery, $options: 'i' } },
+          { description: { $regex: normalizedQuery, $options: 'i' } },
+        ];
+      }
+
+      const sortDirection = sortOrder === 'asc' ? 1 : -1;
+      const sort = { [sortBy]: sortDirection } as Record<string, 1 | -1>;
+
+      const collection = dependencies.catalogStore.getCollection();
+      const [items, total] = await Promise.all([
+        collection.find(filter).sort(sort).skip(skip).limit(limit).toArray(),
+        collection.countDocuments(filter),
+      ]);
+
+      const response: CatalogListResponse = {
+        data: items.map(toCatalogResponse),
+        total,
+        page,
+        limit,
+      };
+
+      return reply.status(200).send(response);
+    },
+  );
+
   app.post(
     '/api/catalog',
     {
