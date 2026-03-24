@@ -16,7 +16,12 @@
 - Fluxo de autenticação por email/senha habilitado com sessão via cookie.
 - Hook pós-cadastro para criação automática e idempotente do perfil de negócio.
 - Model de domínio `profile` com índice único em `authUserId`.
+- Model de domínio `catalog` com índices em `profileId` para itens de produto e serviço.
 - Endpoint autenticado `GET /api/profile` com resposta sanitizada (sem campos internos de auth).
+- Endpoint autenticado `POST /api/catalog` para criação de itens de catálogo.
+- Endpoint autenticado `PUT /api/catalog/:itemId` para edição de itens de catálogo no escopo do perfil.
+- Endpoint autenticado `DELETE /api/catalog/:itemId` para exclusão de itens de catálogo com validação de vínculo em pedidos.
+- Endpoint autenticado `GET /api/catalog` para listagem com paginação, busca, filtros e ordenação.
 - Camada base HTTP com CORS, error handler global e endpoint de health (`GET /api/health`).
 - Base de qualidade com lint, build, testes automatizados (Vitest) e validação de formatação (Prettier).
 - Regras de formatação padronizadas no monorepo (`.prettierignore` e `.prettierrc.json`).
@@ -47,8 +52,15 @@
   - Servidor Fastify com bootstrap tipado.
   - Roteamento técnico de autenticação Better Auth em `GET|POST /api/auth/*`.
   - Recuperação de sessão autenticada para proteção de endpoints.
+  - Store de domínio `profile` com índice único em `authUserId`.
+  - Store de domínio `catalog` com índices em `profileId` para itens de produto e serviço.
   - Endpoint `GET /api/profile` com leitura de perfil do usuário autenticado.
   - Coleção Bruno (`apps/api/bruno/meupj`) com requests de health, sign-up, sign-in e profile.
+  - Endpoint `POST /api/catalog` com criação de item de catálogo autenticado.
+  - Endpoint `PUT /api/catalog/:itemId` com edição de item de catálogo autenticado.
+  - Endpoint `DELETE /api/catalog/:itemId` com exclusão de item de catálogo autenticado e validação de vínculos.
+  - Endpoint `GET /api/catalog` com listagem autenticada, busca, filtros, ordenação e paginação.
+  - Coleção Bruno (`apps/api/bruno/meupj`) com requests de health, sign-up, sign-in, profile e catalog.
   - Variáveis obrigatórias de auth: `BETTER_AUTH_SECRET` e `BETTER_AUTH_URL`.
   - Endpoint de health para status de aplicação e dependências.
   - Segurança/CORS e tratamento global de erros.
