@@ -1,0 +1,42 @@
+info:
+  name: Clients Create
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: '{{baseUrl}}/api/clients'
+  headers:
+    - name: Content-Type
+      value: application/json
+    - name: Cookie
+      value: sessionCookie
+  auth: inherit
+  body:
+    mimeType: application/json
+    text: |
+      {
+        "nome": "João da Silva",
+        "tipoPessoa": "fisica",
+        "documento": "123.456.789-00",
+        "email": "joao@example.com",
+        "telefone": "31 98888-5678",
+        "origem": "indicacao",
+        "aniversario": "1985-07-22",
+        "anotacoes": "Cliente pontual",
+        "endereco": {
+          "cep": "31270-080",
+          "logradouro": "Rua das Flores",
+          "numero": "42",
+          "complemento": "Apto 5",
+          "bairro": "Santa Efigênia",
+          "cidade": "Belo Horizonte",
+          "estado": "MG"
+        }
+      }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
