@@ -21,11 +21,11 @@
 - [ ] MPJ-30 - Implementar criação de cliente
 - [ ] MPJ-31 - Implementar edição e exclusão de cliente
 - [ ] MPJ-32 - Implementar listagem, busca e filtros de clientes
-- [ ] MPJ-33 - Criar schema e índices da collection catalogo
-- [ ] MPJ-34 - Implementar criação de item do catálogo
-- [ ] MPJ-35 - Implementar edição de item do catálogo
-- [ ] MPJ-36 - Implementar exclusão de item do catálogo com validação de vínculo
-- [ ] MPJ-37 - Implementar listagem, busca e filtros de catálogo
+- [x] MPJ-33 - Criar schema e índices da collection catalogo
+- [x] MPJ-34 - Implementar criação de item do catálogo
+- [x] MPJ-35 - Implementar edição de item do catálogo
+- [x] MPJ-36 - Implementar exclusão de item do catálogo com validação de vínculo
+- [x] MPJ-37 - Implementar listagem, busca e filtros de catálogo
 - [ ] MPJ-38 - Criar schema e índices da collection pedidos
 - [ ] MPJ-39 - Implementar criação de pedido com itens e pagamentos
 - [ ] MPJ-40 - Implementar edição e exclusão de pedido

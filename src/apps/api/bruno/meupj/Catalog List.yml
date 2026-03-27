@@ -1,0 +1,18 @@
+info:
+  name: Catalog List
+  type: http
+  seq: 11
+
+http:
+  method: GET
+  url: '{{baseUrl}}/api/catalog?page=1&limit=20&q=sample&type=product&sortBy=createdAt&sortOrder=desc'
+  headers:
+    - name: Cookie
+      value: sessionCookie
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
