@@ -2,30 +2,30 @@ import type { Collection, Db, WithId } from 'mongodb';
 
 export const CLIENTS_COLLECTION_NAME = 'clientes';
 
-export type PersonType = 'fisica' | 'juridica';
+export type PersonType = 'individual' | 'company';
 
 export type ClientAddress = {
-  cep: string;
-  logradouro: string;
-  numero: string;
-  complemento?: string;
-  bairro: string;
-  cidade: string;
-  estado: string;
-  pais?: string;
+  zipCode: string;
+  street: string;
+  number: string;
+  complement?: string;
+  district: string;
+  city: string;
+  state: string;
+  country?: string;
 };
 
 export type Client = {
   profileId: string;
-  nome: string;
-  tipoPessoa: PersonType;
-  documento: string;
+  name: string;
+  type: PersonType;
+  document: string;
   email: string;
-  telefone: string;
-  origem?: string;
-  aniversario?: string;
-  anotacoes?: string;
-  endereco: ClientAddress;
+  phone: string;
+  origin?: string;
+  birthDate?: string;
+  notes?: string;
+  address: ClientAddress;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -55,9 +55,9 @@ const ensureClientsIndexes = async (db: Db): Promise<void> => {
   );
 
   await collection.createIndex(
-    { profileId: 1, nome: 1 },
+    { profileId: 1, name: 1 },
     {
-      name: 'clients_profileId_nome',
+      name: 'clients_profileId_name',
     },
   );
 

@@ -16,8 +16,8 @@ http:
     - name: q
       value: ''
       disabled: true
-    - name: tipoPessoa
-      value: 'fisica'
+    - name: type
+      value: 'individual'
       disabled: true
     - name: sortBy
       value: 'createdAt'

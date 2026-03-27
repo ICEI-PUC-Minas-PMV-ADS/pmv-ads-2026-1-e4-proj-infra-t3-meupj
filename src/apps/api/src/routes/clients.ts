@@ -15,15 +15,15 @@ type ClientRouteDependencies = {
 type ClientResponse = {
   _id: string;
   profileId: string;
-  nome: string;
-  tipoPessoa: PersonType;
-  documento: string;
+  name: string;
+  type: PersonType;
+  document: string;
   email: string;
-  telefone: string;
-  origem?: string;
-  aniversario?: string;
-  anotacoes?: string;
-  endereco: ClientAddress;
+  phone: string;
+  origin?: string;
+  birthDate?: string;
+  notes?: string;
+  address: ClientAddress;
   createdAt: string;
   updatedAt: string;
 };
@@ -38,32 +38,32 @@ type ClientListResponse = {
 type ClientUpdateSet = Partial<
   Pick<
     Client,
-    | 'nome'
-    | 'tipoPessoa'
-    | 'documento'
+    | 'name'
+    | 'type'
+    | 'document'
     | 'email'
-    | 'telefone'
-    | 'origem'
-    | 'aniversario'
-    | 'anotacoes'
-    | 'endereco'
+    | 'phone'
+    | 'origin'
+    | 'birthDate'
+    | 'notes'
+    | 'address'
   >
 > & {
   updatedAt: Date;
 };
 
-const PersonTypeSchema = Type.Union([Type.Literal('fisica'), Type.Literal('juridica')]);
+const PersonTypeSchema = Type.Union([Type.Literal('individual'), Type.Literal('company')]);
 
 const AddressSchema = Type.Object(
   {
-    cep: Type.String(),
-    logradouro: Type.String(),
-    numero: Type.String(),
-    complemento: Type.Optional(Type.String()),
-    bairro: Type.String(),
-    cidade: Type.String(),
-    estado: Type.String({ maxLength: 2 }),
-    pais: Type.Optional(Type.String()),
+    zipCode: Type.String(),
+    street: Type.String(),
+    number: Type.String(),
+    complement: Type.Optional(Type.String()),
+    district: Type.String(),
+    city: Type.String(),
+    state: Type.String({ maxLength: 2 }),
+    country: Type.Optional(Type.String()),
   },
   {
     additionalProperties: false,
@@ -72,15 +72,15 @@ const AddressSchema = Type.Object(
 
 const ClientCreateSchema = Type.Object(
   {
-    nome: Type.String(),
-    tipoPessoa: PersonTypeSchema,
-    documento: Type.String(),
+    name: Type.String(),
+    type: PersonTypeSchema,
+    document: Type.String(),
     email: Type.String({ format: 'email' }),
-    telefone: Type.String(),
-    origem: Type.Optional(Type.String()),
-    aniversario: Type.Optional(Type.String({ format: 'date' })),
-    anotacoes: Type.Optional(Type.String()),
-    endereco: AddressSchema,
+    phone: Type.String(),
+    origin: Type.Optional(Type.String()),
+    birthDate: Type.Optional(Type.String({ format: 'date' })),
+    notes: Type.Optional(Type.String()),
+    address: AddressSchema,
   },
   {
     additionalProperties: false,
@@ -89,15 +89,15 @@ const ClientCreateSchema = Type.Object(
 
 const ClientUpdateSchema = Type.Object(
   {
-    nome: Type.Optional(Type.String()),
-    tipoPessoa: Type.Optional(PersonTypeSchema),
-    documento: Type.Optional(Type.String()),
+    name: Type.Optional(Type.String()),
+    type: Type.Optional(PersonTypeSchema),
+    document: Type.Optional(Type.String()),
     email: Type.Optional(Type.String({ format: 'email' })),
-    telefone: Type.Optional(Type.String()),
-    origem: Type.Optional(Type.String()),
-    aniversario: Type.Optional(Type.String({ format: 'date' })),
-    anotacoes: Type.Optional(Type.String()),
-    endereco: Type.Optional(AddressSchema),
+    phone: Type.Optional(Type.String()),
+    origin: Type.Optional(Type.String()),
+    birthDate: Type.Optional(Type.String({ format: 'date' })),
+    notes: Type.Optional(Type.String()),
+    address: Type.Optional(AddressSchema),
   },
   {
     additionalProperties: false,
@@ -115,10 +115,10 @@ const ClientParamsSchema = Type.Object(
 );
 
 const ClientSortBySchema = Type.Union([
-  Type.Literal('nome'),
+  Type.Literal('name'),
   Type.Literal('email'),
   Type.Literal('createdAt'),
-  Type.Literal('aniversario'),
+  Type.Literal('birthDate'),
 ]);
 
 const ClientSortOrderSchema = Type.Union([Type.Literal('asc'), Type.Literal('desc')]);
@@ -128,7 +128,7 @@ const ClientListQuerySchema = Type.Object(
     page: Type.Optional(Type.Integer({ minimum: 1 })),
     limit: Type.Optional(Type.Integer({ minimum: 1 })),
     q: Type.Optional(Type.String()),
-    tipoPessoa: Type.Optional(PersonTypeSchema),
+    type: Type.Optional(PersonTypeSchema),
     sortBy: Type.Optional(ClientSortBySchema),
     sortOrder: Type.Optional(ClientSortOrderSchema),
   },
@@ -141,15 +141,15 @@ const ClientResponseSchema = Type.Object(
   {
     _id: Type.String(),
     profileId: Type.String(),
-    nome: Type.String(),
-    tipoPessoa: PersonTypeSchema,
-    documento: Type.String(),
+    name: Type.String(),
+    type: PersonTypeSchema,
+    document: Type.String(),
     email: Type.String({ format: 'email' }),
-    telefone: Type.String(),
-    origem: Type.Optional(Type.String()),
-    aniversario: Type.Optional(Type.String({ format: 'date' })),
-    anotacoes: Type.Optional(Type.String()),
-    endereco: AddressSchema,
+    phone: Type.String(),
+    origin: Type.Optional(Type.String()),
+    birthDate: Type.Optional(Type.String({ format: 'date' })),
+    notes: Type.Optional(Type.String()),
+    address: AddressSchema,
     createdAt: Type.String({ format: 'date-time' }),
     updatedAt: Type.String({ format: 'date-time' }),
   },
@@ -226,24 +226,24 @@ type ClientListQuery = Static<typeof ClientListQuerySchema>;
 const toClientResponse = (item: WithId<Client>): ClientResponse => ({
   _id: item._id.toHexString(),
   profileId: item.profileId,
-  nome: item.nome,
-  tipoPessoa: item.tipoPessoa,
-  documento: item.documento,
+  name: item.name,
+  type: item.type,
+  document: item.document,
   email: item.email,
-  telefone: item.telefone,
-  endereco: item.endereco,
+  phone: item.phone,
+  address: item.address,
   createdAt: item.createdAt.toISOString(),
   updatedAt: item.updatedAt.toISOString(),
-  ...(item.origem !== undefined && { origem: item.origem }),
-  ...(item.aniversario !== undefined && { aniversario: item.aniversario }),
-  ...(item.anotacoes !== undefined && { anotacoes: item.anotacoes }),
+  ...(item.origin !== undefined && { origin: item.origin }),
+  ...(item.birthDate !== undefined && { birthDate: item.birthDate }),
+  ...(item.notes !== undefined && { notes: item.notes }),
 });
 
-const validateDocumentByType = (documento: string, tipoPessoa: PersonType): boolean => {
+const validateDocumentByType = (documento: string, type: PersonType): boolean => {
   // Remove caracteres não numéricos
   const cleanDoc = documento.replace(/\D/g, '');
 
-  if (tipoPessoa === 'fisica') {
+  if (type === 'individual') {
     // CPF: 11 dígitos
     if (cleanDoc.length !== 11) return false;
 
@@ -252,7 +252,7 @@ const validateDocumentByType = (documento: string, tipoPessoa: PersonType): bool
     if (cpf.every(digit => digit === cpf[0])) return false; // CPF com todos dígitos iguais
 
     return true;
-  } else if (tipoPessoa === 'juridica') {
+  } else if (type === 'company') {
     // CNPJ: 14 dígitos
     if (cleanDoc.length !== 14) return false;
 
@@ -302,16 +302,16 @@ export const registerClientsRoutes = (
         profileId,
       };
 
-      if (query.tipoPessoa) {
-        filter.tipoPessoa = query.tipoPessoa;
+      if (query.type) {
+        filter.type = query.type;
       }
 
       if (query.q && query.q.trim().length > 0) {
         const normalizedQuery = query.q.trim();
         filter.$or = [
-          { nome: { $regex: normalizedQuery, $options: 'i' } },
+          { name: { $regex: normalizedQuery, $options: 'i' } },
           { email: { $regex: normalizedQuery, $options: 'i' } },
-          { documento: { $regex: normalizedQuery, $options: 'i' } },
+          { document: { $regex: normalizedQuery, $options: 'i' } },
         ];
       }
 
@@ -359,10 +359,10 @@ export const registerClientsRoutes = (
       const body = request.body as ClientCreateBody;
 
       // Validar documento conforme tipo
-      if (!validateDocumentByType(body.documento, body.tipoPessoa)) {
+      if (!validateDocumentByType(body.document, body.type)) {
         return reply.status(400).send({
           error: 'BadRequest',
-          message: `Documento inválido para tipo ${body.tipoPessoa}`,
+          message: `Documento inválido para tipo ${body.type}`,
           statusCode: 400,
         });
       }
@@ -370,17 +370,17 @@ export const registerClientsRoutes = (
       const now = new Date();
       const client: Omit<Client, '_id'> = {
         profileId: profile._id.toHexString(),
-        nome: body.nome,
-        tipoPessoa: body.tipoPessoa,
-        documento: body.documento,
+        name: body.name,
+        type: body.type,
+        document: body.document,
         email: body.email,
-        telefone: body.telefone,
-        endereco: body.endereco,
+        phone: body.phone,
+        address: body.address,
         createdAt: now,
         updatedAt: now,
-        ...(body.origem !== undefined && { origem: body.origem }),
-        ...(body.aniversario !== undefined && { aniversario: body.aniversario }),
-        ...(body.anotacoes !== undefined && { anotacoes: body.anotacoes }),
+        ...(body.origin !== undefined && { origin: body.origin }),
+        ...(body.birthDate !== undefined && { birthDate: body.birthDate }),
+        ...(body.notes !== undefined && { notes: body.notes }),
       };
 
       const collection = dependencies.clientsStore.getCollection();
@@ -424,9 +424,9 @@ export const registerClientsRoutes = (
 
       const collection = dependencies.clientsStore.getCollection();
 
-      // Se documento ou tipoPessoa estão sendo atualizados, validar documento
-      if (body.documento !== undefined || body.tipoPessoa !== undefined) {
-        // Buscar cliente atual para obter o tipoPessoa se não estiver sendo atualizado
+      // Se document ou type estão sendo atualizados, validar documento
+      if (body.document !== undefined || body.type !== undefined) {
+        // Buscar cliente atual para obter o type se não estiver sendo atualizado
         const currentClient = await collection.findOne({
           _id: new ObjectId(params.clientId),
           profileId: profile._id.toHexString(),
@@ -436,13 +436,13 @@ export const registerClientsRoutes = (
           return reply.status(404).send(NotFoundPayload);
         }
 
-        const tipoPessoaToValidate = body.tipoPessoa ?? currentClient.tipoPessoa;
-        const documentoToValidate = body.documento ?? currentClient.documento;
+        const typeToValidate = body.type ?? currentClient.type;
+        const documentToValidate = body.document ?? currentClient.document;
 
-        if (!validateDocumentByType(documentoToValidate, tipoPessoaToValidate)) {
+        if (!validateDocumentByType(documentToValidate, typeToValidate)) {
           return reply.status(400).send({
             error: 'BadRequest',
-            message: `Documento inválido para tipo ${tipoPessoaToValidate}`,
+            message: `Documento inválido para tipo ${typeToValidate}`,
             statusCode: 400,
           });
         }
@@ -452,15 +452,15 @@ export const registerClientsRoutes = (
 
       const setPayload: ClientUpdateSet = {
         updatedAt: now,
-        ...(body.nome !== undefined && { nome: body.nome }),
-        ...(body.tipoPessoa !== undefined && { tipoPessoa: body.tipoPessoa }),
-        ...(body.documento !== undefined && { documento: body.documento }),
+        ...(body.name !== undefined && { name: body.name }),
+        ...(body.type !== undefined && { type: body.type }),
+        ...(body.document !== undefined && { document: body.document }),
         ...(body.email !== undefined && { email: body.email }),
-        ...(body.telefone !== undefined && { telefone: body.telefone }),
-        ...(body.origem !== undefined && { origem: body.origem }),
-        ...(body.aniversario !== undefined && { aniversario: body.aniversario }),
-        ...(body.anotacoes !== undefined && { anotacoes: body.anotacoes }),
-        ...(body.endereco !== undefined && { endereco: body.endereco }),
+        ...(body.phone !== undefined && { phone: body.phone }),
+        ...(body.origin !== undefined && { origin: body.origin }),
+        ...(body.birthDate !== undefined && { birthDate: body.birthDate }),
+        ...(body.notes !== undefined && { notes: body.notes }),
+        ...(body.address !== undefined && { address: body.address }),
       };
 
       const clientObjectId = new ObjectId(params.clientId);

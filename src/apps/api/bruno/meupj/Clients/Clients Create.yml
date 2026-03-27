@@ -16,22 +16,22 @@ http:
     mimeType: application/json
     text: |
       {
-        "nome": "João da Silva",
-        "tipoPessoa": "fisica",
-        "documento": "123.456.789-00",
+        "name": "João da Silva",
+        "type": "individual",
+        "document": "123.456.789-00",
         "email": "joao@example.com",
-        "telefone": "31 98888-5678",
-        "origem": "indicacao",
-        "aniversario": "1985-07-22",
-        "anotacoes": "Cliente pontual",
-        "endereco": {
-          "cep": "31270-080",
-          "logradouro": "Rua das Flores",
-          "numero": "42",
-          "complemento": "Apto 5",
-          "bairro": "Santa Efigênia",
-          "cidade": "Belo Horizonte",
-          "estado": "MG"
+        "phone": "31 98888-5678",
+        "origin": "indicacao",
+        "birthDate": "1985-07-22",
+        "notes": "Cliente pontual",
+        "address": {
+          "zipCode": "31270-080",
+          "street": "Rua das Flores",
+          "number": "42",
+          "complement": "Apto 5",
+          "district": "Santa Efigênia",
+          "city": "Belo Horizonte",
+          "state": "MG"
         }
       }
 

@@ -16,9 +16,9 @@ http:
     mimeType: application/json
     text: |
       {
-        "nome": "João Silva Updated",
+        "name": "João Silva Updated",
         "email": "joao.updated@example.com",
-        "telefone": "31 99999-1234"
+        "phone": "31 99999-1234"
       }
 
 settings:
