@@ -7,6 +7,7 @@ import { createAuthService, createUnavailableAuthService, type AuthService } fro
 import { createCatalogStore, type CatalogStore } from './lib/catalog.js';
 import { createClientsStore, type ClientStore } from './lib/clients.js';
 import { mongoService, type MongoService } from './lib/mongo.js';
+import { createOrdersStore, type OrdersStore } from './lib/orders.js';
 import { createProfileStore, type ProfileStore } from './lib/profile.js';
 import { registerGlobalErrorHandler } from './plugins/error-handler.js';
 import { registerSecurityPlugins } from './plugins/security.js';
@@ -23,6 +24,7 @@ export type BuildAppOptions = {
   profileStore?: ProfileStore;
   catalogStore?: CatalogStore;
   clientsStore?: ClientStore;
+  ordersStore?: OrdersStore;
 };
 
 const resolveInitialLogLevel = (): string => process.env.LOG_LEVEL ?? 'info';
@@ -95,6 +97,16 @@ export const buildApp = async (options: BuildAppOptions = {}): Promise<FastifyIn
   } catch (error) {
     const normalizedError = error instanceof Error ? error : new Error(String(error));
     app.log.error({ err: normalizedError }, 'Unable to ensure clients indexes');
+  }
+
+  const selectedOrdersStore =
+    options.ordersStore ?? createOrdersStore(() => selectedMongoService.getDb());
+
+  try {
+    await selectedOrdersStore.ensureIndexes();
+  } catch (error) {
+    const normalizedError = error instanceof Error ? error : new Error(String(error));
+    app.log.error({ err: normalizedError }, 'Unable to ensure orders indexes');
   }
 
   let selectedAuthService = options.auth;
