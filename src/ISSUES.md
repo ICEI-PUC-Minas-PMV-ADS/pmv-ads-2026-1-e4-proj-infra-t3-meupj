@@ -27,7 +27,7 @@
 - [x] MPJ-36 - Implementar exclusão de item do catálogo com validação de vínculo
 - [x] MPJ-37 - Implementar listagem, busca e filtros de catálogo
 - [x] MPJ-38 - Criar schema e índices da collection pedidos
-- [ ] MPJ-39 - Implementar criação de pedido com itens e pagamentos
+- [x] MPJ-39 - Implementar criação de pedido com itens e pagamentos
 - [ ] MPJ-40 - Implementar edição e exclusão de pedido
 - [ ] MPJ-41 - Implementar numeração automática e transições de status
 - [ ] MPJ-42 - Implementar listagem, busca e filtros de pedidos
