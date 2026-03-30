@@ -7,6 +7,7 @@ import type { CatalogStore } from '../lib/catalog.js';
 import type { CountersStore } from '../lib/counters.js';
 import {
   isValidOrderStatusTransition,
+  type OrderItemSnapshot,
   type OrderStatus,
   type OrdersStore,
   type PaymentMethod,
@@ -373,17 +374,22 @@ export const registerOrdersRoutes = (
         const subtotal = catalogData.unitPrice * payloadItem.quantity;
         calculcatedItemsTotal += subtotal;
 
-        return {
+        const itemSnapshot: any = {
           catalogItemId: payloadItem.catalogItemId,
           type: catalogData.type,
           name: catalogData.name,
-          description: catalogData.description,
           unitPrice: catalogData.unitPrice,
           unitMeasure: catalogData.unitMeasure,
           quantity: payloadItem.quantity,
           subtotal,
           position: index,
         };
+
+        if (catalogData.description !== undefined) {
+          itemSnapshot.description = catalogData.description;
+        }
+
+        return itemSnapshot as OrderItemSnapshot;
       });
 
       const startTotal = calculcatedItemsTotal;
@@ -522,17 +528,22 @@ export const registerOrdersRoutes = (
           const subtotal = catalogData.unitPrice * payloadItem.quantity;
           calculatedItemsTotal += subtotal;
 
-          return {
+          const itemSnapshot: any = {
             catalogItemId: payloadItem.catalogItemId,
             type: catalogData.type,
             name: catalogData.name,
-            description: catalogData.description,
             unitPrice: catalogData.unitPrice,
             unitMeasure: catalogData.unitMeasure,
             quantity: payloadItem.quantity,
             subtotal,
             position: index,
           };
+
+          if (catalogData.description !== undefined) {
+            itemSnapshot.description = catalogData.description;
+          }
+
+          return itemSnapshot as OrderItemSnapshot;
         });
       }
 
