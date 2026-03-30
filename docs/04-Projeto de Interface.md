@@ -78,7 +78,7 @@ Permitir que o usuário acesse o sistema de forma segura e crie sua conta.
 - Marcos: facilidade para múltiplos acessos  
 
 
-![Login e Cadastro](./docs/img/login_cadastro.jpeg)
+![Login e Cadastro](./img/login_cadastro.jpeg)
 
 ### 2. Catálogo (Produtos e Serviços)
 
@@ -111,7 +111,7 @@ Gerenciar os itens oferecidos pelo usuário.
 - Marcos: controle facilitado  
 
 ---
-![Catalogo](./docs/img/catalogo.jpeg)
+![Catalogo](./img/catalogo.jpeg)
 
 
 ### 3. Financeiro
@@ -147,8 +147,7 @@ Apresentar a situação financeira do negócio de forma clara e centralizada.
 - Marcos: acompanhamento financeiro  
 
 ### 4. Lista de Clientes
-
-![Lista de Clientes](./docs/img/lista_clientes.jpeg)
+![Lista de Clientes](./img/lista_clientes.jpeg)
 
 #### Objetivo
 Permitir a visualização, organização e gerenciamento dos clientes cadastrados no sistema.
@@ -188,7 +187,7 @@ O formulário de cadastro foi organizado em blocos para facilitar o preenchiment
 
 ### 5. Perfil do Usuário ("Meu Perfil")
 
-![Perfil](./docs/img/perfil.jpeg)
+![Perfil](./img/perfil.jpeg)
 
 #### Objetivo
 Permitir que o usuário gerencie seus dados pessoais e as informações do seu negócio, utilizadas nos documentos e na personalização do sistema.
