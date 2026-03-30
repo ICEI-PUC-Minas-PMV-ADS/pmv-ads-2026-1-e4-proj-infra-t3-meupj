@@ -189,10 +189,132 @@ type OrderCreateBody = Static<typeof OrderCreateSchema>;
 type OrderUpdateBody = Static<typeof OrderUpdateSchema>;
 type OrderParams = Static<typeof OrderParamsSchema>;
 
+const OrderSortBySchema = Type.Union([
+  Type.Literal('createdAt'),
+  Type.Literal('orderNumber'),
+  Type.Literal('total'),
+]);
+
+const OrderSortOrderSchema = Type.Union([Type.Literal('asc'), Type.Literal('desc')]);
+
+const OrderListQuerySchema = Type.Object(
+  {
+    page: Type.Optional(Type.Integer({ minimum: 1 })),
+    limit: Type.Optional(Type.Integer({ minimum: 1 })),
+    q: Type.Optional(Type.String()),
+    clientId: Type.Optional(Type.String()),
+    status: Type.Optional(OrderStatusSchema),
+    createdFrom: Type.Optional(Type.String({ format: 'date-time' })),
+    createdTo: Type.Optional(Type.String({ format: 'date-time' })),
+    sortBy: Type.Optional(OrderSortBySchema),
+    sortOrder: Type.Optional(OrderSortOrderSchema),
+  },
+  {
+    additionalProperties: false,
+  },
+);
+
+const OrderListResponseSchema = Type.Object(
+  {
+    data: Type.Array(OrderResponseSchema),
+    total: Type.Integer({ minimum: 0 }),
+    page: Type.Integer({ minimum: 1 }),
+    limit: Type.Integer({ minimum: 1 }),
+  },
+  {
+    additionalProperties: false,
+  },
+);
+
+type OrderListQuery = Static<typeof OrderListQuerySchema>;
+
 export const registerOrdersRoutes = (
   app: FastifyInstance,
   dependencies: OrdersRouteDependencies,
 ): void => {
+  app.get(
+    '/api/orders',
+    {
+      schema: {
+        querystring: OrderListQuerySchema,
+        response: {
+          200: OrderListResponseSchema,
+          401: UnauthorizedSchema,
+        },
+      },
+    },
+    async (request, reply) => {
+      const session = await dependencies.authService.getSessionFromHeaders(request.headers);
+
+      if (!session) {
+        return reply.status(401).send(UnauthorizedPayload);
+      }
+
+      const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
+      const profileId = profile._id.toHexString();
+      const query = request.query as OrderListQuery;
+
+      const page = query.page ?? 1;
+      const limit = query.limit ?? 20;
+      const sortBy = query.sortBy ?? 'createdAt';
+      const sortOrder = query.sortOrder ?? 'desc';
+      const skip = (page - 1) * limit;
+
+      const filter: Record<string, any> = { profileId };
+
+      if (query.clientId) {
+        filter.clientId = query.clientId;
+      }
+
+      if (query.status) {
+        filter.status = query.status;
+      }
+
+      if (query.createdFrom || query.createdTo) {
+        filter.createdAt = {};
+        if (query.createdFrom) {
+          filter.createdAt.$gte = new Date(query.createdFrom);
+        }
+        if (query.createdTo) {
+          filter.createdAt.$lte = new Date(query.createdTo);
+        }
+      }
+
+      if (query.q && query.q.trim().length > 0) {
+        const normalizedQuery = query.q.trim();
+        filter.$or = [
+          { orderNumber: { $regex: normalizedQuery, $options: 'i' } },
+          { reference: { $regex: normalizedQuery, $options: 'i' } },
+          { 'items.name': { $regex: normalizedQuery, $options: 'i' } },
+        ];
+      }
+
+      const sortDirection = sortOrder === 'asc' ? 1 : -1;
+      const sort = { [sortBy]: sortDirection } as Record<string, 1 | -1>;
+
+      const collection = dependencies.ordersStore.getCollection();
+
+      const [documents, total] = await Promise.all([
+        collection.find(filter).sort(sort).skip(skip).limit(limit).toArray(),
+        collection.countDocuments(filter),
+      ]);
+
+      const response = {
+        data: documents.map((doc) => ({
+          ...doc,
+          _id: doc._id.toHexString(),
+          createdAt: doc.createdAt.toISOString(),
+          updatedAt: doc.updatedAt.toISOString(),
+        })),
+        total,
+        page,
+        limit,
+      };
+
+      return reply.status(200).send(response);
+    },
+  );
+
   app.post(
     '/api/orders',
     {
