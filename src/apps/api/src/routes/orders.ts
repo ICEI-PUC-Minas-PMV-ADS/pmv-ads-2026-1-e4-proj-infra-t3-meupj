@@ -5,7 +5,12 @@ import { ObjectId } from 'mongodb';
 import type { AuthService } from '../lib/auth.js';
 import type { CatalogStore } from '../lib/catalog.js';
 import type { CountersStore } from '../lib/counters.js';
-import type { OrderStatus, OrdersStore, PaymentMethod } from '../lib/orders.js';
+import {
+  isValidOrderStatusTransition,
+  type OrderStatus,
+  type OrdersStore,
+  type PaymentMethod,
+} from '../lib/orders.js';
 import type { ProfileStore } from '../lib/profile.js';
 import type { TransactionsStore } from '../lib/transactions.js';
 
@@ -386,8 +391,7 @@ export const registerOrdersRoutes = (
       const fees = body.fees ?? 0;
       const finalTotal = startTotal - discount + fees;
 
-      const orderSeq = await dependencies.countersStore.getNextSequence(`orders_${profileId}`);
-      const orderNumberStr = String(orderSeq).padStart(4, '0');
+      const orderNumberStr = await dependencies.countersStore.generateOrderNumber(profileId);
 
       const now = new Date();
 
@@ -457,6 +461,7 @@ export const registerOrdersRoutes = (
           400: BadRequestSchema,
           401: UnauthorizedSchema,
           404: NotFoundSchema,
+          409: ConflictSchema,
         },
       },
     },
@@ -529,6 +534,17 @@ export const registerOrdersRoutes = (
             position: index,
           };
         });
+      }
+
+      if (body.status !== undefined && body.status !== existingOrder.status) {
+        const isTransitionValid = isValidOrderStatusTransition(existingOrder.status, body.status);
+        if (!isTransitionValid) {
+          return reply.status(409).send({
+            error: 'Conflict',
+            message: `Invalid status transition from '${existingOrder.status}' to '${body.status}'`,
+            statusCode: 409,
+          });
+        }
       }
 
       const activeDiscount = body.discount ?? existingOrder.discount ?? 0;

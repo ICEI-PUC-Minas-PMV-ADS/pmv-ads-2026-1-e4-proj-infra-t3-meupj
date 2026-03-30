@@ -10,6 +10,28 @@ export type OrderStatus =
   | 'warranty'
   | 'cancelled';
 
+export const isValidOrderStatusTransition = (current: OrderStatus, next: OrderStatus): boolean => {
+  if (current === next) {
+    return true;
+  }
+  switch (current) {
+    case 'draft':
+      return next === 'pendingApproval' || next === 'cancelled';
+    case 'pendingApproval':
+      return next === 'inProgress' || next === 'cancelled';
+    case 'inProgress':
+      return next === 'completed' || next === 'warranty' || next === 'cancelled';
+    case 'completed':
+      return next === 'warranty';
+    case 'warranty':
+      return next === 'completed' || next === 'cancelled';
+    case 'cancelled':
+      return false;
+    default:
+      return false;
+  }
+};
+
 export type PaymentMethod =
   | 'pix'
   | 'cash'
