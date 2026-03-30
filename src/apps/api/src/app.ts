@@ -5,12 +5,14 @@ import Fastify, { type FastifyInstance } from 'fastify';
 import { registerEnv, type EnvData } from './env.js';
 import { createAuthService, createUnavailableAuthService, type AuthService } from './lib/auth.js';
 import { createCatalogStore, type CatalogStore } from './lib/catalog.js';
+import { createClientsStore, type ClientStore } from './lib/clients.js';
 import { mongoService, type MongoService } from './lib/mongo.js';
 import { createProfileStore, type ProfileStore } from './lib/profile.js';
 import { registerGlobalErrorHandler } from './plugins/error-handler.js';
 import { registerSecurityPlugins } from './plugins/security.js';
 import { registerAuthRoutes } from './routes/auth.js';
 import { registerCatalogRoutes } from './routes/catalog.js';
+import { registerClientsRoutes } from './routes/clients.js';
 import { registerHealthRoutes } from './routes/health.js';
 import { registerProfileRoutes } from './routes/profile.js';
 
@@ -20,6 +22,7 @@ export type BuildAppOptions = {
   auth?: AuthService;
   profileStore?: ProfileStore;
   catalogStore?: CatalogStore;
+  clientsStore?: ClientStore;
 };
 
 const resolveInitialLogLevel = (): string => process.env.LOG_LEVEL ?? 'info';
@@ -84,6 +87,16 @@ export const buildApp = async (options: BuildAppOptions = {}): Promise<FastifyIn
     app.log.error({ err: normalizedError }, 'Unable to ensure catalog indexes');
   }
 
+  const selectedClientsStore =
+    options.clientsStore ?? createClientsStore(() => selectedMongoService.getDb());
+
+  try {
+    await selectedClientsStore.ensureIndexes();
+  } catch (error) {
+    const normalizedError = error instanceof Error ? error : new Error(String(error));
+    app.log.error({ err: normalizedError }, 'Unable to ensure clients indexes');
+  }
+
   let selectedAuthService = options.auth;
 
   if (!selectedAuthService) {
@@ -119,6 +132,12 @@ export const buildApp = async (options: BuildAppOptions = {}): Promise<FastifyIn
     authService: selectedAuthService,
     profileStore: selectedProfileStore,
     catalogStore: selectedCatalogStore,
+  });
+
+  registerClientsRoutes(app, {
+    authService: selectedAuthService,
+    profileStore: selectedProfileStore,
+    clientsStore: selectedClientsStore,
   });
 
   registerHealthRoutes(app, {
