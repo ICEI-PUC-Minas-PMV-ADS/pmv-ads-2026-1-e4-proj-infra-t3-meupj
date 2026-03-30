@@ -77,6 +77,35 @@ const OrderCreateSchema = Type.Object(
   },
 );
 
+const OrderUpdateSchema = Type.Object(
+  {
+    clientId: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+    items: Type.Optional(Type.Array(OrderItemCreateSchema, { minItems: 1 })),
+    discount: Type.Optional(Type.Number()),
+    fees: Type.Optional(Type.Number()),
+    paymentMethods: Type.Optional(Type.Array(PaymentMethodSchema)),
+    status: Type.Optional(OrderStatusSchema),
+    reference: Type.Optional(Type.String()),
+    paymentTerms: Type.Optional(Type.String()),
+    warrantyTerms: Type.Optional(Type.String()),
+    additionalInfo: Type.Optional(Type.String()),
+    internalNotes: Type.Optional(Type.String()),
+  },
+  {
+    additionalProperties: false,
+    minProperties: 1,
+  },
+);
+
+const OrderParamsSchema = Type.Object(
+  {
+    orderId: Type.String({ pattern: '^[a-fA-F0-9]{24}$' }),
+  },
+  {
+    additionalProperties: false,
+  },
+);
+
 const OrderResponseSchema = Type.Object(
   {
     _id: Type.String(),
@@ -123,7 +152,19 @@ const UnauthorizedSchema = Type.Object({
 const BadRequestSchema = Type.Object({
   error: Type.Literal('Bad Request'),
   message: Type.String(),
-  statusCode: Type.Literal(400),
+  statusCode: Type.Literal(401),
+});
+
+const NotFoundSchema = Type.Object({
+  error: Type.Literal('Not Found'),
+  message: Type.Literal('Order not found'),
+  statusCode: Type.Literal(404),
+});
+
+const ConflictSchema = Type.Object({
+  error: Type.Literal('Conflict'),
+  message: Type.Literal('Order has confirmed transactions and cannot be deleted'),
+  statusCode: Type.Literal(409),
 });
 
 const UnauthorizedPayload = Object.freeze({
@@ -132,7 +173,21 @@ const UnauthorizedPayload = Object.freeze({
   statusCode: 401,
 });
 
+const NotFoundPayload = Object.freeze({
+  error: 'Not Found',
+  message: 'Order not found',
+  statusCode: 404,
+});
+
+const ConflictPayload = Object.freeze({
+  error: 'Conflict',
+  message: 'Order has confirmed transactions and cannot be deleted',
+  statusCode: 409,
+});
+
 type OrderCreateBody = Static<typeof OrderCreateSchema>;
+type OrderUpdateBody = Static<typeof OrderUpdateSchema>;
+type OrderParams = Static<typeof OrderParamsSchema>;
 
 export const registerOrdersRoutes = (
   app: FastifyInstance,
@@ -266,6 +321,209 @@ export const registerOrdersRoutes = (
         createdAt: createdOrder.createdAt.toISOString(),
         updatedAt: createdOrder.updatedAt.toISOString(),
       });
+    },
+  );
+
+  app.put(
+    '/api/orders/:orderId',
+    {
+      schema: {
+        params: OrderParamsSchema,
+        body: OrderUpdateSchema,
+        response: {
+          200: OrderResponseSchema,
+          400: BadRequestSchema,
+          401: UnauthorizedSchema,
+          404: NotFoundSchema,
+        },
+      },
+    },
+    async (request, reply) => {
+      const session = await dependencies.authService.getSessionFromHeaders(request.headers);
+
+      if (!session) {
+        return reply.status(401).send(UnauthorizedPayload);
+      }
+
+      const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
+      const profileId = profile._id.toHexString();
+      const params = request.params as OrderParams;
+      const orderObjectId = new ObjectId(params.orderId);
+      const body = request.body as OrderUpdateBody;
+
+      const ordersCollection = dependencies.ordersStore.getCollection();
+      const existingOrder = await ordersCollection.findOne({
+        _id: orderObjectId,
+        profileId,
+      });
+
+      if (!existingOrder) {
+        return reply.status(404).send(NotFoundPayload);
+      }
+
+      let orderItemsSnapshot = existingOrder.items;
+      let calculatedItemsTotal = existingOrder.items.reduce((acc, curr) => acc + curr.subtotal, 0);
+
+      if (body.items) {
+        const itemIds = body.items.map((i) => new ObjectId(i.catalogItemId));
+        const catalogCollection = dependencies.catalogStore.getCollection();
+
+        const foundCatalogItems = await catalogCollection
+          .find({
+            _id: { $in: itemIds },
+            profileId,
+          })
+          .toArray();
+
+        if (foundCatalogItems.length !== body.items.length) {
+          return reply.status(400).send({
+            error: 'Bad Request',
+            message: 'One or more catalog items were not found or do not belong to this profile',
+            statusCode: 400,
+          });
+        }
+
+        calculatedItemsTotal = 0;
+        orderItemsSnapshot = body.items.map((payloadItem, index) => {
+          const catalogData = foundCatalogItems.find(
+            (c) => c._id.toHexString() === payloadItem.catalogItemId,
+          );
+          if (!catalogData) {
+            throw new Error('Inconsistent catalog items lookup');
+          }
+
+          const subtotal = catalogData.unitPrice * payloadItem.quantity;
+          calculatedItemsTotal += subtotal;
+
+          return {
+            catalogItemId: payloadItem.catalogItemId,
+            type: catalogData.type,
+            name: catalogData.name,
+            description: catalogData.description,
+            unitPrice: catalogData.unitPrice,
+            unitMeasure: catalogData.unitMeasure,
+            quantity: payloadItem.quantity,
+            subtotal,
+            position: index,
+          };
+        });
+      }
+
+      const activeDiscount = body.discount ?? existingOrder.discount ?? 0;
+      const activeFees = body.fees ?? existingOrder.fees ?? 0;
+      const finalTotal = calculatedItemsTotal - activeDiscount + activeFees;
+
+      const now = new Date();
+
+      const setPayload: Partial<typeof existingOrder> = {
+        updatedAt: now,
+        ...((body.items || body.discount !== undefined || body.fees !== undefined) && {
+          total: finalTotal,
+        }),
+        ...(body.items !== undefined && { items: orderItemsSnapshot }),
+        ...(body.clientId !== undefined && { clientId: body.clientId }),
+        ...(body.status !== undefined && { status: body.status }),
+        ...(body.discount !== undefined && { discount: body.discount }),
+        ...(body.fees !== undefined && { fees: body.fees }),
+        ...(body.paymentMethods !== undefined && { paymentMethods: body.paymentMethods }),
+        ...(body.reference !== undefined && { reference: body.reference }),
+        ...(body.paymentTerms !== undefined && { paymentTerms: body.paymentTerms }),
+        ...(body.warrantyTerms !== undefined && { warrantyTerms: body.warrantyTerms }),
+        ...(body.additionalInfo !== undefined && { additionalInfo: body.additionalInfo }),
+        ...(body.internalNotes !== undefined && { internalNotes: body.internalNotes }),
+      };
+
+      const updateResult = await ordersCollection.updateOne(
+        {
+          _id: orderObjectId,
+          profileId,
+        },
+        {
+          $set: setPayload,
+        },
+      );
+
+      if (updateResult.matchedCount === 0) {
+        return reply.status(404).send(NotFoundPayload);
+      }
+
+      const updatedOrder = await ordersCollection.findOne({
+        _id: orderObjectId,
+        profileId,
+      });
+
+      if (!updatedOrder) {
+        return reply.status(404).send(NotFoundPayload);
+      }
+
+      return reply.status(200).send({
+        ...updatedOrder,
+        _id: updatedOrder._id.toHexString(),
+        createdAt: updatedOrder.createdAt.toISOString(),
+        updatedAt: updatedOrder.updatedAt.toISOString(),
+      });
+    },
+  );
+
+  app.delete(
+    '/api/orders/:orderId',
+    {
+      schema: {
+        params: OrderParamsSchema,
+        response: {
+          204: Type.Null(),
+          401: UnauthorizedSchema,
+          404: NotFoundSchema,
+          409: ConflictSchema,
+        },
+      },
+    },
+    async (request, reply) => {
+      const session = await dependencies.authService.getSessionFromHeaders(request.headers);
+
+      if (!session) {
+        return reply.status(401).send(UnauthorizedPayload);
+      }
+
+      const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
+      const params = request.params as OrderParams;
+      const orderObjectId = new ObjectId(params.orderId);
+      const profileId = profile._id.toHexString();
+
+      const ordersCollection = dependencies.ordersStore.getCollection();
+      const existingOrder = await ordersCollection.findOne({
+        _id: orderObjectId,
+        profileId,
+      });
+
+      if (!existingOrder) {
+        return reply.status(404).send(NotFoundPayload);
+      }
+
+      const transactionsCollection = dependencies.transactionsStore.getCollection();
+      const confirmedTransaction = await transactionsCollection.findOne({
+        orderId: params.orderId,
+        status: 'paid',
+      });
+
+      if (confirmedTransaction) {
+        return reply.status(409).send(ConflictPayload);
+      }
+
+      await transactionsCollection.deleteMany({
+        orderId: params.orderId,
+      });
+
+      const deleteResult = await ordersCollection.deleteOne({
+        _id: orderObjectId,
+        profileId,
+      });
+
+      if (deleteResult.deletedCount === 0) {
+        return reply.status(404).send(NotFoundPayload);
+      }
+
+      return reply.status(204).send();
     },
   );
 };
