@@ -11,8 +11,7 @@
     "lint": "turbo run lint format:check",
     "test": "turbo run test",
     "format": "turbo run format",
-    "format:check": "turbo run format:check",
-    "seed:transactions": "tsx src/scripts/seed-transactions.ts"
+    "format:check": "turbo run format:check"
   },
   "devDependencies": {
     "prettier": "3.8.1",
