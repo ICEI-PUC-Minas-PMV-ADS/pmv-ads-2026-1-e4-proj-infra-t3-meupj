@@ -4,8 +4,9 @@ import type { Client } from './clients.js';
 import type { Order } from './orders.js';
 import type { ProfileDocument } from './profile.js';
 
-export type BudgetDocumentPayload = {
-  documentType: 'budget';
+type CommercialDocumentType = 'budget' | 'serviceOrder';
+
+type CommercialDocumentPayload = {
   generatedAt: string;
   profile: {
     name: string | null;
@@ -54,18 +55,27 @@ export type BudgetDocumentPayload = {
   };
 };
 
-export const buildBudgetDocument = (
+export type BudgetDocumentPayload = CommercialDocumentPayload & {
+  documentType: 'budget';
+};
+
+export type ServiceOrderDocumentPayload = CommercialDocumentPayload & {
+  documentType: 'serviceOrder';
+};
+
+const buildCommercialDocument = <TDocumentType extends CommercialDocumentType>(
+  documentType: TDocumentType,
   order: WithId<Order>,
   profile: WithId<ProfileDocument>,
   client: WithId<Client> | null,
-  generatedAt = new Date(),
-): BudgetDocumentPayload => {
+  generatedAt: Date,
+): (TDocumentType extends 'budget' ? BudgetDocumentPayload : ServiceOrderDocumentPayload) => {
   const itemsSubtotal = order.items.reduce((acc, item) => acc + item.subtotal, 0);
   const discount = order.discount ?? 0;
   const fees = order.fees ?? 0;
 
   return {
-    documentType: 'budget',
+    documentType,
     generatedAt: generatedAt.toISOString(),
     profile: {
       name: profile.business.name,
@@ -114,5 +124,23 @@ export const buildBudgetDocument = (
       fees,
       total: order.total,
     },
-  };
+  } as TDocumentType extends 'budget' ? BudgetDocumentPayload : ServiceOrderDocumentPayload;
+};
+
+export const buildBudgetDocument = (
+  order: WithId<Order>,
+  profile: WithId<ProfileDocument>,
+  client: WithId<Client> | null,
+  generatedAt = new Date(),
+): BudgetDocumentPayload => {
+  return buildCommercialDocument('budget', order, profile, client, generatedAt);
+};
+
+export const buildServiceOrderDocument = (
+  order: WithId<Order>,
+  profile: WithId<ProfileDocument>,
+  client: WithId<Client> | null,
+  generatedAt = new Date(),
+): ServiceOrderDocumentPayload => {
+  return buildCommercialDocument('serviceOrder', order, profile, client, generatedAt);
 };

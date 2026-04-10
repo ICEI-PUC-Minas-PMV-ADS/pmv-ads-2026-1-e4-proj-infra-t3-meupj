@@ -82,7 +82,7 @@ As seguintes issues fazem parte deste escopo:
 - **MPJ-49**: Criar serviço de montagem de ordem de serviço
 
   - Descrição: Implementar serviço para gerar documentos de ordem de serviço baseados em pedidos e lançamentos.
-  - Status: Pendente
+  - Status: Concluído
   - Dependências: MPJ-43 a MPJ-47, pedidos (já implementado)
 - **MPJ-50**: Criar serviço de montagem de recibo
 
@@ -127,7 +127,7 @@ As seguintes issues fazem parte deste escopo:
 
 ## Próximos Passos
 
-MPJ-43 a MPJ-48 foram concluídos. O próximo passo é iniciar MPJ-49: criar serviço de montagem de ordem de serviço.
+MPJ-43 a MPJ-49 foram concluídos. O próximo passo é iniciar MPJ-50: criar serviço de montagem de recibo.
 
 ## Registro de alterações
 
@@ -172,6 +172,13 @@ MPJ-43 a MPJ-48 foram concluídos. O próximo passo é iniciar MPJ-49: criar ser
   - Implementadas respostas `401` (não autenticado), `404` (pedido inexistente/fora do escopo) e `200` com documento JSON.
   - Rota registrada em `src/apps/api/src/app.ts`.
   - Criados testes de integração em `src/apps/api/src/__tests__/documents.test.ts` cobrindo casos de `401`, `404` e sucesso com payload de orçamento.
+
+- **MPJ-49 concluído** em 10 de abril de 2026:
+  - Criado serviço `buildServiceOrderDocument` em `src/apps/api/src/lib/documents.ts` para montagem do payload de ordem de serviço.
+  - Adicionada rota protegida `GET /api/documents/service-order/:orderId` em `src/apps/api/src/routes/documents.ts`.
+  - Mantido escopo por `profileId` para busca de pedido e cliente associado.
+  - Implementadas respostas `401` (não autenticado), `404` (pedido inexistente/fora do escopo) e `200` com documento JSON.
+  - Criados testes de integração em `src/apps/api/src/__tests__/documents.test.ts` cobrindo casos de `401`, `404` e sucesso com payload de ordem de serviço.
 
 ## Seed Mock para Teste de Schema
 - **Arquivo criado**: `src/apps/api/src/scripts/seed-transactions.ts`

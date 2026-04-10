@@ -293,4 +293,148 @@ describe('documents routes', () => {
       total: 250,
     });
   });
+
+  it('returns 401 for service-order endpoint when unauthenticated', async () => {
+    app = await buildApp({
+      envData: DEFAULT_ENV,
+      mongo: createMongoMock(true),
+      auth: createAuthServiceMock(null),
+      profileStore: createProfileStoreMock(),
+      ordersStore: createOrdersStoreMock(null),
+      clientsStore: createClientsStoreMock(null),
+      catalogStore: createCatalogStoreStub(),
+      transactionsStore: createTransactionsStoreStub(),
+      countersStore: createCountersStoreStub(),
+    });
+
+    const response = await app.inject({
+      method: 'GET',
+      url: `/api/documents/service-order/${new ObjectId().toHexString()}`,
+    });
+
+    expect(response.statusCode).toBe(401);
+    expect(response.json()).toEqual({
+      error: 'Unauthorized',
+      message: 'Unauthorized',
+      statusCode: 401,
+    });
+  });
+
+  it('returns 404 for service-order endpoint when order does not exist in profile scope', async () => {
+    app = await buildApp({
+      envData: DEFAULT_ENV,
+      mongo: createMongoMock(true),
+      auth: createAuthServiceMock({ user: { id: 'auth-user-1' } }),
+      profileStore: createProfileStoreMock(),
+      ordersStore: createOrdersStoreMock(null),
+      clientsStore: createClientsStoreMock(null),
+      catalogStore: createCatalogStoreStub(),
+      transactionsStore: createTransactionsStoreStub(),
+      countersStore: createCountersStoreStub(),
+    });
+
+    const response = await app.inject({
+      method: 'GET',
+      url: `/api/documents/service-order/${new ObjectId().toHexString()}`,
+      headers: { authorization: 'Bearer fake-token' },
+    });
+
+    expect(response.statusCode).toBe(404);
+    expect(response.json()).toEqual({
+      error: 'Not Found',
+      message: 'Order not found',
+      statusCode: 404,
+    });
+  });
+
+  it('returns assembled service-order document for existing order', async () => {
+    const profileId = new ObjectId();
+    const clientId = new ObjectId();
+    const orderId = new ObjectId();
+
+    const order = {
+      _id: orderId,
+      profileId: profileId.toHexString(),
+      clientId: clientId.toHexString(),
+      orderNumber: 'ORD2601010',
+      status: 'inProgress' as const,
+      paymentMethods: ['pix' as const],
+      items: [
+        {
+          catalogItemId: new ObjectId().toHexString(),
+          type: 'service' as const,
+          name: 'Manutencao preventiva',
+          unitPrice: 200,
+          unitMeasure: 'hora',
+          quantity: 1,
+          subtotal: 200,
+          position: 0,
+        },
+      ],
+      discount: 0,
+      fees: 15,
+      total: 215,
+      createdAt: new Date('2026-04-10T11:00:00.000Z'),
+      updatedAt: new Date('2026-04-10T11:30:00.000Z'),
+      warrantyTerms: '30 dias',
+    };
+
+    const client = {
+      _id: clientId,
+      profileId: profileId.toHexString(),
+      name: 'Cliente 2',
+      type: 'company' as const,
+      document: '12345678000111',
+      email: 'contato@cliente2.com',
+      phone: '3133334444',
+      address: {
+        zipCode: '30120000',
+        street: 'Rua C',
+        number: '45',
+        district: 'Funcionarios',
+        city: 'Belo Horizonte',
+        state: 'MG',
+        country: 'Brasil',
+      },
+      createdAt: new Date('2026-01-01T00:00:00.000Z'),
+      updatedAt: new Date('2026-01-01T00:00:00.000Z'),
+    };
+
+    app = await buildApp({
+      envData: DEFAULT_ENV,
+      mongo: createMongoMock(true),
+      auth: createAuthServiceMock({ user: { id: 'auth-user-1' } }),
+      profileStore: createProfileStoreMock(profileId, 'auth-user-1'),
+      ordersStore: createOrdersStoreMock(order),
+      clientsStore: createClientsStoreMock(client),
+      catalogStore: createCatalogStoreStub(),
+      transactionsStore: createTransactionsStoreStub(),
+      countersStore: createCountersStoreStub(),
+    });
+
+    const response = await app.inject({
+      method: 'GET',
+      url: `/api/documents/service-order/${orderId.toHexString()}`,
+      headers: { authorization: 'Bearer fake-token' },
+    });
+
+    expect(response.statusCode).toBe(200);
+
+    const body = response.json<{
+      documentType: string;
+      order: { orderNumber: string; status: string };
+      client: { name: string } | null;
+      summary: { itemsSubtotal: number; discount: number; fees: number; total: number };
+    }>();
+    expect(body.documentType).toBe('serviceOrder');
+    expect(body.order.orderNumber).toBe('ORD2601010');
+    expect(body.order.status).toBe('inProgress');
+    expect(body.client?.name).toBe('Cliente 2');
+    expect(body.summary).toMatchObject({
+      itemsSubtotal: 200,
+      discount: 0,
+      fees: 15,
+      total: 215,
+    });
+  });
 });
