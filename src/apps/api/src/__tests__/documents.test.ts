@@ -10,7 +10,7 @@ import type { CountersStore } from '../lib/counters.js';
 import type { MongoService } from '../lib/mongo.js';
 import type { Order, OrdersStore } from '../lib/orders.js';
 import type { ProfileStore } from '../lib/profile.js';
-import type { TransactionsStore } from '../lib/transactions.js';
+import type { Transaction, TransactionsStore } from '../lib/transactions.js';
 
 const DEFAULT_ENV = {
   BETTER_AUTH_SECRET: '01234567890123456789012345678901',
@@ -127,11 +127,30 @@ const createCatalogStoreStub = () =>
     getCollection: vi.fn(() => createNoOpCollection()),
   }) as unknown as CatalogStore;
 
-const createTransactionsStoreStub = () =>
-  ({
+type TransactionQuery = {
+  _id: { toHexString: () => string };
+  profileId: string;
+  status?: string;
+};
+
+const createTransactionsStoreMock = (
+  transaction: (Transaction & { _id: ObjectId }) | null,
+): TransactionsStore => {
+  const collection = {
+    findOne: vi.fn((query: TransactionQuery) => {
+      if (!transaction) return Promise.resolve(null);
+      if (transaction._id.toHexString() !== query._id.toHexString()) return Promise.resolve(null);
+      if (transaction.profileId !== query.profileId) return Promise.resolve(null);
+      if (query.status && transaction.status !== query.status) return Promise.resolve(null);
+      return Promise.resolve(transaction);
+    }),
+  } as unknown as Collection<Transaction>;
+
+  return {
     ensureIndexes: vi.fn().mockResolvedValue(undefined),
-    getCollection: vi.fn(() => createNoOpCollection()),
-  }) as unknown as TransactionsStore;
+    getCollection: vi.fn(() => collection),
+  };
+};
 
 const createCountersStoreStub = () =>
   ({
@@ -160,7 +179,7 @@ describe('documents routes', () => {
       ordersStore: createOrdersStoreMock(null),
       clientsStore: createClientsStoreMock(null),
       catalogStore: createCatalogStoreStub(),
-      transactionsStore: createTransactionsStoreStub(),
+      transactionsStore: createTransactionsStoreMock(null),
       countersStore: createCountersStoreStub(),
     });
 
@@ -186,7 +205,7 @@ describe('documents routes', () => {
       ordersStore: createOrdersStoreMock(null),
       clientsStore: createClientsStoreMock(null),
       catalogStore: createCatalogStoreStub(),
-      transactionsStore: createTransactionsStoreStub(),
+      transactionsStore: createTransactionsStoreMock(null),
       countersStore: createCountersStoreStub(),
     });
 
@@ -265,7 +284,7 @@ describe('documents routes', () => {
       ordersStore: createOrdersStoreMock(order),
       clientsStore: createClientsStoreMock(client),
       catalogStore: createCatalogStoreStub(),
-      transactionsStore: createTransactionsStoreStub(),
+      transactionsStore: createTransactionsStoreMock(null),
       countersStore: createCountersStoreStub(),
     });
 
@@ -303,7 +322,7 @@ describe('documents routes', () => {
       ordersStore: createOrdersStoreMock(null),
       clientsStore: createClientsStoreMock(null),
       catalogStore: createCatalogStoreStub(),
-      transactionsStore: createTransactionsStoreStub(),
+      transactionsStore: createTransactionsStoreMock(null),
       countersStore: createCountersStoreStub(),
     });
 
@@ -329,7 +348,7 @@ describe('documents routes', () => {
       ordersStore: createOrdersStoreMock(null),
       clientsStore: createClientsStoreMock(null),
       catalogStore: createCatalogStoreStub(),
-      transactionsStore: createTransactionsStoreStub(),
+      transactionsStore: createTransactionsStoreMock(null),
       countersStore: createCountersStoreStub(),
     });
 
@@ -408,7 +427,7 @@ describe('documents routes', () => {
       ordersStore: createOrdersStoreMock(order),
       clientsStore: createClientsStoreMock(client),
       catalogStore: createCatalogStoreStub(),
-      transactionsStore: createTransactionsStoreStub(),
+      transactionsStore: createTransactionsStoreMock(null),
       countersStore: createCountersStoreStub(),
     });
 
@@ -436,5 +455,166 @@ describe('documents routes', () => {
       fees: 15,
       total: 215,
     });
+  });
+
+  it('returns 401 for receipt endpoint when unauthenticated', async () => {
+    app = await buildApp({
+      envData: DEFAULT_ENV,
+      mongo: createMongoMock(true),
+      auth: createAuthServiceMock(null),
+      profileStore: createProfileStoreMock(),
+      ordersStore: createOrdersStoreMock(null),
+      clientsStore: createClientsStoreMock(null),
+      catalogStore: createCatalogStoreStub(),
+      transactionsStore: createTransactionsStoreMock(null),
+      countersStore: createCountersStoreStub(),
+    });
+
+    const response = await app.inject({
+      method: 'GET',
+      url: `/api/documents/receipt/${new ObjectId().toHexString()}`,
+    });
+
+    expect(response.statusCode).toBe(401);
+    expect(response.json()).toEqual({
+      error: 'Unauthorized',
+      message: 'Unauthorized',
+      statusCode: 401,
+    });
+  });
+
+  it('returns 404 for receipt endpoint when confirmed transaction does not exist', async () => {
+    app = await buildApp({
+      envData: DEFAULT_ENV,
+      mongo: createMongoMock(true),
+      auth: createAuthServiceMock({ user: { id: 'auth-user-1' } }),
+      profileStore: createProfileStoreMock(),
+      ordersStore: createOrdersStoreMock(null),
+      clientsStore: createClientsStoreMock(null),
+      catalogStore: createCatalogStoreStub(),
+      transactionsStore: createTransactionsStoreMock(null),
+      countersStore: createCountersStoreStub(),
+    });
+
+    const response = await app.inject({
+      method: 'GET',
+      url: `/api/documents/receipt/${new ObjectId().toHexString()}`,
+      headers: { authorization: 'Bearer fake-token' },
+    });
+
+    expect(response.statusCode).toBe(404);
+    expect(response.json()).toEqual({
+      error: 'Not Found',
+      message: 'Transaction not found',
+      statusCode: 404,
+    });
+  });
+
+  it('returns assembled receipt document for confirmed transaction', async () => {
+    const profileId = new ObjectId();
+    const clientId = new ObjectId();
+    const orderId = new ObjectId();
+    const transactionId = new ObjectId();
+
+    const order = {
+      _id: orderId,
+      profileId: profileId.toHexString(),
+      clientId: clientId.toHexString(),
+      orderNumber: 'ORD2601011',
+      status: 'completed' as const,
+      paymentMethods: ['pix' as const],
+      items: [
+        {
+          catalogItemId: new ObjectId().toHexString(),
+          type: 'service' as const,
+          name: 'Servico finalizado',
+          unitPrice: 300,
+          unitMeasure: 'un',
+          quantity: 1,
+          subtotal: 300,
+          position: 0,
+        },
+      ],
+      discount: 0,
+      fees: 0,
+      total: 300,
+      createdAt: new Date('2026-04-10T12:00:00.000Z'),
+      updatedAt: new Date('2026-04-10T12:30:00.000Z'),
+      reference: 'REF-REC-01',
+    };
+
+    const client = {
+      _id: clientId,
+      profileId: profileId.toHexString(),
+      name: 'Cliente Recibo',
+      type: 'individual' as const,
+      document: '12345678900',
+      email: 'recibo@cliente.com',
+      phone: '31999888777',
+      address: {
+        zipCode: '30130000',
+        street: 'Rua D',
+        number: '200',
+        district: 'Savassi',
+        city: 'Belo Horizonte',
+        state: 'MG',
+        country: 'Brasil',
+      },
+      createdAt: new Date('2026-01-01T00:00:00.000Z'),
+      updatedAt: new Date('2026-01-01T00:00:00.000Z'),
+    };
+
+    const transaction = {
+      _id: transactionId,
+      profileId: profileId.toHexString(),
+      orderId: orderId.toHexString(),
+      clientId: clientId.toHexString(),
+      type: 'income' as const,
+      status: 'confirmed' as const,
+      paymentMethod: 'pix' as const,
+      amount: 300,
+      transactionDate: new Date('2026-04-10T13:00:00.000Z'),
+      dueDate: new Date('2026-04-10T13:00:00.000Z'),
+      category: 'Servico',
+      reference: 'TX-REC-01',
+      notes: 'Pagamento integral',
+      createdAt: new Date('2026-04-10T13:05:00.000Z'),
+      updatedAt: new Date('2026-04-10T13:05:00.000Z'),
+    };
+
+    app = await buildApp({
+      envData: DEFAULT_ENV,
+      mongo: createMongoMock(true),
+      auth: createAuthServiceMock({ user: { id: 'auth-user-1' } }),
+      profileStore: createProfileStoreMock(profileId, 'auth-user-1'),
+      ordersStore: createOrdersStoreMock(order),
+      clientsStore: createClientsStoreMock(client),
+      catalogStore: createCatalogStoreStub(),
+      transactionsStore: createTransactionsStoreMock(transaction),
+      countersStore: createCountersStoreStub(),
+    });
+
+    const response = await app.inject({
+      method: 'GET',
+      url: `/api/documents/receipt/${transactionId.toHexString()}`,
+      headers: { authorization: 'Bearer fake-token' },
+    });
+
+    expect(response.statusCode).toBe(200);
+
+    const body = response.json<{
+      documentType: string;
+      client: { name: string } | null;
+      order: { orderNumber: string } | null;
+      transaction: { status: string; amount: number; type: string };
+      summary: { totalReceived: number };
+    }>();
+    expect(body.documentType).toBe('receipt');
+    expect(body.client?.name).toBe('Cliente Recibo');
+    expect(body.order?.orderNumber).toBe('ORD2601011');
+    expect(body.transaction.status).toBe('confirmed');
+    expect(body.transaction.type).toBe('income');
+    expect(body.transaction.amount).toBe(300);
+    expect(body.summary.totalReceived).toBe(300);
   });
 });

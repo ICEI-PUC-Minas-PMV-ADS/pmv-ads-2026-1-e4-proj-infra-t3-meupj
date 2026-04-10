@@ -87,7 +87,7 @@ As seguintes issues fazem parte deste escopo:
 - **MPJ-50**: Criar serviço de montagem de recibo
 
   - Descrição: Implementar serviço para gerar recibos baseados em lançamentos confirmados.
-  - Status: Pendente
+  - Status: Concluído
   - Dependências: MPJ-43 a MPJ-47
 
 ## Histórico e Referências
@@ -127,7 +127,7 @@ As seguintes issues fazem parte deste escopo:
 
 ## Próximos Passos
 
-MPJ-43 a MPJ-49 foram concluídos. O próximo passo é iniciar MPJ-50: criar serviço de montagem de recibo.
+MPJ-43 a MPJ-50 foram concluídos. O próximo passo é consolidar MPJ-51 com revisão final dos endpoints de documentos comerciais.
 
 ## Registro de alterações
 
@@ -179,6 +179,13 @@ MPJ-43 a MPJ-49 foram concluídos. O próximo passo é iniciar MPJ-50: criar ser
   - Mantido escopo por `profileId` para busca de pedido e cliente associado.
   - Implementadas respostas `401` (não autenticado), `404` (pedido inexistente/fora do escopo) e `200` com documento JSON.
   - Criados testes de integração em `src/apps/api/src/__tests__/documents.test.ts` cobrindo casos de `401`, `404` e sucesso com payload de ordem de serviço.
+
+- **MPJ-50 concluído** em 10 de abril de 2026:
+  - Criado serviço `buildReceiptDocument` em `src/apps/api/src/lib/documents.ts` para montagem do payload de recibo a partir de lançamento confirmado.
+  - Adicionada rota protegida `GET /api/documents/receipt/:transactionId` em `src/apps/api/src/routes/documents.ts`.
+  - Implementado escopo por `profileId` e filtro de `status = confirmed` para geração de recibo.
+  - Implementadas respostas `401` (não autenticado), `404` (lançamento inexistente/fora do escopo/não confirmado) e `200` com documento JSON.
+  - Criados testes de integração em `src/apps/api/src/__tests__/documents.test.ts` cobrindo casos de `401`, `404` e sucesso com payload de recibo.
 
 ## Seed Mock para Teste de Schema
 - **Arquivo criado**: `src/apps/api/src/scripts/seed-transactions.ts`

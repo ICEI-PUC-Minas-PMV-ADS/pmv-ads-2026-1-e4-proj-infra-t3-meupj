@@ -193,6 +193,7 @@ export const buildApp = async (options: BuildAppOptions = {}): Promise<FastifyIn
     profileStore: selectedProfileStore,
     ordersStore: selectedOrdersStore,
     clientsStore: selectedClientsStore,
+    transactionsStore: selectedTransactionsStore,
   });
 
   registerHealthRoutes(app, {

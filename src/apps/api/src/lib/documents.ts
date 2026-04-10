@@ -3,6 +3,7 @@ import type { WithId } from 'mongodb';
 import type { Client } from './clients.js';
 import type { Order } from './orders.js';
 import type { ProfileDocument } from './profile.js';
+import type { Transaction } from './transactions.js';
 
 type CommercialDocumentType = 'budget' | 'serviceOrder';
 
@@ -61,6 +62,51 @@ export type BudgetDocumentPayload = CommercialDocumentPayload & {
 
 export type ServiceOrderDocumentPayload = CommercialDocumentPayload & {
   documentType: 'serviceOrder';
+};
+
+export type ReceiptDocumentPayload = {
+  documentType: 'receipt';
+  generatedAt: string;
+  profile: {
+    name: string | null;
+    document: string | null;
+    phone: string | null;
+    email: string | null;
+    footer: string | null;
+    address: ProfileDocument['business']['address'];
+  };
+  client: {
+    _id: string;
+    name: string;
+    type: Client['type'];
+    document: string;
+    email: string;
+    phone: string;
+    address: Client['address'];
+  } | null;
+  order: {
+    _id: string;
+    orderNumber: string;
+    reference?: string;
+    status: Order['status'];
+  } | null;
+  transaction: {
+    _id: string;
+    type: Transaction['type'];
+    status: 'confirmed';
+    paymentMethod?: Transaction['paymentMethod'];
+    amount: number;
+    transactionDate: string;
+    dueDate?: string;
+    category?: string;
+    reference?: string;
+    notes?: string;
+    createdAt: string;
+    updatedAt: string;
+  };
+  summary: {
+    totalReceived: number;
+  };
 };
 
 const buildCommercialDocument = <TDocumentType extends CommercialDocumentType>(
@@ -143,4 +189,61 @@ export const buildServiceOrderDocument = (
   generatedAt = new Date(),
 ): ServiceOrderDocumentPayload => {
   return buildCommercialDocument('serviceOrder', order, profile, client, generatedAt);
+};
+
+export const buildReceiptDocument = (
+  transaction: WithId<Transaction>,
+  profile: WithId<ProfileDocument>,
+  client: WithId<Client> | null,
+  order: WithId<Order> | null,
+  generatedAt = new Date(),
+): ReceiptDocumentPayload => {
+  return {
+    documentType: 'receipt',
+    generatedAt: generatedAt.toISOString(),
+    profile: {
+      name: profile.business.name,
+      document: profile.business.document,
+      phone: profile.business.phone,
+      email: profile.business.email,
+      footer: profile.business.footer,
+      address: profile.business.address,
+    },
+    client: client
+      ? {
+          _id: client._id.toHexString(),
+          name: client.name,
+          type: client.type,
+          document: client.document,
+          email: client.email,
+          phone: client.phone,
+          address: client.address,
+        }
+      : null,
+    order: order
+      ? {
+          _id: order._id.toHexString(),
+          orderNumber: order.orderNumber,
+          status: order.status,
+          ...(order.reference !== undefined && { reference: order.reference }),
+        }
+      : null,
+    transaction: {
+      _id: transaction._id.toHexString(),
+      type: transaction.type,
+      status: 'confirmed',
+      amount: transaction.amount,
+      transactionDate: transaction.transactionDate.toISOString(),
+      createdAt: transaction.createdAt.toISOString(),
+      updatedAt: transaction.updatedAt.toISOString(),
+      ...(transaction.paymentMethod !== undefined && { paymentMethod: transaction.paymentMethod }),
+      ...(transaction.dueDate !== undefined && { dueDate: transaction.dueDate.toISOString() }),
+      ...(transaction.category !== undefined && { category: transaction.category }),
+      ...(transaction.reference !== undefined && { reference: transaction.reference }),
+      ...(transaction.notes !== undefined && { notes: transaction.notes }),
+    },
+    summary: {
+      totalReceived: transaction.amount,
+    },
+  };
 };
