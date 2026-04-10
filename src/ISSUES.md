@@ -32,7 +32,7 @@
 - [x] MPJ-41 - Implementar numeração automática e transições de status
 - [x] MPJ-42 - Implementar listagem, busca e filtros de pedidos
 - [ ] MPJ-43 - Criar schema e índices da collection lancamentos
-- [ ] MPJ-44 - Implementar criação de lançamento de receita
+- [x] MPJ-44 - Implementar criação de lançamento de receita
 - [ ] MPJ-45 - Implementar criação de lançamento de custo
 - [ ] MPJ-46 - Implementar listagem, busca e filtros de lançamentos
 - [ ] MPJ-47 - Implementar edição, exclusão e confirmação de lançamentos

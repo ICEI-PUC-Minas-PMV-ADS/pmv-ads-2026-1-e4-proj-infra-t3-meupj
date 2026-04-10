@@ -4,18 +4,21 @@ import type { PaymentMethod } from './orders.js';
 export const TRANSACTIONS_COLLECTION_NAME = 'transactions';
 
 export type TransactionType = 'income' | 'expense';
-export type TransactionStatus = 'pending' | 'paid' | 'cancelled';
+export type TransactionStatus = 'pending' | 'confirmed' | 'cancelled';
 
 export type Transaction = {
   profileId: string;
   orderId?: string;
+  clientId?: string;
   type: TransactionType;
   status: TransactionStatus;
   paymentMethod?: PaymentMethod;
   amount: number;
-  dueDate: Date;
-  paidDate?: Date;
+  transactionDate: Date;
+  dueDate?: Date;
+  category?: string;
   reference?: string;
+  notes?: string;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -48,6 +51,35 @@ const ensureTransactionsIndexes = async (db: Db): Promise<void> => {
     { profileId: 1, orderId: 1 },
     {
       name: 'transactions_profileId_orderId',
+      sparse: true,
+    },
+  );
+
+  await collection.createIndex(
+    { profileId: 1, transactionDate: 1 },
+    {
+      name: 'transactions_profileId_transactionDate',
+    },
+  );
+
+  await collection.createIndex(
+    { profileId: 1, type: 1 },
+    {
+      name: 'transactions_profileId_type',
+    },
+  );
+
+  await collection.createIndex(
+    { profileId: 1, status: 1 },
+    {
+      name: 'transactions_profileId_status',
+    },
+  );
+
+  await collection.createIndex(
+    { profileId: 1, clientId: 1 },
+    {
+      name: 'transactions_profileId_clientId',
       sparse: true,
     },
   );

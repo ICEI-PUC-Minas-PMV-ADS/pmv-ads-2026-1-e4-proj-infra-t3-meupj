@@ -431,8 +431,7 @@ export const registerOrdersRoutes = (
           orderId: insertedOrderId,
           type: 'income' as const,
           status: 'pending' as const,
-          amount: schedule.amount,
-          dueDate: new Date(schedule.dueDate),
+          amount: schedule.amount,          transactionDate: new Date(schedule.dueDate),          dueDate: new Date(schedule.dueDate),
           createdAt: now,
           updatedAt: now,
           ...(schedule.paymentMethod !== undefined && { paymentMethod: schedule.paymentMethod }),
@@ -652,7 +651,7 @@ export const registerOrdersRoutes = (
       const transactionsCollection = dependencies.transactionsStore.getCollection();
       const confirmedTransaction = await transactionsCollection.findOne({
         orderId: params.orderId,
-        status: 'paid',
+        status: 'confirmed',
       });
 
       if (confirmedTransaction) {
