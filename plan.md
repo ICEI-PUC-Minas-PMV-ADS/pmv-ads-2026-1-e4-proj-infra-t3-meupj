@@ -196,128 +196,23 @@ MPJ-43 a MPJ-51 foram concluídos. O próximo passo é iniciar MPJ-52: criar end
   - Padronizados contratos de erro para `401` e `404` nos recursos inexistentes/fora do escopo.
   - Cobertura de integração consolidada em `src/apps/api/src/__tests__/documents.test.ts`.
 
-## Seed Mock para Teste de Schema
-- **Arquivo criado**: `src/apps/api/src/scripts/seed-transactions.ts`
-- **Objetivo**: popular a collection `transactions` com dados de exemplo e validar o schema estendido sem depender de endpoints existentes.
-- **Como usar**:
-  1. Preferencialmente passe a URI diretamente pelos parâmetros do comando.
-  2. Execute `cd src/apps/api && pnpm seed:transactions -- --uri="<MONGODB_URI>" --db="<MONGODB_DB_NAME>"`.
-  3. Se preferir, ainda é possível usar `src/apps/api/.env` como fallback.
-- **O que o script faz**:
-  - conecta ao MongoDB usando a URI recebida por CLI ou a mesma `MONGODB_URI` do projeto;
-  - insere transações de exemplo com `type`, `status`, `amount`, `transactionDate`, `dueDate`, `category`, `paymentMethod`, `clientId`, `reference`, `notes`, `createdAt` e `updatedAt`;
-  - lista os índices existentes na collection `transactions`.
+## Consolidação Final das Mudanças
 
-> Isso permite validar MPJ-43 com dados reais antes de avançar para as rotas de criação de receita e custo.
+- **Implementações concluídas no escopo original**:
+  - MPJ-43 a MPJ-51 finalizados (schema/índices de lançamentos, CRUD e confirmação de transações, documentos comerciais e endpoints de documentos).
+  - Cobertura de integração consolidada para transações e documentos.
 
+- **Commits da fase (resumo cronológico)**:
+  - `c974d5f` - implementação principal de fluxo de transações e orçamento.
+  - `4edc969` - remoção de artefatos locais temporários (seed/postman antigos).
+  - `87e7c7e` - ordem de serviço.
+  - `b6d8c04` - recibo.
+  - `0fe675a` - fechamento formal de rastreio no plano/issues.
 
-Contexto Adicional:
+- **Validação técnica registrada**:
+  - suíte de documentos passando com cenários de `401`, `404` e `200`.
+  - regressão da API passando após as entregas da fase.
 
-**Descrição**
-Implementar edição, exclusão e confirmação de transações com regras de status e integridade.
-
-**Critérios de aceite**
-
-* Criar endpoint protegido `PUT /api/transactions/:transactionId` para edição.
-* Criar endpoint protegido `DELETE /api/transactions/:transactionId` para exclusão.
-* Criar endpoint protegido `PATCH /api/transactions/:transactionId/confirm` para confirmação.
-* Operações devem respeitar escopo por `profileId`.
-* Edição atualiza `updatedAt` e valida campos numéricos/enums.
-* Confirmação altera `status` para `confirmed` (idempotente se já confirmado).
-* Exclusão deve respeitar regra de bloqueio para registros confirmados quando aplicável (retornar `409`).
-* Recurso inexistente no escopo retorna `404`.
-* Erros retornam contrato `{ error, message, statusCode }`.
-
-Implementar criação de lançamento de custo
-
-**Descrição**
-Implementar criação de transação de custo com endpoint protegido e validações de negócio.
-
-**Critérios de aceite**
-
-* Criar endpoint protegido `POST /api/transactions/expense` (sessão Better Auth obrigatória).
-* `type` deve ser fixado como `expense` pela regra do endpoint.
-* Payload mínimo: `amount`, `transactionDate`; campos opcionais: `dueDate`, `orderId`, `clientId`, `category`, `paymentMethod`, `reference`, `notes`.
-* Resolver `profileId` a partir da sessão; não aceitar `profileId` no payload.
-* Status inicial padrão: `pending` (com possibilidade de regra explícita para `confirmed`, se definida).
-* Validar `amount` como valor numérico maior que zero.
-* Persistir `createdAt` e `updatedAt` automaticamente.
-* Resposta de sucesso retorna `201` com transação criada.
-* Erros retornam contrato `{ error, message, statusCode }`.
-
-
-Implementar criação de lançamento de receita
-
-
-**Descrição**
-Implementar criação de transação de receita com endpoint protegido e validações de negócio.
-
-**Critérios de aceite**
-
-* Criar endpoint protegido `POST /api/transactions/income` (sessão Better Auth obrigatória).
-* `type` deve ser fixado como `income` pela regra do endpoint.
-* Payload mínimo: `amount`, `transactionDate`; campos opcionais: `dueDate`, `orderId`, `clientId`, `category`, `paymentMethod`, `reference`, `notes`.
-* Resolver `profileId` a partir da sessão; não aceitar `profileId` no payload.
-* Status inicial padrão: `pending` (com possibilidade de regra explícita para `confirmed`, se definida).
-* Validar `amount` como valor numérico maior que zero.
-* Persistir `createdAt` e `updatedAt` automaticamente.
-* Resposta de sucesso retorna `201` com transação criada.
-* Erros retornam contrato `{ error, message, statusCode }`.
-
-
-Criar schema e índices da collection lancamentos
-
-
-**Descrição**
-Implementar o data model da collection `transactions` para receitas e custos, com derivação de status de exibição `overdue`.
-
-**Critérios de aceite**
-
-* Criar collection `transactions` com campos: `profileId`, `type`, `status`, `amount`, `transactionDate`, `dueDate`, `orderId`, `clientId`, `category`, `paymentMethod`, `reference`, `notes`, `createdAt`, `updatedAt`.
-* `type` deve aceitar apenas `income` ou `expense`.
-* `status` persistido deve aceitar apenas `pending` ou `confirmed`.
-* `paymentMethod` deve ser enum técnico em inglês (`pix`, `cash`, `creditCard`, `debitCard`, `bankTransfer`, `bankSlip`, `onCredit`).
-* `overdue` não deve ser persistido em banco; deve ser derivado em leitura:
-  * `displayStatus = overdue` quando `status === pending` e `dueDate < today`.
-* Criar índices mínimos:
-  * `{ profileId: 1 }`
-  * `{ profileId: 1, type: 1 }`
-  * `{ profileId: 1, status: 1 }`
-  * `{ profileId: 1, orderId: 1 }`
-  * `{ profileId: 1, dueDate: 1 }`
-* Não armazenar `authUserId` nesta collection; vínculo de domínio deve ser por `profileId`.
-
-Expor endpoints de documentos comerciais
-
-
-**Descrição**
-Expor endpoints para consumo dos serviços de documentos comerciais em rotas `/api/documents/*`.
-
-**Critérios de aceite**
-
-* Criar endpoint protegido `GET /api/documents/budget/:orderId`.
-* Criar endpoint protegido `GET /api/documents/service-order/:orderId`.
-* Criar endpoint protegido `GET /api/documents/receipt/:transactionId`.
-* Endpoints devem resolver `profileId` da sessão Better Auth e aplicar escopo em todas as buscas.
-* Respostas devem retornar payload JSON montado pelos serviços de documentos (sem obrigatoriedade de PDF nesta etapa).
-* Recurso fora do escopo ou inexistente deve retornar `404`.
-* Erros devem seguir contrato `{ error, message, statusCode }`.
-* Cobrir rotas com testes automatizados de integração.
-
-
-Implementar listagem, busca e filtros de lançamentos
-
-
-**Descrição**
-Implementar listagem de transações com paginação, busca, filtros e status derivado para exibição.
-
-**Critérios de aceite**
-
-* Criar endpoint protegido `GET /api/transactions`.
-* Suportar paginação com `page` e `limit`.
-* Suportar busca por `q` em `reference`, `category` e `notes`.
-* Suportar filtros por `type`, `status`, `paymentMethod`, `orderId`, `clientId`, `dueFrom`, `dueTo`, `transactionFrom`, `transactionTo`.
-* Filtro por `status` deve aceitar `overdue` como derivação de leitura (sem persistência em banco).
-* Retornar somente transações do `profileId` autenticado.
-* Resposta retorna `200` com shape `{ data, total, page, limit }` e campo `displayStatus` em cada item.
-* Erros retornam contrato `{ error, message, statusCode }`.
+- **Artefatos de uso manual**:
+  - Collection/Environment Postman foram preparados durante a validacao final da fase.
+  - Os arquivos foram removidos do repositorio em seguida por solicitacao do responsavel, mantendo apenas os registros no plano.
