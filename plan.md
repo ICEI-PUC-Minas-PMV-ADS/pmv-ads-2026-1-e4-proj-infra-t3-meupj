@@ -127,7 +127,7 @@ As seguintes issues fazem parte deste escopo:
 
 ## Próximos Passos
 
-MPJ-43 a MPJ-50 foram concluídos. O próximo passo é consolidar MPJ-51 com revisão final dos endpoints de documentos comerciais.
+MPJ-43 a MPJ-51 foram concluídos. O próximo passo é iniciar MPJ-52: criar endpoint de resumo de receitas.
 
 ## Registro de alterações
 
@@ -186,6 +186,15 @@ MPJ-43 a MPJ-50 foram concluídos. O próximo passo é consolidar MPJ-51 com rev
   - Implementado escopo por `profileId` e filtro de `status = confirmed` para geração de recibo.
   - Implementadas respostas `401` (não autenticado), `404` (lançamento inexistente/fora do escopo/não confirmado) e `200` com documento JSON.
   - Criados testes de integração em `src/apps/api/src/__tests__/documents.test.ts` cobrindo casos de `401`, `404` e sucesso com payload de recibo.
+
+- **MPJ-51 concluído** em 10 de abril de 2026:
+  - Expostos os endpoints protegidos de documentos comerciais em `src/apps/api/src/routes/documents.ts`:
+    - `GET /api/documents/budget/:orderId`
+    - `GET /api/documents/service-order/:orderId`
+    - `GET /api/documents/receipt/:transactionId`
+  - Aplicado escopo por `profileId` em todas as buscas de pedido, cliente e lançamento.
+  - Padronizados contratos de erro para `401` e `404` nos recursos inexistentes/fora do escopo.
+  - Cobertura de integração consolidada em `src/apps/api/src/__tests__/documents.test.ts`.
 
 ## Seed Mock para Teste de Schema
 - **Arquivo criado**: `src/apps/api/src/scripts/seed-transactions.ts`
