@@ -1,11 +1,11 @@
 info:
-  name: Catalog Delete
+  name: Orders Delete
   type: http
-  seq: 10
+  seq: 4
 
 http:
   method: DELETE
-  url: '{{baseUrl}}/api/catalog/{{catalogItemId}}'
+  url: '{{baseUrl}}/api/orders/PUT_ORDER_ID_HERE'
   headers:
     - name: Cookie
       value: sessionCookie

@@ -414,7 +414,7 @@ export const registerCatalogRoutes = (
       if (!existingItem) {
         return reply.status(404).send(NotFoundPayload);
       }
-// TODO: Validar integração quando a coleção 'orders' for implementada
+      // TODO: Validar integração quando a coleção 'orders' for implementada
       const ordersCollection = collection.db.collection<Document>('orders');
       const linkedOrder = await ordersCollection.findOne({
         'items.catalogItemId': params.itemId,

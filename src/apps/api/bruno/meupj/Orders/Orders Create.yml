@@ -1,0 +1,44 @@
+info:
+  name: Orders Create
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: '{{baseUrl}}/api/orders'
+  headers:
+    - name: Cookie
+      value: sessionCookie
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "items": [
+          {
+            "catalogItemId": "PUT_CATALOG_ITEM_ID_HERE",
+            "quantity": 2
+          }
+        ],
+        "discount": 0,
+        "fees": 0,
+        "paymentMethods": [
+          "pix"
+        ],
+        "paymentSchedule": [
+          {
+            "amount": 20.00,
+            "dueDate": "2026-12-31T23:59:59.000Z",
+            "paymentMethod": "pix"
+          }
+        ],
+        "status": "draft"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

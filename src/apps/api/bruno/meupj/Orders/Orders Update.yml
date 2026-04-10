@@ -1,11 +1,11 @@
 info:
-  name: Catalog Update
+  name: Orders Update
   type: http
-  seq: 9
+  seq: 3
 
 http:
   method: PUT
-  url: '{{baseUrl}}/api/catalog/{{catalogItemId}}'
+  url: '{{baseUrl}}/api/orders/PUT_ORDER_ID_HERE'
   headers:
     - name: Cookie
       value: sessionCookie
@@ -15,9 +15,8 @@ http:
     type: json
     data: |-
       {
-        "name": "Updated Sample Product",
-        "unitPrice": 12.50,
-        "unitMeasure": "piece"
+        "status": "pendingApproval",
+        "discount": 5.00
       }
   auth: inherit
 

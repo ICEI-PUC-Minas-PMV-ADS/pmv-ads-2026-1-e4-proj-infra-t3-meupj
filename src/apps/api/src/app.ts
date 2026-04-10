@@ -6,14 +6,18 @@ import { registerEnv, type EnvData } from './env.js';
 import { createAuthService, createUnavailableAuthService, type AuthService } from './lib/auth.js';
 import { createCatalogStore, type CatalogStore } from './lib/catalog.js';
 import { createClientsStore, type ClientStore } from './lib/clients.js';
+import { createCountersStore, type CountersStore } from './lib/counters.js';
 import { mongoService, type MongoService } from './lib/mongo.js';
+import { createOrdersStore, type OrdersStore } from './lib/orders.js';
 import { createProfileStore, type ProfileStore } from './lib/profile.js';
+import { createTransactionsStore, type TransactionsStore } from './lib/transactions.js';
 import { registerGlobalErrorHandler } from './plugins/error-handler.js';
 import { registerSecurityPlugins } from './plugins/security.js';
 import { registerAuthRoutes } from './routes/auth.js';
 import { registerCatalogRoutes } from './routes/catalog.js';
 import { registerClientsRoutes } from './routes/clients.js';
 import { registerHealthRoutes } from './routes/health.js';
+import { registerOrdersRoutes } from './routes/orders.js';
 import { registerProfileRoutes } from './routes/profile.js';
 
 export type BuildAppOptions = {
@@ -23,6 +27,9 @@ export type BuildAppOptions = {
   profileStore?: ProfileStore;
   catalogStore?: CatalogStore;
   clientsStore?: ClientStore;
+  ordersStore?: OrdersStore;
+  countersStore?: CountersStore;
+  transactionsStore?: TransactionsStore;
 };
 
 const resolveInitialLogLevel = (): string => process.env.LOG_LEVEL ?? 'info';
@@ -97,6 +104,29 @@ export const buildApp = async (options: BuildAppOptions = {}): Promise<FastifyIn
     app.log.error({ err: normalizedError }, 'Unable to ensure clients indexes');
   }
 
+  const selectedOrdersStore =
+    options.ordersStore ?? createOrdersStore(() => selectedMongoService.getDb());
+
+  try {
+    await selectedOrdersStore.ensureIndexes();
+  } catch (error) {
+    const normalizedError = error instanceof Error ? error : new Error(String(error));
+    app.log.error({ err: normalizedError }, 'Unable to ensure orders indexes');
+  }
+
+  const selectedCountersStore =
+    options.countersStore ?? createCountersStore(() => selectedMongoService.getDb());
+
+  const selectedTransactionsStore =
+    options.transactionsStore ?? createTransactionsStore(() => selectedMongoService.getDb());
+
+  try {
+    await selectedTransactionsStore.ensureIndexes();
+  } catch (error) {
+    const normalizedError = error instanceof Error ? error : new Error(String(error));
+    app.log.error({ err: normalizedError }, 'Unable to ensure transactions indexes');
+  }
+
   let selectedAuthService = options.auth;
 
   if (!selectedAuthService) {
@@ -138,6 +168,15 @@ export const buildApp = async (options: BuildAppOptions = {}): Promise<FastifyIn
     authService: selectedAuthService,
     profileStore: selectedProfileStore,
     clientsStore: selectedClientsStore,
+  });
+
+  registerOrdersRoutes(app, {
+    authService: selectedAuthService,
+    profileStore: selectedProfileStore,
+    catalogStore: selectedCatalogStore,
+    ordersStore: selectedOrdersStore,
+    countersStore: selectedCountersStore,
+    transactionsStore: selectedTransactionsStore,
   });
 
   registerHealthRoutes(app, {

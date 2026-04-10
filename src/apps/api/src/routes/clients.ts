@@ -38,15 +38,7 @@ type ClientListResponse = {
 type ClientUpdateSet = Partial<
   Pick<
     Client,
-    | 'name'
-    | 'type'
-    | 'document'
-    | 'email'
-    | 'phone'
-    | 'origin'
-    | 'birthDate'
-    | 'notes'
-    | 'address'
+    'name' | 'type' | 'document' | 'email' | 'phone' | 'origin' | 'birthDate' | 'notes' | 'address'
   >
 > & {
   updatedAt: Date;
@@ -249,7 +241,7 @@ const validateDocumentByType = (documento: string, type: PersonType): boolean =>
 
     // Validação básica de CPF (pode ser aprimorada)
     const cpf = cleanDoc.split('').map(Number);
-    if (cpf.every(digit => digit === cpf[0])) return false; // CPF com todos dígitos iguais
+    if (cpf.every((digit) => digit === cpf[0])) return false; // CPF com todos dígitos iguais
 
     return true;
   } else if (type === 'company') {
@@ -258,7 +250,7 @@ const validateDocumentByType = (documento: string, type: PersonType): boolean =>
 
     // Validação básica de CNPJ (pode ser aprimorada)
     const cnpj = cleanDoc.split('').map(Number);
-    if (cnpj.every(digit => digit === cnpj[0])) return false; // CNPJ com todos dígitos iguais
+    if (cnpj.every((digit) => digit === cnpj[0])) return false; // CNPJ com todos dígitos iguais
 
     return true;
   }
