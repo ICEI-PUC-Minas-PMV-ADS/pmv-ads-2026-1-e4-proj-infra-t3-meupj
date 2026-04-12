@@ -16,9 +16,11 @@ import { registerSecurityPlugins } from './plugins/security.js';
 import { registerAuthRoutes } from './routes/auth.js';
 import { registerCatalogRoutes } from './routes/catalog.js';
 import { registerClientsRoutes } from './routes/clients.js';
+import { registerDocumentsRoutes } from './routes/documents.js';
 import { registerHealthRoutes } from './routes/health.js';
 import { registerOrdersRoutes } from './routes/orders.js';
 import { registerProfileRoutes } from './routes/profile.js';
+import { registerTransactionsRoutes } from './routes/transactions.js';
 
 export type BuildAppOptions = {
   envData?: EnvData;
@@ -176,6 +178,21 @@ export const buildApp = async (options: BuildAppOptions = {}): Promise<FastifyIn
     catalogStore: selectedCatalogStore,
     ordersStore: selectedOrdersStore,
     countersStore: selectedCountersStore,
+    transactionsStore: selectedTransactionsStore,
+  });
+
+  registerTransactionsRoutes(app, {
+    authService: selectedAuthService,
+    profileStore: selectedProfileStore,
+    clientsStore: selectedClientsStore,
+    transactionsStore: selectedTransactionsStore,
+  });
+
+  registerDocumentsRoutes(app, {
+    authService: selectedAuthService,
+    profileStore: selectedProfileStore,
+    ordersStore: selectedOrdersStore,
+    clientsStore: selectedClientsStore,
     transactionsStore: selectedTransactionsStore,
   });
 

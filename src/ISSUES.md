@@ -31,15 +31,15 @@
 - [x] MPJ-40 - Implementar edição e exclusão de pedido
 - [x] MPJ-41 - Implementar numeração automática e transições de status
 - [x] MPJ-42 - Implementar listagem, busca e filtros de pedidos
-- [ ] MPJ-43 - Criar schema e índices da collection lancamentos
-- [ ] MPJ-44 - Implementar criação de lançamento de receita
-- [ ] MPJ-45 - Implementar criação de lançamento de custo
-- [ ] MPJ-46 - Implementar listagem, busca e filtros de lançamentos
-- [ ] MPJ-47 - Implementar edição, exclusão e confirmação de lançamentos
-- [ ] MPJ-48 - Criar serviço de montagem de orçamento
-- [ ] MPJ-49 - Criar serviço de montagem de ordem de serviço
-- [ ] MPJ-50 - Criar serviço de montagem de recibo
-- [ ] MPJ-51 - Expor endpoints de documentos comerciais
+- [x] MPJ-43 - Criar schema e índices da collection lancamentos
+- [x] MPJ-44 - Implementar criação de lançamento de receita
+- [x] MPJ-45 - Implementar criação de lançamento de custo
+- [x] MPJ-46 - Implementar listagem, busca e filtros de lançamentos
+- [x] MPJ-47 - Implementar edição, exclusão e confirmação de lançamentos
+- [x] MPJ-48 - Criar serviço de montagem de orçamento
+- [x] MPJ-49 - Criar serviço de montagem de ordem de serviço
+- [x] MPJ-50 - Criar serviço de montagem de recibo
+- [x] MPJ-51 - Expor endpoints de documentos comerciais
 - [ ] MPJ-52 - Criar endpoint de resumo de receitas
 - [ ] MPJ-53 - Criar endpoint de resumo de custos
 - [ ] MPJ-54 - Criar endpoint de resultado financeiro
