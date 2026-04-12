@@ -86,6 +86,41 @@ Os testes de catalog cobrem:
 - Exclusão com sucesso (`204`).
 - Validação de formato inválido de `itemId` (`400`).
 
+## Clients
+
+### Arquivo de Teste
+
+- `src/apps/api/src/__tests__/clients.test.ts`
+
+### Cobertura Registrada
+
+Os testes de clients cobrem:
+
+1. **Store de clientes**
+- Criação e validação dos índices esperados (`profileId`, `profileId + name`, acesso único no `documento` e `email`).
+- Garantia de que os índices não sejam gerados repetidamente em sub-invocações no mesmo DB.
+- Validação de retorno da função padrão `getCollection()`.
+
+2. **GET /api/clients**
+- Restrição global `401` sem a presença de uma sessão ativa autenticada.
+- Respostas paginadas por padrão.
+- Checagem funcional da listagem com termo de busca text-based em nomes, endereços de email ou identificadores usando `$regex`.
+
+3. **POST /api/clients**
+- Restrição global de autenticação com status de verificação `401`.
+- Bloqueio com erro de BadRequest (`400`) se houver injeção de documentos incorretos (ex: CPF/CNPJ com formatação de repetição de caracteres).
+- Submissão correta `201` para a criação lícita de indivíduos (tipo `individual`) e companhias comerciais (tipo `company`).
+
+4. **PUT /api/clients/:clientId**
+- Alterações em propriedades variadas de um cliente existente de forma bem-sucedida.
+- Recusa com erro `400` para documentação sub-padrão no ato do update.
+- Falha apropriada (`404`) quando a rota mira um objeto de id inexistente no escopo em questão.
+
+5. **DELETE /api/clients/:clientId**
+- Retorno correto (`204`) quando executa a limpeza sem problemas de um cliente válido.
+- Segurança de dados com falha estrutural por `Conflict` (Erro `409`) quando interligado na tabela virtual temporária de *`orders`*.
+- Erro relacional ao tentar deletar clientes inválidos.
+
 ## Observações
 
 - Os testes são executados com mocks/stubs de dependências (autenticação, profile store e acesso a banco), garantindo isolamento da unidade testada.
