@@ -101,10 +101,21 @@ const CatalogSortBySchema = Type.Union([
 
 const CatalogSortOrderSchema = Type.Union([Type.Literal('asc'), Type.Literal('desc')]);
 
+const PAGE_DEFAULT = 1;
+const LIMIT_DEFAULT = 20;
+const MAX_PAGE = 1000;
+const MAX_LIMIT = 100;
+const POSITIVE_INTEGER_PATTERN = '^[1-9][0-9]*$';
+const POSITIVE_INTEGER_REGEX = new RegExp(POSITIVE_INTEGER_PATTERN);
+
+const PositiveIntegerStringSchema = Type.String({ pattern: POSITIVE_INTEGER_PATTERN });
+
 const CatalogListQuerySchema = Type.Object(
   {
-    page: Type.Optional(Type.Integer({ minimum: 1 })),
-    limit: Type.Optional(Type.Integer({ minimum: 1 })),
+    page: Type.Optional(Type.Union([Type.Integer({ minimum: 1, maximum: MAX_PAGE }), PositiveIntegerStringSchema])),
+    limit: Type.Optional(
+      Type.Union([Type.Integer({ minimum: 1, maximum: MAX_LIMIT }), PositiveIntegerStringSchema]),
+    ),
     q: Type.Optional(Type.String()),
     type: Type.Optional(CatalogTypeSchema),
     sortBy: Type.Optional(CatalogSortBySchema),
@@ -186,6 +197,37 @@ type CatalogUpdateBody = Static<typeof CatalogUpdateSchema>;
 type CatalogParams = Static<typeof CatalogParamsSchema>;
 type CatalogListQuery = Static<typeof CatalogListQuerySchema>;
 
+const toBoundedPositiveInteger = (
+  value: number | string | undefined,
+  fallback: number,
+  maximum: number,
+): number => {
+  const safeFallback = Math.min(Math.max(fallback, 1), maximum);
+
+  if (typeof value === 'number') {
+    if (!Number.isSafeInteger(value) || value < 1) {
+      return safeFallback;
+    }
+
+    return Math.min(value, maximum);
+  }
+
+  if (typeof value === 'string') {
+    if (!POSITIVE_INTEGER_REGEX.test(value)) {
+      return safeFallback;
+    }
+
+    const parsed = Number.parseInt(value, 10);
+    if (!Number.isSafeInteger(parsed) || parsed < 1) {
+      return safeFallback;
+    }
+
+    return Math.min(parsed, maximum);
+  }
+
+  return safeFallback;
+};
+
 const toCatalogResponse = (item: WithId<CatalogItem>): CatalogResponse => ({
   _id: item._id.toHexString(),
   profileId: item.profileId,
@@ -224,8 +266,8 @@ export const registerCatalogRoutes = (
       const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
       const query = request.query as CatalogListQuery;
 
-      const page = query.page ?? 1;
-      const limit = query.limit ?? 20;
+      const page = toBoundedPositiveInteger(query.page, PAGE_DEFAULT, MAX_PAGE);
+      const limit = toBoundedPositiveInteger(query.limit, LIMIT_DEFAULT, MAX_LIMIT);
       const sortBy = query.sortBy ?? 'createdAt';
       const sortOrder = query.sortOrder ?? 'desc';
       const skip = (page - 1) * limit;
