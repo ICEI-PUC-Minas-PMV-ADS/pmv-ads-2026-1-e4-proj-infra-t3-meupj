@@ -36,7 +36,10 @@ const createMongoMock = (healthy: boolean): MongoService => ({
   close: vi.fn().mockResolvedValue(undefined),
 });
 
-const createProfileStoreMock = (profileId = new ObjectId(), authUserId = 'auth-user-1'): ProfileStore => ({
+const createProfileStoreMock = (
+  profileId = new ObjectId(),
+  authUserId = 'auth-user-1',
+): ProfileStore => ({
   ensureIndexes: vi.fn().mockResolvedValue(undefined),
   getByAuthUserId: vi.fn().mockResolvedValue({
     _id: profileId,
@@ -88,6 +91,16 @@ const createProfileStoreMock = (profileId = new ObjectId(), authUserId = 'auth-u
     createdAt: new Date('2026-01-01T00:00:00.000Z'),
     updatedAt: new Date('2026-01-01T00:00:00.000Z'),
   }),
+  updateBusinessByAuthUserId: vi.fn(async (_resolvedAuthUserId, business) => ({
+    _id: profileId,
+    authUserId: _resolvedAuthUserId,
+    business: {
+      ...business,
+      address: { ...business.address },
+    },
+    createdAt: new Date('2026-01-01T00:00:00.000Z'),
+    updatedAt: new Date('2026-01-02T00:00:00.000Z'),
+  })),
 });
 
 const createNoOpCollection = () => ({
