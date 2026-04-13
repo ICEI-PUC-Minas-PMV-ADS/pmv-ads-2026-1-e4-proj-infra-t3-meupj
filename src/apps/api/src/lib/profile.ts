@@ -43,6 +43,10 @@ export type ProfileStore = {
   ensureIndexes: () => Promise<void>;
   getByAuthUserId: (authUserId: string) => Promise<WithId<ProfileDocument> | null>;
   ensureByAuthUserId: (authUserId: string) => Promise<WithId<ProfileDocument>>;
+  updateBusinessByAuthUserId: (
+    authUserId: string,
+    business: ProfileBusiness,
+  ) => Promise<WithId<ProfileDocument>>;
 };
 
 const indexedDatabases = new WeakSet<Db>();
@@ -107,12 +111,14 @@ export const createProfileStore = (getDb: () => Db): ProfileStore => ({
     const db = getDb();
     await ensureProfileIndexes(db);
   },
+
   getByAuthUserId: async (authUserId: string) => {
     const db = getDb();
     await ensureProfileIndexes(db);
 
     return getProfileCollection(db).findOne({ authUserId });
   },
+
   ensureByAuthUserId: async (authUserId: string) => {
     const db = getDb();
     await ensureProfileIndexes(db);
@@ -131,6 +137,34 @@ export const createProfileStore = (getDb: () => Db): ProfileStore => ({
 
     if (!profile) {
       throw new Error('Failed to load profile after upsert');
+    }
+
+    return profile;
+  },
+
+  updateBusinessByAuthUserId: async (authUserId: string, business: ProfileBusiness) => {
+    const db = getDb();
+    await ensureProfileIndexes(db);
+
+    const collection = getProfileCollection(db);
+    const now = new Date();
+
+    await collection.updateOne(
+      { authUserId },
+      {
+        $setOnInsert: createDefaultProfile(authUserId, now),
+        $set: {
+          business: cloneBusiness(business),
+          updatedAt: now,
+        },
+      },
+      { upsert: true },
+    );
+
+    const profile = await collection.findOne({ authUserId });
+
+    if (!profile) {
+      throw new Error('Failed to load profile after update');
     }
 
     return profile;

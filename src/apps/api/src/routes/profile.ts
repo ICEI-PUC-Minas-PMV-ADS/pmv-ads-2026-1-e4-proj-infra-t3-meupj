@@ -1,4 +1,4 @@
-import { Type } from '@sinclair/typebox';
+import { Type, type Static } from '@sinclair/typebox';
 import type { FastifyInstance } from 'fastify';
 
 import type { AuthService } from '../lib/auth.js';
@@ -66,6 +66,8 @@ const UnauthorizedPayload = Object.freeze({
   statusCode: 401,
 });
 
+type ProfileUpdateBody = Static<typeof ProfileBusinessSchema>;
+
 export const registerProfileRoutes = (
   app: FastifyInstance,
   dependencies: ProfileRouteDependencies,
@@ -93,6 +95,39 @@ export const registerProfileRoutes = (
       };
 
       const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
+
+      return reply.send(toPublicProfile(profile));
+    },
+  );
+
+  app.put(
+    '/api/profile',
+    {
+      schema: {
+        body: ProfileBusinessSchema,
+        response: {
+          200: ProfileResponseSchema,
+          401: UnauthorizedSchema,
+        },
+      },
+    },
+    async (request, reply) => {
+      const session = await dependencies.authService.getSessionFromHeaders(request.headers);
+
+      if (!session) {
+        return reply.status(401).send(UnauthorizedPayload);
+      }
+
+      request.user = {
+        id: session.user.id,
+        email: session.user.email,
+      };
+
+      const body = request.body as ProfileUpdateBody;
+      const profile = await dependencies.profileStore.updateBusinessByAuthUserId(
+        session.user.id,
+        body,
+      );
 
       return reply.send(toPublicProfile(profile));
     },

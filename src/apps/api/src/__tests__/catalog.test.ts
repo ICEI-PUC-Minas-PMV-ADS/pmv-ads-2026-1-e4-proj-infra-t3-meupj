@@ -94,6 +94,15 @@ const createProfileStoreMock = (profile = createProfileFixture()): ProfileStore 
   ensureIndexes: () => Promise.resolve(undefined),
   getByAuthUserId: () => Promise.resolve(profile),
   ensureByAuthUserId: () => Promise.resolve(profile),
+  updateBusinessByAuthUserId: (_authUserId, business) =>
+    Promise.resolve({
+      ...profile,
+      business: {
+        ...business,
+        address: { ...business.address },
+      },
+      updatedAt: new Date('2026-01-02T00:00:00.000Z'),
+    }),
 });
 
 type FakeCollection = {
