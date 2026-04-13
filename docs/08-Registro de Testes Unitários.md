@@ -121,6 +121,50 @@ Os testes de clients cobrem:
 - Segurança de dados com falha estrutural por `Conflict` (Erro `409`) quando interligado na tabela virtual temporária de *`orders`*.
 - Erro relacional ao tentar deletar clientes inválidos.
 
+- ## Profile
+
+### Arquivo de Teste
+
+- `src/apps/api/src/__tests__/app.test.ts`
+
+### Cobertura Registrada
+
+Os testes de profile cobrem:
+
+1. **Store de perfil**
+- Criação do perfil automaticamente caso não exista (`ensureByAuthUserId`).
+- Garantia de unicidade do perfil por `authUserId`.
+- Atualização dos dados do negócio com persistência em banco (`updateBusinessByAuthUserId`).
+- Atualização do campo `updatedAt` após modificação.
+- Clonagem segura dos dados para evitar mutações inesperadas.
+
+2. **GET /api/profile**
+- Retorno `401` para requisições sem autenticação.
+- Recuperação do perfil do usuário autenticado.
+- Criação automática do perfil caso não exista.
+- Serialização correta dos dados (`Date` → `string`).
+- Isolamento dos dados por usuário autenticado (`authUserId`).
+
+3. **PUT /api/profile**
+- Retorno `401` para requisições sem autenticação.
+- Atualização completa dos dados do negócio.
+- Persistência correta no banco MongoDB.
+- Atualização do campo `updatedAt`.
+- Validação do payload conforme schema definido.
+- Retorno do perfil atualizado com dados normalizados.
+
+4. **Validação de dados**
+- Estrutura obrigatória do objeto `business`.
+- Validação de campos opcionais como `logo`, `footer` e `color`.
+- Validação da estrutura de endereço (`address`).
+- Bloqueio de propriedades adicionais fora do schema (`additionalProperties: false`).
+
+5. **Isolamento e segurança**
+- Garantia de que um usuário não acessa dados de outro (`authUserId`).
+- Execução com mocks de autenticação para simular sessões válidas.
+- Uso de mocks de banco para evitar dependência de infraestrutura externa.
+
+
 ## Observações
 
 - Os testes são executados com mocks/stubs de dependências (autenticação, profile store e acesso a banco), garantindo isolamento da unidade testada.
