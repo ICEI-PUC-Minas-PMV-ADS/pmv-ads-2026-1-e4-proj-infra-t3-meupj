@@ -1,0 +1,28 @@
+info:
+  name: Clients Update
+  type: http
+  seq: 3
+
+http:
+  method: PUT
+  url: '{{baseUrl}}/api/clients/{{clientId}}'
+  headers:
+    - name: Content-Type
+      value: application/json
+    - name: Cookie
+      value: sessionCookie
+  auth: inherit
+  body:
+    mimeType: application/json
+    text: |
+      {
+        "name": "João Silva Updated",
+        "email": "joao.updated@example.com",
+        "phone": "31 99999-1234"
+      }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

@@ -1,0 +1,67 @@
+# ISSUES
+
+## ETAPA 2: MAPEADAS
+
+- [x] MPJ-14 - Inicializar monorepo com Turborepo
+- [x] MPJ-15 - Configurar projeto Fastify em TypeScript ESM
+- [x] MPJ-16 - Configurar conexão com MongoDB
+- [x] MPJ-17 - Criar infraestrutura compartilhada da API
+- [x] MPJ-18 - Configurar base de testes do backend
+- [ ] MPJ-19 - Configurar serviço de upload de arquivos
+- [x] MPJ-20 - Integrar Better Auth com Fastify
+- [x] MPJ-21 - Configurar adapter MongoDB do Better Auth
+- [x] MPJ-22 - Habilitar cadastro e login por email/senha
+- [ ] MPJ-23 - Configurar exclusão de conta autenticada
+- [ ] MPJ-24 - Configurar recuperação e alteração de senha
+- [x] MPJ-25 - Criar schema e model de perfil do negócio
+- [x] MPJ-26 - Criar endpoint de leitura do perfil autenticado
+- [ ] MPJ-27 - Definir política de exclusão em cascata do domínio
+- [ ] MPJ-28 - Criar endpoint de edição do perfil do negócio
+- [ ] MPJ-29 - Criar schema e índices da collection clientes
+- [ ] MPJ-30 - Implementar criação de cliente
+- [ ] MPJ-31 - Implementar edição e exclusão de cliente
+- [ ] MPJ-32 - Implementar listagem, busca e filtros de clientes
+- [x] MPJ-33 - Criar schema e índices da collection catalogo
+- [x] MPJ-34 - Implementar criação de item do catálogo
+- [x] MPJ-35 - Implementar edição de item do catálogo
+- [x] MPJ-36 - Implementar exclusão de item do catálogo com validação de vínculo
+- [x] MPJ-37 - Implementar listagem, busca e filtros de catálogo
+- [x] MPJ-38 - Criar schema e índices da collection pedidos
+- [x] MPJ-39 - Implementar criação de pedido com itens e pagamentos
+- [x] MPJ-40 - Implementar edição e exclusão de pedido
+- [x] MPJ-41 - Implementar numeração automática e transições de status
+- [x] MPJ-42 - Implementar listagem, busca e filtros de pedidos
+- [x] MPJ-43 - Criar schema e índices da collection lancamentos
+- [x] MPJ-44 - Implementar criação de lançamento de receita
+- [x] MPJ-45 - Implementar criação de lançamento de custo
+- [x] MPJ-46 - Implementar listagem, busca e filtros de lançamentos
+- [x] MPJ-47 - Implementar edição, exclusão e confirmação de lançamentos
+- [x] MPJ-48 - Criar serviço de montagem de orçamento
+- [x] MPJ-49 - Criar serviço de montagem de ordem de serviço
+- [x] MPJ-50 - Criar serviço de montagem de recibo
+- [x] MPJ-51 - Expor endpoints de documentos comerciais
+- [ ] MPJ-52 - Criar endpoint de resumo de receitas
+- [ ] MPJ-53 - Criar endpoint de resumo de custos
+- [ ] MPJ-54 - Criar endpoint de resultado financeiro
+- [ ] MPJ-55 - Otimizar pipelines e índices do dashboard
+- [ ] MPJ-56 - Criar suíte de testes dos módulos principais
+- [ ] MPJ-57 - Documentar contratos da API
+- [ ] MPJ-58 - Revisar readiness da etapa backend
+
+## GERAL: NÃO MAPEADAS
+
+- [x] Reforçar testes de tratamento global de erros
+- [x] Reforçar testes de configuração de CORS
+- [x] Melhorar aplicação de LOG_LEVEL no bootstrap da API
+- [x] Corrigir normalização de status code no error handler
+- [x] Ajustar script de desenvolvimento removendo --parallel
+- [x] Refinar AGENTS.md para visão geral estrutural do projeto e recursos disponíveis
+- [x] Adicionar regra no AGENTS.md para atualização obrigatória após mudanças relevantes no projeto
+- [x] Fixar versões exatas das dependências atuais nos package.json e no pnpm-lock.yaml
+- [x] Ajustar regra de dependências no AGENTS.md para usar latest apenas em novas adições
+- [x] Adicionar fallback de indisponibilidade de autenticação retornando 503 no handler técnico de auth
+- [x] Padronizar endpoints de domínio da API para o prefixo `/api/*`
+- [x] Adicionar coleção Bruno no repositório para rastreabilidade de testes da API
+- [x] Criar script sign-in no Bruno para capturar e persistir cookie de sessão
+- [x] Atualizar descrições das issues abertas da Etapa 2 no Linear com lógica técnica em inglês e padronização de contexto atual
+- [x] Configurar validação de formatação com Prettier no pipeline Turborepo (scripts `format` e `format:check`)

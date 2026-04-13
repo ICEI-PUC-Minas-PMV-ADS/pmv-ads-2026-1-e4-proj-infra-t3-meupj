@@ -1,0 +1,28 @@
+info:
+  name: Catalog Update
+  type: http
+  seq: 9
+
+http:
+  method: PUT
+  url: '{{baseUrl}}/api/catalog/{{catalogItemId}}'
+  headers:
+    - name: Cookie
+      value: sessionCookie
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "name": "Updated Sample Product",
+        "unitPrice": 12.50,
+        "unitMeasure": "piece"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

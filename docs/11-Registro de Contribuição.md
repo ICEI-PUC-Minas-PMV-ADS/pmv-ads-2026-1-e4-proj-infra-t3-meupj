@@ -39,22 +39,26 @@ Coletar e documentar todos os requisitos necessários para o desenvolvimento do 
 
 ### Objetivo
 
-Desenvolver a lógica de negócio e os serviços de backend do projeto.
+Desenvolver a lógica de negócio e os serviços de backend do projeto, garantindo a criação de uma API REST funcional, integrada a um banco de dados NoSQL e validada por meio de testes unitários.
 
 ### Tarefas
 
-- **Desenvolvimento da API**: Implementar as APIs necessárias para o funcionamento do sistema.
-- **Gestão de Banco de Dados**: Projetar e implementar o banco de dados.
-- **Testes Unitários**: Criar e executar testes unitários para garantir a qualidade do código backend.
+- **Desenvolvimento da API**: Implementação de endpoints REST para autenticação, clientes, catálogo, pedidos, lançamentos financeiros, documentos comerciais e perfil do negócio.
+- **Gestão de Banco de Dados**: Modelagem e implementação do banco de dados NoSQL (MongoDB), incluindo definição de coleções, índices e persistência de dados.
+- **Testes Unitários**: Criação e execução de testes unitários utilizando Vitest, cobrindo módulos como clientes, catálogo, transações, documentos e perfil do negócio.
 
 ### Responsáveis
 
-- **Desenvolvedor Backend**: Nome do desenvolvedor
-- **Engenheiro de Dados**: Nome do engenheiro
+- **Amanda Lopes**: Implementação do CRUD de clientes e testes unitários relacionados ao gerenciamento de clientes.
+- **Bruna Bricio**: Desenvolvimento de documentação, diagramas, modelagem do sistema e implementação do endpoint de atualização do perfil do negócio, incluindo testes unitários associados.
+- **Maria Júlia Sales**: Implementação do CRUD de catálogo de serviços/produtos e testes unitários, incluindo validação de paginação e filtros.
+- **Eric Martins**: Implementação das funcionalidades relacionadas a pedidos.
+- **Guilherme Andrade**: Implementação dos módulos de lançamentos financeiros e documentos comerciais.
+- **Rico Amantino**: Configuração da fundação do backend, incluindo arquitetura inicial, integração com MongoDB e autenticação com Better Auth.
 
 ### Prazo
 
-- **Data de conclusão**: YYYY-MM-DD
+- **Data de conclusão**: 2026-04-12
 
 ---
 

@@ -1,0 +1,14 @@
+name: local
+variables:
+  - name: baseUrl
+    value: http://localhost:3000
+  - name: email
+    value: lucas@meupj.com
+  - secret: true
+    name: password
+  - name: name
+    value: Lucas
+  - name: catalogItemId
+    value: ''
+  - secret: true
+    name: sessionCookie

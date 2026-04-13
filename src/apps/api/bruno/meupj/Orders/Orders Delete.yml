@@ -1,0 +1,18 @@
+info:
+  name: Orders Delete
+  type: http
+  seq: 4
+
+http:
+  method: DELETE
+  url: '{{baseUrl}}/api/orders/PUT_ORDER_ID_HERE'
+  headers:
+    - name: Cookie
+      value: sessionCookie
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

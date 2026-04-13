@@ -1,0 +1,31 @@
+info:
+  name: Catalog
+  type: http
+  seq: 8
+
+http:
+  method: POST
+  url: '{{baseUrl}}/api/catalog'
+  headers:
+    - name: Cookie
+      value: sessionCookie
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "type": "product",
+        "name": "Sample Product",
+        "unitPrice": 10.99,
+        "unitMeasure": "unit",
+        "description": "A sample product description",
+        "costPrice": 5.50
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

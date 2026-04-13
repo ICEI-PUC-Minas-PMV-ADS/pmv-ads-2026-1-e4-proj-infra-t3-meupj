@@ -1,0 +1,42 @@
+info:
+  name: Clients Create
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: '{{baseUrl}}/api/clients'
+  headers:
+    - name: Content-Type
+      value: application/json
+    - name: Cookie
+      value: sessionCookie
+  auth: inherit
+  body:
+    mimeType: application/json
+    text: |
+      {
+        "name": "João da Silva",
+        "type": "individual",
+        "document": "123.456.789-00",
+        "email": "joao@example.com",
+        "phone": "31 98888-5678",
+        "origin": "indicacao",
+        "birthDate": "1985-07-22",
+        "notes": "Cliente pontual",
+        "address": {
+          "zipCode": "31270-080",
+          "street": "Rua das Flores",
+          "number": "42",
+          "complement": "Apto 5",
+          "district": "Santa Efigênia",
+          "city": "Belo Horizonte",
+          "state": "MG"
+        }
+      }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
