@@ -47,6 +47,10 @@ Assim que a primeira versão do sistema estiver disponível, deverá complementa
 
 <li><a href="src/README.md"> Código Fonte</a></li>
 
+# Deploy
+
+<li><a href="https://meupj-api-student.delightfulwave-8b9abc5f.brazilsouth.azurecontainerapps.io/">Código Fonte</a></li>
+
 # Apresentação
 
 <li><a href="presentation/README.md"> Apresentação da solução</a></li>
