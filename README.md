@@ -49,7 +49,7 @@ Assim que a primeira versão do sistema estiver disponível, deverá complementa
 
 # Deploy
 
-<li><a href="https://meupj-api-student.delightfulwave-8b9abc5f.brazilsouth.azurecontainerapps.io/">Código Fonte</a></li>
+<li><a href="https://meupj-api-student.delightfulwave-8b9abc5f.brazilsouth.azurecontainerapps.io/">meupj.azurecontainerapps.io</a></li>
 
 # Apresentação
 
