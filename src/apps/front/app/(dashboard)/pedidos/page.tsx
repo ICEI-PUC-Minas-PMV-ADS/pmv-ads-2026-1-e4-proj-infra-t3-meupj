@@ -1,9 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { Search, Plus, Loader2, AlertCircle, FileText } from 'lucide-react';
+import { Search, Plus, FileText } from 'lucide-react';
 import { useEffect, useState, useCallback } from 'react';
 import { OrdersService, type Order, type OrderStatus } from '@/services/orders.service';
+import { Alert, Badge, Spinner, EmptyState } from '@/components/ui';
 
 // ─── Mock Data ─────────────────────────────────────────────────────────────────
 // TODO: Remover quando a API estiver acessível e descomentar a chamada real em fetchOrders
@@ -65,6 +66,15 @@ const STATUS_STYLE: Record<OrderStatus, { dot: string; badge: string }> = {
   completed:       { dot: 'bg-emerald-500', badge: 'bg-emerald-50 text-emerald-700' },
   warranty:        { dot: 'bg-purple-500',  badge: 'bg-purple-50 text-purple-700' },
   cancelled:       { dot: 'bg-red-400',     badge: 'bg-red-50 text-red-600' },
+};
+
+const STATUS_BADGE: Record<OrderStatus, 'default' | 'warning' | 'info' | 'success' | 'danger'> = {
+  draft:           'default',
+  pendingApproval: 'warning',
+  inProgress:      'info',
+  completed:       'success',
+  warranty:        'default',
+  cancelled:       'danger',
 };
 
 type TabKey = 'all' | OrderStatus;
@@ -252,37 +262,36 @@ export default function PedidosPage() {
           {/* Loading */}
           {loading && (
             <div className="flex flex-col items-center justify-center py-24 gap-3 text-gray-400">
-              <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+              <Spinner size={32} />
               <p className="text-sm">Carregando pedidos...</p>
             </div>
           )}
 
           {/* Error */}
           {!loading && error && (
-            <div className="flex items-center gap-3 bg-red-50 border border-red-100 text-red-600 p-4 rounded-xl text-sm">
-              <AlertCircle className="h-5 w-5 flex-shrink-0" />
-              <span>{error}</span>
+            <Alert variant="error">
+              {error}
               <button
                 onClick={() => fetchOrders(activeTab, search)}
                 className="ml-auto text-red-700 underline text-xs font-medium"
               >
                 Tentar novamente
               </button>
-            </div>
+            </Alert>
           )}
 
           {/* Empty state */}
           {!loading && !error && orders.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-24 gap-3 text-gray-400">
-              <FileText className="h-12 w-12 text-gray-200" />
-              <p className="text-sm font-medium text-gray-500">Nenhum pedido encontrado</p>
-              <Link
-                href="/pedidos/novo"
-                className="mt-2 text-sm text-indigo-600 font-medium hover:underline"
-              >
-                Criar primeiro pedido
-              </Link>
-            </div>
+            <EmptyState
+              icon={<FileText size={48} />}
+              title="Nenhum pedido encontrado"
+              description="Crie o primeiro pedido para começar."
+              action={
+                <Link href="/pedidos/novo" className="text-sm text-indigo-600 font-medium hover:underline">
+                  Criar primeiro pedido
+                </Link>
+              }
+            />
           )}
 
           {/* List */}
@@ -302,9 +311,7 @@ export default function PedidosPage() {
                   <div className="flex items-center gap-2 sm:gap-3">
                     <div className={`w-2 h-2 rounded-full ${style.dot} flex-shrink-0`} />
                     <h3 className="font-bold text-gray-900 text-[15px]">{order.orderNumber}</h3>
-                    <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full ${style.badge}`}>
-                      {label}
-                    </span>
+                    <Badge variant={STATUS_BADGE[order.status] ?? 'default'}>{label}</Badge>
                   </div>
                   <p className="text-[13px] font-medium text-gray-500 mt-1 pl-4 sm:pl-5 truncate">
                     {order.clientId ? order.clientId : '— sem cliente —'}
