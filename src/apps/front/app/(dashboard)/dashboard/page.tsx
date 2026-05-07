@@ -1,14 +1,87 @@
-import Link from 'next/link';
-import { ChevronDown, Plus } from 'lucide-react';
+'use client';
 
-const transactions = [
-  { id: 1, type: 'income', title: 'Consultoria — PED-0004', subtitle: 'João Ferreira · Pix · 14/03', status: 'confirmado', value: '+R$ 1.200', dot: 'bg-emerald-500', valueColor: 'text-emerald-700', badgeColor: 'bg-emerald-100/60 text-emerald-700' },
-  { id: 2, type: 'expense', title: 'Aluguel do espaço', subtitle: 'Custo geral · 10/03', status: 'pago', value: '-R$ 350', dot: 'bg-red-500', valueColor: 'text-red-700', badgeColor: 'bg-emerald-100/60 text-emerald-700' },
-  { id: 3, type: 'income', title: 'Parcela 2/3 — PED-0003', subtitle: 'Ana Silveira · 30/03', status: 'pendente', value: '+R$ 400', dot: 'bg-blue-500', valueColor: 'text-emerald-700', badgeColor: 'bg-blue-100/60 text-blue-700' },
-  { id: 4, type: 'expense', title: 'Material de escritório', subtitle: 'Custo geral · venc. 05/03', status: 'atrasado', value: '-R$ 80', dot: 'bg-red-500', valueColor: 'text-red-700', badgeColor: 'bg-red-100/60 text-red-700' },
-];
+import Link from 'next/link';
+import { ChevronDown, Plus, Loader2 } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
+import { TransactionsService, type Transaction } from '@/services/transactions.service';
 
 export default function FinanceiroPage() {
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState<'all' | 'income' | 'expense'>('all');
+  const [dateRange, setDateRange] = useState<'month' | 'all'>('month');
+
+  useEffect(() => {
+    async function loadTransactions() {
+      try {
+        setLoading(true);
+        
+        const query: any = {};
+        
+        if (dateRange === 'month') {
+          const now = new Date();
+          const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+          const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59).toISOString();
+          query.transactionFrom = firstDay;
+          query.transactionTo = lastDay;
+        }
+
+        const response = await TransactionsService.list(query);
+        setTransactions(response.data || []);
+      } catch (err) {
+        console.error('Failed to load transactions:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadTransactions();
+  }, [dateRange]);
+
+  const kpis = useMemo(() => {
+    console.log('Calculando KPIs com', transactions.length, 'transações:', transactions);
+
+    const confirmedIncome = transactions
+      .filter(tx => tx.type === 'income' && tx.status === 'confirmed')
+      .reduce((acc, tx) => acc + (Number(tx.amount) || 0), 0);
+
+    const pendingIncome = transactions
+      .filter(tx => tx.type === 'income' && tx.status === 'pending' && tx.displayStatus !== 'overdue')
+      .reduce((acc, tx) => acc + (Number(tx.amount) || 0), 0);
+
+    const overdueIncome = transactions
+      .filter(tx => tx.type === 'income' && tx.displayStatus === 'overdue')
+      .reduce((acc, tx) => acc + (Number(tx.amount) || 0), 0);
+
+    const confirmedExpenses = transactions
+      .filter(tx => tx.type === 'expense' && tx.status === 'confirmed')
+      .reduce((acc, tx) => acc + (Number(tx.amount) || 0), 0);
+
+    const result = {
+      confirmedIncome,
+      pendingIncome,
+      overdueIncome,
+      confirmedExpenses,
+      result: confirmedIncome - confirmedExpenses
+    };
+
+    console.log('KPIs calculados:', result);
+    return result;
+  }, [transactions]);
+
+  const filteredTransactions = useMemo(() => {
+    if (filter === 'all') return transactions;
+    return transactions.filter(tx => tx.type === filter);
+  }, [transactions, filter]);
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit' }).format(date);
+  };
+
   return (
     <div className="flex flex-col min-h-full bg-white">
       {/* Header */}
@@ -18,9 +91,17 @@ export default function FinanceiroPage() {
             <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Financeiro</h1>
           </div>
           <div className="flex gap-3">
-             <button className="hidden sm:flex px-4 py-2 border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors items-center gap-2 text-sm font-medium">
-                Este mês <ChevronDown size={16} className="text-gray-400" />
-             </button>
+             <div className="relative">
+               <select 
+                 value={dateRange}
+                 onChange={(e) => setDateRange(e.target.value as 'month' | 'all')}
+                 className="flex px-4 py-2 border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors items-center gap-2 text-sm font-medium appearance-none cursor-pointer pr-10"
+               >
+                  <option value="month">Este mês</option>
+                  <option value="all">Sempre</option>
+               </select>
+               <ChevronDown size={16} className="text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+             </div>
              <Link href="/dashboard/novo" className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-all shadow-sm shadow-indigo-600/20 flex items-center justify-center gap-2 active:scale-95">
                 <Plus size={18} />
                 <span className="hidden sm:inline">Novo lançamento</span>
@@ -30,11 +111,11 @@ export default function FinanceiroPage() {
 
         {/* Dashboard KPIs */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mt-1 md:mt-2">
-           <div className="border border-gray-200 rounded-xl p-3 md:p-4 flex flex-col gap-1 md:gap-1.5 relative overflow-hidden">
+           <div className="border border-gray-200 rounded-xl p-3 md:p-4 flex flex-col gap-1 md:gap-1.5 relative overflow-hidden bg-white shadow-sm">
              <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500"></div>
              <span className="text-[9px] md:text-[10px] font-bold tracking-widest text-gray-400 uppercase">Receita confirmada</span>
-             <div className="bg-emerald-100/60 text-emerald-800 font-bold px-2 md:px-3 py-1.5 md:py-2 rounded-md inline-block w-fit mt-0.5 md:mt-1 text-xs md:text-base">
-               R$ 1.200,00
+             <div className="text-emerald-700 font-bold px-0 py-1 rounded-md inline-block w-fit mt-0.5 md:mt-1 text-lg md:text-2xl">
+               {formatCurrency(kpis.confirmedIncome)}
              </div>
              <div className="flex items-center gap-1.5 md:gap-2 mt-0.5 md:mt-1">
                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
@@ -42,11 +123,11 @@ export default function FinanceiroPage() {
              </div>
            </div>
            
-           <div className="border border-gray-200 rounded-xl p-3 md:p-4 flex flex-col gap-1 md:gap-1.5 relative overflow-hidden">
+           <div className="border border-gray-200 rounded-xl p-3 md:p-4 flex flex-col gap-1 md:gap-1.5 relative overflow-hidden bg-white shadow-sm">
              <div className="absolute top-0 left-0 w-1 h-full bg-blue-500"></div>
              <span className="text-[9px] md:text-[10px] font-bold tracking-widest text-gray-400 uppercase">A receber</span>
-             <div className="bg-blue-100/60 text-blue-800 font-bold px-2 md:px-3 py-1.5 md:py-2 rounded-md inline-block w-fit mt-0.5 md:mt-1 text-xs md:text-base">
-               R$ 400,00
+             <div className="text-blue-700 font-bold px-0 py-1 rounded-md inline-block w-fit mt-0.5 md:mt-1 text-lg md:text-2xl">
+               {formatCurrency(kpis.pendingIncome)}
              </div>
              <div className="flex items-center gap-1.5 md:gap-2 mt-0.5 md:mt-1">
                <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
@@ -54,11 +135,11 @@ export default function FinanceiroPage() {
              </div>
            </div>
 
-           <div className="border border-gray-200 rounded-xl p-3 md:p-4 flex flex-col gap-1 md:gap-1.5 relative overflow-hidden">
+           <div className="border border-gray-200 rounded-xl p-3 md:p-4 flex flex-col gap-1 md:gap-1.5 relative overflow-hidden bg-white shadow-sm">
              <div className="absolute top-0 left-0 w-1 h-full bg-red-500"></div>
              <span className="text-[9px] md:text-[10px] font-bold tracking-widest text-gray-400 uppercase">Em atraso</span>
-             <div className="bg-red-100/60 text-red-800 font-bold px-2 md:px-3 py-1.5 md:py-2 rounded-md inline-block w-fit mt-0.5 md:mt-1 text-xs md:text-base">
-               R$ 80,00
+             <div className="text-red-700 font-bold px-0 py-1 rounded-md inline-block w-fit mt-0.5 md:mt-1 text-lg md:text-2xl">
+               {formatCurrency(kpis.overdueIncome)}
              </div>
              <div className="flex items-center gap-1.5 md:gap-2 mt-0.5 md:mt-1">
                <div className="w-1.5 h-1.5 rounded-full bg-red-500"></div>
@@ -66,11 +147,11 @@ export default function FinanceiroPage() {
              </div>
            </div>
 
-           <div className="border border-gray-200 rounded-xl p-3 md:p-4 flex flex-col gap-1 md:gap-1.5 relative overflow-hidden bg-gray-50/50">
+           <div className="border border-gray-200 rounded-xl p-3 md:p-4 flex flex-col gap-1 md:gap-1.5 relative overflow-hidden bg-gray-50/50 shadow-inner">
              <div className="absolute top-0 left-0 w-1 h-full bg-gray-500"></div>
              <span className="text-[9px] md:text-[10px] font-bold tracking-widest text-gray-400 uppercase">Resultado</span>
-             <div className="bg-gray-200/60 text-gray-800 font-bold px-2 md:px-3 py-1.5 md:py-2 rounded-md inline-block w-fit mt-0.5 md:mt-1 text-xs md:text-base">
-               R$ 770,00
+             <div className={`font-bold px-0 py-1 rounded-md inline-block w-fit mt-0.5 md:mt-1 text-lg md:text-2xl ${kpis.result >= 0 ? 'text-gray-800' : 'text-red-600'}`}>
+               {formatCurrency(kpis.result)}
              </div>
              <div className="flex items-center gap-1.5 md:gap-2 mt-0.5 md:mt-1">
                <span className="text-[11px] md:text-sm font-medium text-gray-500">receitas - custos</span>
@@ -90,13 +171,22 @@ export default function FinanceiroPage() {
 
         {/* Tabs */}
         <nav className="flex gap-8 -mb-6 border-t border-gray-100 pt-4 mt-2">
-          <button className="border-b-2 border-indigo-600 pb-4 text-sm font-semibold text-indigo-600 px-1">
+          <button 
+            onClick={() => setFilter('all')}
+            className={`pb-4 text-sm px-1 transition-all ${filter === 'all' ? 'border-b-2 border-indigo-600 font-semibold text-indigo-600' : 'border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-900 hover:border-gray-300'}`}
+          >
             Todos
           </button>
-          <button className="border-b-2 border-transparent pb-4 text-sm font-medium text-gray-500 hover:text-gray-900 hover:border-gray-300 transition-colors px-1">
+          <button 
+            onClick={() => setFilter('income')}
+            className={`pb-4 text-sm px-1 transition-all ${filter === 'income' ? 'border-b-2 border-indigo-600 font-semibold text-indigo-600' : 'border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-900 hover:border-gray-300'}`}
+          >
             Receitas
           </button>
-          <button className="border-b-2 border-transparent pb-4 text-sm font-medium text-gray-500 hover:text-gray-900 hover:border-gray-300 transition-colors px-1">
+          <button 
+            onClick={() => setFilter('expense')}
+            className={`pb-4 text-sm px-1 transition-all ${filter === 'expense' ? 'border-b-2 border-indigo-600 font-semibold text-indigo-600' : 'border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-900 hover:border-gray-300'}`}
+          >
             Custos
           </button>
         </nav>
@@ -105,23 +195,50 @@ export default function FinanceiroPage() {
       <main className="flex-1 p-6 md:p-10 bg-gray-50/30">
          {/* List View */}
         <div className="flex flex-col max-w-5xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
-           {transactions.map((tx, index) => (
-              <div key={tx.id} className={`flex items-center gap-4 py-4 ${index !== transactions.length - 1 ? 'border-b border-gray-100' : ''}`}>
-                 <div className={`w-2 h-2 rounded-full ${tx.dot} flex-shrink-0 mt-1 self-start sm:self-center`}></div>
-                 <div className="flex-1 min-w-0 flex flex-col">
-                    <h3 className="font-bold text-gray-900 text-sm truncate">{tx.title}</h3>
-                    <p className="text-[12px] text-gray-500 mt-0.5 truncate">{tx.subtitle}</p>
-                 </div>
-                 <div className="text-right flex items-center justify-end gap-3 sm:gap-4">
-                    <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full ${tx.badgeColor} lowercase`}>
-                        {tx.status}
-                    </span>
-                    <span className={`text-sm sm:text-base font-bold min-w-[70px] text-right ${tx.valueColor}`}>
-                        {tx.value}
-                    </span>
-                 </div>
-              </div>
-           ))}
+           {loading ? (
+             <div className="flex flex-col items-center justify-center py-20 text-gray-400 gap-3">
+               <Loader2 size={32} className="animate-spin text-indigo-600" />
+               <span className="text-sm font-medium">Carregando lançamentos...</span>
+             </div>
+           ) : filteredTransactions.length === 0 ? (
+             <div className="flex flex-col items-center justify-center py-20 text-gray-400 gap-2 border-2 border-dashed border-gray-200 rounded-3xl">
+               <span className="text-sm font-medium">Nenhum lançamento encontrado.</span>
+               <Link href="/dashboard/novo" className="text-indigo-600 text-sm font-bold hover:underline">
+                 Criar primeiro lançamento
+               </Link>
+             </div>
+           ) : (
+             filteredTransactions.map((tx, index) => (
+                <div key={tx._id} className={`flex items-center gap-4 py-4 ${index !== filteredTransactions.length - 1 ? 'border-b border-gray-100' : ''}`}>
+                   <div className={`w-2 h-2 rounded-full flex-shrink-0 mt-1 self-start sm:self-center ${
+                     tx.type === 'income' ? 'bg-emerald-500' : 'bg-red-500'
+                   }`}></div>
+                   <div className="flex-1 min-w-0 flex flex-col">
+                      <h3 className="font-bold text-gray-900 text-sm truncate">
+                        {tx.category ? (tx.category.charAt(0).toUpperCase() + tx.category.slice(1)) : 'Sem categoria'} 
+                        {tx.reference ? ` — ${tx.reference}` : ''}
+                      </h3>
+                      <p className="text-[12px] text-gray-500 mt-0.5 truncate uppercase tracking-tight">
+                        {tx.paymentMethod || 'N/A'} · {formatDate(tx.transactionDate)}
+                      </p>
+                   </div>
+                   <div className="text-right flex items-center justify-end gap-3 sm:gap-4">
+                      <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full lowercase ${
+                        tx.displayStatus === 'confirmed' ? 'bg-emerald-100/60 text-emerald-700' : 
+                        tx.displayStatus === 'overdue' ? 'bg-red-100/60 text-red-700' :
+                        'bg-blue-100/60 text-blue-700'
+                      }`}>
+                          {tx.displayStatus === 'confirmed' ? 'confirmado' : tx.displayStatus === 'overdue' ? 'atrasado' : 'pendente'}
+                      </span>
+                      <span className={`text-sm sm:text-base font-bold min-w-[70px] text-right ${
+                        tx.type === 'income' ? 'text-emerald-700' : 'text-red-700'
+                      }`}>
+                          {tx.type === 'income' ? '+' : '-'}{formatCurrency(tx.amount)}
+                      </span>
+                   </div>
+                </div>
+             ))
+           )}
            
            {/* Mobile FAB */}
            <Link href="/dashboard/novo" className="sm:hidden fixed bottom-20 right-6 w-14 h-14 bg-indigo-600 text-white rounded-full flex items-center justify-center shadow-lg shadow-indigo-600/30 hover:bg-indigo-700 transition-colors active:scale-95 z-40">

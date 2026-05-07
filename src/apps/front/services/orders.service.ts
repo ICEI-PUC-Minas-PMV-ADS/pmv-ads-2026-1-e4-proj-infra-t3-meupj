@@ -1,4 +1,4 @@
-const BASE_URL = 'https://meupj-api-student.delightfulwave-8b9abc5f.brazilsouth.azurecontainerapps.io';
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:3002';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -118,6 +118,9 @@ export const OrdersService = {
     if (query.sortOrder)   params.set('sortOrder',   query.sortOrder);
 
     const qs = params.toString();
+    // Fastify with TypeBox might be strict about types in query strings if not using a specific parser.
+    // However, URLSearchParams always produces strings. 
+    // The backend error "limit must be integer" suggests it's not parsing the string '50' as an integer correctly in the schema validation.
     const url = `${BASE_URL}/api/orders${qs ? `?${qs}` : ''}`;
 
     const response = await fetch(url, {
