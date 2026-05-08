@@ -63,6 +63,37 @@ export default function FinanceiroPage() {
     };
   }, [transactions]);
 
+  const chartData = useMemo(() => {
+    // Pegar o último dia do mês atual
+    const now = new Date();
+    const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+    const segments = 10; // Manter 10 barras como no design original
+    const daysPerSegment = daysInMonth / segments;
+    
+    const incomeBySegment = Array(segments).fill(0);
+    
+    // Filtrar apenas receitas confirmadas do mês atual
+    const currentMonthIncomes = transactions.filter(tx => {
+      const date = new Date(tx.transactionDate);
+      return tx.type === 'income' && 
+             tx.status === 'confirmed' && 
+             date.getMonth() === now.getMonth() && 
+             date.getFullYear() === now.getFullYear();
+    });
+
+    currentMonthIncomes.forEach(tx => {
+      const day = new Date(tx.transactionDate).getDate();
+      const segmentIndex = Math.min(Math.floor((day - 1) / daysPerSegment), segments - 1);
+      incomeBySegment[segmentIndex] += (Number(tx.amount) || 0);
+    });
+
+    const maxIncome = Math.max(...incomeBySegment, 1);
+    return incomeBySegment.map(value => ({
+      height: Math.max((value / maxIncome) * 100, 5), // Mínimo de 5% para visibilidade
+      value: value
+    }));
+  }, [transactions]);
+
   const filteredTransactions = useMemo(() => {
     if (filter === 'all') return transactions;
     return transactions.filter(tx => tx.type === filter);
@@ -154,14 +185,19 @@ export default function FinanceiroPage() {
            </div>
         </div>
 
-        {/* Chart placeholder */}
+        {/* Chart dynamic */}
         <div className="w-full h-24 flex flex-col items-center justify-end pb-2 relative opacity-70">
            <div className="flex items-end gap-1.5 sm:gap-3 h-16">
-              {[4, 6, 5, 8, 12, 10, 14, 9, 11, 7].map((h, i) => (
-                <div key={i} className={`w-3 sm:w-6 rounded-t-sm ${i % 3 === 0 ? 'bg-emerald-200' : 'bg-blue-200'}`} style={{ height: `${h * 10}%` }}></div>
+              {chartData.map((data, i) => (
+                <div 
+                  key={i} 
+                  title={formatCurrency(data.value)}
+                  className={`w-3 sm:w-6 rounded-t-sm transition-all duration-500 ${i % 2 === 0 ? 'bg-emerald-400/40' : 'bg-emerald-500/60'}`} 
+                  style={{ height: `${data.height}%` }}
+                ></div>
               ))}
            </div>
-           <span className="text-[10px] text-gray-400 mt-2">Receitas por mês</span>
+           <span className="text-[10px] text-gray-400 mt-2">Receitas do mês atual</span>
         </div>
 
         {/* Tabs */}

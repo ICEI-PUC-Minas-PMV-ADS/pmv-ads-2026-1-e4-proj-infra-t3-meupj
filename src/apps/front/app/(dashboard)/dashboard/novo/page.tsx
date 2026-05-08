@@ -6,13 +6,19 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { TransactionsService, type PaymentMethod } from '@/services/transactions.service';
 import { OrdersService, type Order } from '@/services/orders.service';
-import { Alert } from '@/components/ui/Feedback';
+import { Alert, Toast } from '@/components/ui/Feedback';
+
+interface ToastState {
+  id: number;
+  message: string;
+  variant: 'success' | 'error' | 'warning';
+}
 
 export default function NovoLancamentoPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
   const [orders, setOrders] = useState<Order[]>([]);
+  const [toasts, setToasts] = useState<ToastState[]>([]);
   
   // Form States
   const [tipo, setTipo] = useState<'income' | 'expense'>('income');
@@ -25,31 +31,24 @@ export default function NovoLancamentoPage() {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | ''>('');
   const [reference, setReference] = useState('');
   const [notes, setNotes] = useState('');
-  const [error, setError] = useState<string | null>(null);
 
-  // Load orders for the dropdown
-  /* 
-  useEffect(() => {
-    async function loadOrders() {
-      try {
-        const response = await OrdersService.list({ limit: 50 });
-        setOrders(response.data || []);
-      } catch (err) {
-        console.warn('Could not load orders for dropdown, but form will remain functional:', err);
-        // We don't set the main error state here to avoid blocking the whole form
-      }
-    }
-    loadOrders();
-  }, []);
-  */
+  const addToast = (message: string, variant: 'success' | 'error' | 'warning') => {
+    const id = Date.now();
+    setToasts((prev) => [...prev, { id, message, variant }]);
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id));
+    }, 5000);
+  };
+
+  const removeToast = (id: number) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
-    setSuccess(false);
 
     if (!amount || parseFloat(amount.replace(',', '.')) <= 0) {
-      setError('Por favor, insira um valor válido.');
+      addToast('Por favor, insira um valor válido.', 'warning');
       return;
     }
 
@@ -70,22 +69,19 @@ export default function NovoLancamentoPage() {
 
       const transaction = await TransactionsService.create(tipo, payload);
       
-      // If the backend didn't support status yet, we'd confirm it here.
-      // Now that I've updated the backend, this is a safety fallback.
       if (status === 'confirmed' && transaction.status !== 'confirmed') {
         await TransactionsService.confirm(transaction._id);
       }
 
-      setSuccess(true);
+      addToast('Lançamento realizado com sucesso!', 'success');
       
-      // Redirect after a short delay to allow user to see the success message
       setTimeout(() => {
         router.push('/dashboard');
         router.refresh();
-      }, 2000);
+      }, 1500);
     } catch (err) {
       console.error('Erro ao salvar lançamento:', err);
-      setError(err instanceof Error ? err.message : 'Ocorreu um erro ao salvar o lançamento.');
+      addToast(err instanceof Error ? err.message : 'Ocorreu um erro ao salvar o lançamento.', 'error');
     } finally {
       setLoading(false);
     }
@@ -93,6 +89,18 @@ export default function NovoLancamentoPage() {
 
   return (
     <div className="flex flex-col h-full bg-gray-50/50">
+      {/* Toast Container */}
+      <div className="fixed top-6 right-6 z-[100] flex flex-col gap-3 pointer-events-none">
+        {toasts.map((toast) => (
+          <Toast 
+            key={toast.id}
+            variant={toast.variant}
+            message={toast.message}
+            onClose={() => removeToast(toast.id)}
+          />
+        ))}
+      </div>
+
       {/* Header Form */}
       <div className="bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between sticky top-0 z-20 shadow-sm">
         <div className="flex items-center gap-4">
@@ -106,18 +114,6 @@ export default function NovoLancamentoPage() {
       <div className="flex-1 p-6 md:p-10 max-w-3xl mx-auto w-full animate-in fade-in slide-in-from-bottom-4 duration-500 overflow-y-auto pb-48 md:pb-32">
         <form id="transaction-form" onSubmit={handleSubmit} className="flex flex-col gap-8">
           
-          {error && (
-            <Alert variant="error">
-              {error}
-            </Alert>
-          )}
-
-          {success && (
-            <Alert variant="success">
-              Lançamento realizado com sucesso! Redirecionando...
-            </Alert>
-          )}
-
           {/* Tipo */}
           <div className="flex bg-gray-100/80 p-1 rounded-xl h-[48px]">
             <button 
