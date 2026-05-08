@@ -1,6 +1,4 @@
-const BASE_URL = 'https://meupj-api-student.delightfulwave-8b9abc5f.brazilsouth.azurecontainerapps.io';
-
-// ─── Types ────────────────────────────────────────────────────────────────────
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://meupj-api-student.delightfulwave-8b9abc5f.brazilsouth.azurecontainerapps.io';// ─── Types ────────────────────────────────────────────────────────────────────
 
 export type OrderStatus =
   | 'draft'
