@@ -38,8 +38,6 @@ export default function FinanceiroPage() {
   }, [dateRange]);
 
   const kpis = useMemo(() => {
-    console.log('Calculando KPIs com', transactions.length, 'transações:', transactions);
-
     const confirmedIncome = transactions
       .filter(tx => tx.type === 'income' && tx.status === 'confirmed')
       .reduce((acc, tx) => acc + (Number(tx.amount) || 0), 0);
@@ -56,16 +54,13 @@ export default function FinanceiroPage() {
       .filter(tx => tx.type === 'expense' && tx.status === 'confirmed')
       .reduce((acc, tx) => acc + (Number(tx.amount) || 0), 0);
 
-    const result = {
+    return {
       confirmedIncome,
       pendingIncome,
       overdueIncome,
       confirmedExpenses,
       result: confirmedIncome - confirmedExpenses
     };
-
-    console.log('KPIs calculados:', result);
-    return result;
   }, [transactions]);
 
   const filteredTransactions = useMemo(() => {

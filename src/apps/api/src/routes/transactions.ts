@@ -350,19 +350,12 @@ export const registerTransactionsRoutes = (
     async (request, reply) => {
       const session = await dependencies.authService.getSessionFromHeaders(request.headers);
 
-      // TODO: REVERT THIS BYPASS AFTER LOGIN INTEGRATION
-      // Temporary bypass for local development testing
-      let profileId: string;
       if (!session) {
-        // Fallback to a fixed profile or ensure one exists for development
-        const fallbackProfile = await dependencies.profileStore.ensureByAuthUserId('dev-user-id');
-        profileId = fallbackProfile._id.toHexString();
-        app.log.warn('Bypassing authentication for local transaction testing');
-      } else {
-        const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
-        profileId = profile._id.toHexString();
+        return reply.status(401).send(UnauthorizedPayload);
       }
 
+      const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
+      const profileId = profile._id.toHexString();
       const body = request.body as TransactionCreateBody;
 
       if (body.clientId) {
@@ -407,19 +400,12 @@ export const registerTransactionsRoutes = (
     async (request, reply) => {
       const session = await dependencies.authService.getSessionFromHeaders(request.headers);
 
-      // TODO: REVERT THIS BYPASS AFTER LOGIN INTEGRATION
-      // Temporary bypass for local development testing
-      let profileId: string;
       if (!session) {
-        // Fallback to a fixed profile or ensure one exists for development
-        const fallbackProfile = await dependencies.profileStore.ensureByAuthUserId('dev-user-id');
-        profileId = fallbackProfile._id.toHexString();
-        app.log.warn('Bypassing authentication for local transaction testing');
-      } else {
-        const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
-        profileId = profile._id.toHexString();
+        return reply.status(401).send(UnauthorizedPayload);
       }
 
+      const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
+      const profileId = profile._id.toHexString();
       const body = request.body as TransactionCreateBody;
 
       if (body.clientId) {
@@ -463,15 +449,12 @@ export const registerTransactionsRoutes = (
     async (request, reply) => {
       const session = await dependencies.authService.getSessionFromHeaders(request.headers);
 
-      // Temporary bypass for local development testing
-      let profileId: string;
       if (!session) {
-        const fallbackProfile = await dependencies.profileStore.ensureByAuthUserId('dev-user-id');
-        profileId = fallbackProfile._id.toHexString();
-      } else {
-        const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
-        profileId = profile._id.toHexString();
+        return reply.status(401).send(UnauthorizedPayload);
       }
+
+      const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
+      const profileId = profile._id.toHexString();
 
       const query = request.query as TransactionListQuery;
 
@@ -576,15 +559,12 @@ export const registerTransactionsRoutes = (
     async (request, reply) => {
       const session = await dependencies.authService.getSessionFromHeaders(request.headers);
 
-      // Temporary bypass for local development testing
-      let profileId: string;
       if (!session) {
-        const fallbackProfile = await dependencies.profileStore.ensureByAuthUserId('dev-user-id');
-        profileId = fallbackProfile._id.toHexString();
-      } else {
-        const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
-        profileId = profile._id.toHexString();
+        return reply.status(401).send(UnauthorizedPayload);
       }
+
+      const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
+      const profileId = profile._id.toHexString();
 
       const params = request.params as TransactionParams;
       const body = request.body as TransactionUpdateBody;
@@ -666,15 +646,12 @@ export const registerTransactionsRoutes = (
     async (request, reply) => {
       const session = await dependencies.authService.getSessionFromHeaders(request.headers);
 
-      // Temporary bypass for local development testing
-      let profileId: string;
       if (!session) {
-        const fallbackProfile = await dependencies.profileStore.ensureByAuthUserId('dev-user-id');
-        profileId = fallbackProfile._id.toHexString();
-      } else {
-        const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
-        profileId = profile._id.toHexString();
+        return reply.status(401).send(UnauthorizedPayload);
       }
+
+      const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
+      const profileId = profile._id.toHexString();
 
       const params = request.params as TransactionParams;
       const transactionObjectId = new ObjectId(params.transactionId);
@@ -721,15 +698,12 @@ export const registerTransactionsRoutes = (
     async (request, reply) => {
       const session = await dependencies.authService.getSessionFromHeaders(request.headers);
 
-      // Temporary bypass for local development testing
-      let profileId: string;
       if (!session) {
-        const fallbackProfile = await dependencies.profileStore.ensureByAuthUserId('dev-user-id');
-        profileId = fallbackProfile._id.toHexString();
-      } else {
-        const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
-        profileId = profile._id.toHexString();
+        return reply.status(401).send(UnauthorizedPayload);
       }
+
+      const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
+      const profileId = profile._id.toHexString();
 
       const params = request.params as TransactionParams;
       const transactionObjectId = new ObjectId(params.transactionId);

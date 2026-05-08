@@ -19,16 +19,9 @@ export const registerSecurityPlugins = async (app: FastifyInstance): Promise<voi
 
   const corsOrigins = parseCorsOrigins(app.env.CORS_ORIGIN);
   
-  // Ensure local development origins are always allowed
-  const finalOrigins = Array.from(new Set([
-    ...corsOrigins, 
-    'http://localhost:3000',
-    'http://127.0.0.1:3000'
-  ]));
-
   await app.register(cors, {
-    origin: finalOrigins,
-    credentials: true,
+    origin: corsOrigins.length > 0 ? corsOrigins : false,
+    credentials: corsOrigins.length > 0,
   });
 
   app.addHook('onSend', async (_request, reply, payload) => {

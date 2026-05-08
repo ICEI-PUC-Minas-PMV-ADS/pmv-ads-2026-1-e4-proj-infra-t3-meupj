@@ -252,16 +252,12 @@ export const registerOrdersRoutes = (
     async (request, reply) => {
       const session = await dependencies.authService.getSessionFromHeaders(request.headers);
 
-      // Temporary bypass for local development testing
-      let profileId: string;
       if (!session) {
-        const fallbackProfile = await dependencies.profileStore.ensureByAuthUserId('dev-user-id');
-        profileId = fallbackProfile._id.toHexString();
-      } else {
-        const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
-        profileId = profile._id.toHexString();
+        return reply.status(401).send(UnauthorizedPayload);
       }
 
+      const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
+      const profileId = profile._id.toHexString();
       const query = request.query as OrderListQuery;
 
       const page = query.page ?? 1;
