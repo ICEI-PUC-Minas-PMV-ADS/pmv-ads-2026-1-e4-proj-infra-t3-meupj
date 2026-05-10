@@ -257,7 +257,7 @@ export default function ClientesPage() {
                     className="relative bg-white p-4 sm:p-5 rounded-2xl transition-all flex items-center gap-4 sm:gap-5 group cursor-pointer border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:border-indigo-400"
                     onClick={() => router.push(`/clientes/${client._id}`)}
                   >
-                    <div className="w-12 h-12 bg-gray-100 rounded-full flex-shrink-0 flex items-center justify-center text-gray-400 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors shadow-sm">
+                    <div className="w-12 h-12 bg-gray-100 rounded-full shrink-0 flex items-center justify-center text-gray-400 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors shadow-sm">
                       <User size={20} />
                     </div>
                     <div className="flex-1 min-w-0 flex flex-col justify-center">
