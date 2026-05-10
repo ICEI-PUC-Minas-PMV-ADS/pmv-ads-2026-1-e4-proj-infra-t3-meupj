@@ -12,6 +12,7 @@ import {
 } from '@/services/orders.service';
 import { Button, Input, Select, Textarea, Alert } from '@/components/ui';
 import { useClients } from '@/contexts/clients.context';
+import { useCatalog } from '@/contexts/catalog.context';
 
 // ─── Schemas & Types ──────────────────────────────────────────────────────────
 
@@ -19,7 +20,7 @@ const orderSchema = z.object({
   clientId: z.string().optional().nullable(),
   status: z.enum(['draft', 'pendingApproval', 'inProgress', 'completed', 'warranty', 'cancelled']),
   reference: z.string().optional(),
-  paymentMethods: z.array(z.string()).optional(),
+  paymentMethods: z.array(z.enum(['pix', 'cash', 'creditCard', 'debitCard', 'bankTransfer', 'bankSlip'])).optional(),
   paymentTerms: z.string().optional(),
   discount: z.number().min(0).optional(),
   fees: z.number().min(0).optional(),
@@ -35,20 +36,11 @@ type OrderFormData = z.infer<typeof orderSchema>;
 
 interface LineItem {
   id: number;
-  catalogItemId: string; // will be populated when selecting from catalog
-  name: string; // display only
+  catalogItemId: string;
+  name: string;
   quantity: number;
-  unitPrice: number; // display/read-only from catalog
+  unitPrice: number;
 }
-
-// ─── Mock catalog items (replace with CatalogService.list() when API is ready) ─
-const MOCK_CATALOG = [
-  { id: 'cat-1', name: 'Serviço de Instalação', unitPrice: 250, unitMeasure: 'un' },
-  { id: 'cat-2', name: 'Mão de obra (hora)', unitPrice: 80, unitMeasure: 'hr' },
-  { id: 'cat-3', name: 'Material elétrico (kit)', unitPrice: 450, unitMeasure: 'un' },
-  { id: 'cat-4', name: 'Consultoria técnica', unitPrice: 350, unitMeasure: 'un' },
-];
-
 
 const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
   pix: 'Pix',
@@ -70,10 +62,12 @@ function formatCurrency(n: number) {
 export default function NovoPedidoPage() {
   const router = useRouter();
   const { clientOptions, loadClientOptions } = useClients();
+  const { catalogOptions, loadCatalogOptions } = useCatalog();
 
   useEffect(() => {
     loadClientOptions();
-  }, [loadClientOptions]);
+    loadCatalogOptions();
+  }, [loadClientOptions, loadCatalogOptions]);
 
   // Form state
   const [clientId, setClientId] = useState('');
@@ -106,7 +100,7 @@ export default function NovoPedidoPage() {
     setItems((prev) => prev.filter((i) => i.id !== id));
 
   const updateItemCatalog = (id: number, catalogItemId: string) => {
-    const catalog = MOCK_CATALOG.find((c) => c.id === catalogItemId);
+    const catalog = catalogOptions.find((c) => c.id === catalogItemId);
     setItems((prev) =>
       prev.map((i) =>
         i.id === id
@@ -150,15 +144,8 @@ export default function NovoPedidoPage() {
     try {
       setLoading(true);
 
-      // TODO: Descomentar quando a API estiver acessível
-      // await OrdersService.create(validation.data);
-      // router.push('/pedidos');
-
-      // --- Mock temporário: simula criação ---
-      await new Promise((r) => setTimeout(r, 800));
-      console.log('[MOCK] Pedido criado:', validation.data);
+      await OrdersService.create(validation.data);
       router.push('/pedidos');
-      // ---------------------------------------
     } catch (err: any) {
       setError(err.message || 'Falha ao criar pedido. Tente novamente.');
     } finally {
@@ -252,7 +239,7 @@ export default function NovoPedidoPage() {
                       disabled={loading}
                     >
                       <option value="">Selecione um item...</option>
-                      {MOCK_CATALOG.map((c) => (
+                      {catalogOptions.map((c) => (
                         <option key={c.id} value={c.id}>{c.name}</option>
                       ))}
                     </Select>
@@ -356,8 +343,8 @@ export default function NovoPedidoPage() {
                       onClick={() => togglePaymentMethod(method)}
                       disabled={loading}
                       className={`px-4 py-2 rounded-lg text-sm font-medium border transition-all ${active
-                          ? 'bg-indigo-600 border-indigo-600 text-white'
-                          : 'bg-white border-gray-200 text-gray-600 hover:border-indigo-400 hover:text-indigo-600'
+                        ? 'bg-indigo-600 border-indigo-600 text-white'
+                        : 'bg-white border-gray-200 text-gray-600 hover:border-indigo-400 hover:text-indigo-600'
                         }`}
                     >
                       {PAYMENT_METHOD_LABELS[method]}

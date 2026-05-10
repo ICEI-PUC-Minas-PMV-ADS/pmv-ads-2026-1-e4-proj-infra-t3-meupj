@@ -134,6 +134,25 @@ export const OrdersService = {
   },
 
   /**
+   * Obtém um pedido pelo ID
+   */
+  async getById(orderId: string): Promise<Order> {
+    const response = await fetch(`${BASE_URL}/api/orders/${orderId}`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      if (response.status === 404) throw new Error('Pedido não encontrado.');
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.message || 'Falha ao carregar pedido.');
+    }
+
+    return response.json();
+  },
+
+  /**
    * Cria um novo pedido
    */
   async create(payload: OrderCreatePayload): Promise<Order> {

@@ -5,9 +5,10 @@ import { useParams, useRouter } from 'next/navigation';
 import { useState, useCallback, useEffect } from 'react';
 import { ChevronLeft, Trash2, Plus } from 'lucide-react';
 import { z } from 'zod';
-import { type OrderStatus, type PaymentMethod } from '@/services/orders.service';
+import { OrdersService, type OrderStatus, type PaymentMethod, type Order } from '@/services/orders.service';
 import { Button, Input, Select, Textarea, Alert, Badge } from '@/components/ui';
 import { useClients } from '@/contexts/clients.context';
+import { useCatalog } from '@/contexts/catalog.context';
 
 // ─── Schema ───────────────────────────────────────────────────────────────────
 
@@ -15,7 +16,7 @@ const orderSchema = z.object({
   clientId: z.string().optional().nullable(),
   status: z.enum(['draft', 'pendingApproval', 'inProgress', 'completed', 'warranty', 'cancelled']),
   reference: z.string().optional(),
-  paymentMethods: z.array(z.string()).optional(),
+  paymentMethods: z.array(z.enum(['pix', 'cash', 'creditCard', 'debitCard', 'bankTransfer', 'bankSlip'])).optional(),
   paymentTerms: z.string().optional(),
   discount: z.number().min(0).optional(),
   fees: z.number().min(0).optional(),
@@ -34,24 +35,7 @@ interface LineItem {
 }
 
 // ─── Mocks ────────────────────────────────────────────────────────────────────
-
-const MOCK_CATALOG = [
-  { id: 'cat-1', name: 'Serviço de Instalação', unitPrice: 250 },
-  { id: 'cat-2', name: 'Mão de obra (hora)', unitPrice: 80 },
-  { id: 'cat-3', name: 'Material elétrico (kit)', unitPrice: 450 },
-  { id: 'cat-4', name: 'Consultoria técnica', unitPrice: 350 },
-];
-
-
-// TODO: Substituir por OrdersService.getById(id)
-const MOCK_ORDERS: Record<string, any> = {
-  '1': { orderNumber: 'PED-0004-2026', clientId: 'cli-1', status: 'inProgress', reference: '', paymentMethods: ['pix'], paymentTerms: '50% na entrega', discount: 0, fees: 0, items: [{ id: 1, catalogItemId: 'cat-1', name: 'Serviço de Instalação', quantity: 2, unitPrice: 250 }, { id: 2, catalogItemId: 'cat-2', name: 'Mão de obra (hora)', quantity: 3, unitPrice: 80 }] },
-  '2': { orderNumber: 'PED-0003-2026', clientId: 'cli-2', status: 'pendingApproval', reference: 'OS-2026-003', paymentMethods: ['creditCard'], paymentTerms: '', discount: 50, fees: 0, items: [{ id: 1, catalogItemId: 'cat-3', name: 'Material elétrico (kit)', quantity: 1, unitPrice: 450 }] },
-  '3': { orderNumber: 'PED-0002-2026', clientId: 'cli-3', status: 'completed', reference: '', paymentMethods: ['cash'], paymentTerms: 'À vista', discount: 0, fees: 0, items: [{ id: 1, catalogItemId: 'cat-4', name: 'Consultoria técnica', quantity: 1, unitPrice: 350 }] },
-  '4': { orderNumber: 'PED-0001-2026', clientId: '', status: 'draft', reference: '', paymentMethods: [], paymentTerms: '', discount: 0, fees: 0, items: [{ id: 1, catalogItemId: '', name: '', quantity: 1, unitPrice: 0 }] },
-  '5': { orderNumber: 'PED-0005-2026', clientId: 'cli-1', status: 'cancelled', reference: '', paymentMethods: ['pix'], paymentTerms: '', discount: 0, fees: 0, items: [{ id: 1, catalogItemId: 'cat-2', name: 'Mão de obra (hora)', quantity: 4, unitPrice: 80 }] },
-  '6': { orderNumber: 'PED-0006-2026', clientId: 'cli-3', status: 'warranty', reference: 'GAR-001', paymentMethods: ['bankTransfer'], paymentTerms: '', discount: 0, fees: 100, items: [{ id: 1, catalogItemId: 'cat-1', name: 'Serviço de Instalação', quantity: 6, unitPrice: 250 }, { id: 2, catalogItemId: 'cat-3', name: 'Material elétrico (kit)', quantity: 2, unitPrice: 450 }] },
-};
+// Removidos mocks, utilizando contexts e serviços reais
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -94,32 +78,75 @@ export default function PedidoDetalhePage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const { clientOptions, loadClientOptions } = useClients();
+  const { catalogOptions, loadCatalogOptions } = useCatalog();
 
-  useEffect(() => {
-    loadClientOptions();
-  }, [loadClientOptions]);
+  const [order, setOrder] = useState<Order | null>(null);
+  const [loadingInitial, setLoadingInitial] = useState(true);
 
-  const mockOrder = MOCK_ORDERS[id]; // TODO: substituir por API
-
-  const [clientId, setClientId] = useState(mockOrder?.clientId ?? '');
-  const [status, setStatus] = useState<OrderStatus>(mockOrder?.status ?? 'draft');
-  const [reference, setReference] = useState(mockOrder?.reference ?? '');
-  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>(mockOrder?.paymentMethods ?? []);
-  const [paymentTerms, setPaymentTerms] = useState(mockOrder?.paymentTerms ?? '');
-  const [discount, setDiscount] = useState(mockOrder?.discount ?? 0);
-  const [fees, setFees] = useState(mockOrder?.fees ?? 0);
-  const [items, setItems] = useState<LineItem[]>(
-    mockOrder?.items ?? [{ id: Date.now(), catalogItemId: '', name: '', quantity: 1, unitPrice: 0 }]
-  );
+  const [clientId, setClientId] = useState('');
+  const [status, setStatus] = useState<OrderStatus>('draft');
+  const [reference, setReference] = useState('');
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
+  const [paymentTerms, setPaymentTerms] = useState('');
+  const [discount, setDiscount] = useState(0);
+  const [fees, setFees] = useState(0);
+  const [items, setItems] = useState<LineItem[]>([
+    { id: Date.now(), catalogItemId: '', name: '', quantity: 1, unitPrice: 0 }
+  ]);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
+  useEffect(() => {
+    loadClientOptions();
+    loadCatalogOptions();
+  }, [loadClientOptions, loadCatalogOptions]);
+
+  useEffect(() => {
+    async function loadOrder() {
+      try {
+        const data = await OrdersService.getById(id);
+        setOrder(data);
+        setClientId(data.clientId ?? '');
+        setStatus(data.status);
+        setReference(data.reference ?? '');
+        setPaymentMethods(data.paymentMethods ?? []);
+        setPaymentTerms(data.paymentTerms ?? '');
+        setDiscount(data.discount ?? 0);
+        setFees(data.fees ?? 0);
+        
+        if (data.items && data.items.length > 0) {
+          setItems(data.items.map((i, index) => ({
+            id: Date.now() + index,
+            catalogItemId: i.catalogItemId,
+            name: i.name,
+            quantity: i.quantity,
+            unitPrice: i.unitPrice,
+          })));
+        }
+      } catch (err: any) {
+        setError(err.message || 'Falha ao carregar pedido.');
+      } finally {
+        setLoadingInitial(false);
+      }
+    }
+    loadOrder();
+  }, [id]);
+
   const subtotal = items.reduce((sum, i) => sum + i.unitPrice * i.quantity, 0);
   const total = subtotal - discount + fees;
 
-  if (!mockOrder) {
+  if (loadingInitial) {
+    return (
+      <div className="flex flex-col h-full bg-white items-center justify-center gap-4 text-gray-400">
+        <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+        <p className="font-medium">Carregando pedido...</p>
+      </div>
+    );
+  }
+
+  if (!order) {
     return (
       <div className="flex flex-col h-full bg-white items-center justify-center gap-4 text-gray-400">
         <p className="font-medium">Pedido não encontrado</p>
@@ -137,7 +164,7 @@ export default function PedidoDetalhePage() {
     setItems((p) => p.filter((i) => i.id !== itemId));
 
   const updateItemCatalog = (itemId: number, catalogItemId: string) => {
-    const cat = MOCK_CATALOG.find((c) => c.id === catalogItemId);
+    const cat = catalogOptions.find((c) => c.id === catalogItemId);
     setItems((p) =>
       p.map((i) =>
         i.id === itemId ? { ...i, catalogItemId, name: cat?.name ?? '', unitPrice: cat?.unitPrice ?? 0 } : i
@@ -173,8 +200,7 @@ export default function PedidoDetalhePage() {
 
     try {
       setLoading(true);
-      // TODO: await OrdersService.update(id, validation.data);
-      await new Promise((r) => setTimeout(r, 700));
+      await OrdersService.update(id, validation.data);
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
     } catch (err: any) {
@@ -188,8 +214,7 @@ export default function PedidoDetalhePage() {
     if (!confirm('Tem certeza que deseja excluir este pedido?')) return;
     try {
       setLoading(true);
-      // TODO: await OrdersService.delete(id);
-      await new Promise((r) => setTimeout(r, 500));
+      await OrdersService.delete(id);
       router.push('/pedidos');
     } catch (err: any) {
       setError(err.message || 'Falha ao excluir pedido.');
@@ -210,7 +235,7 @@ export default function PedidoDetalhePage() {
             <ChevronLeft size={20} />
           </Link>
           <div className="flex items-center gap-2">
-            <h1 className="text-sm font-bold text-gray-900 tracking-wide">{mockOrder.orderNumber}</h1>
+            <h1 className="text-sm font-bold text-gray-900 tracking-wide">{order.orderNumber}</h1>
             <Badge variant={STATUS_BADGE[status]}>{STATUS_LABELS[status]}</Badge>
           </div>
         </div>
@@ -292,7 +317,7 @@ export default function PedidoDetalhePage() {
                       disabled={loading}
                     >
                       <option value="">Selecione um item...</option>
-                      {MOCK_CATALOG.map((c) => (
+                      {catalogOptions.map((c) => (
                         <option key={c.id} value={c.id}>{c.name}</option>
                       ))}
                     </Select>

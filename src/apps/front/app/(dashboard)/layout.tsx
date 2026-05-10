@@ -1,17 +1,19 @@
 'use client';
 
 import React from 'react';
-import { LayoutDashboard, Users, Settings, Package, ShoppingCart, Wallet } from 'lucide-react';
+import { LayoutDashboard, Users, Settings, Package, ShoppingCart, Wallet, LogOut } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/auth.context';
 import { ClientsProvider } from '@/contexts/clients.context';
+import { CatalogProvider } from '@/contexts/catalog.context';
+import { OrdersProvider } from '@/contexts/orders.context';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, loading } = useAuth();
+  const { user, loading, logout } = useAuth();
 
   React.useEffect(() => {
     if (!loading && !user) {
@@ -66,17 +68,28 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           })}
         </nav>
 
-        <div className="mt-auto">
+        <div className="mt-auto flex flex-col gap-2">
           <Link href="#" className="w-12 h-12 rounded-xl flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors" title="Configurações">
             <Settings size={22} strokeWidth={1.5} />
           </Link>
+          <button
+            onClick={logout}
+            className="w-12 h-12 rounded-xl flex items-center justify-center text-red-400 hover:text-white hover:bg-red-500/20 transition-colors"
+            title="Sair"
+          >
+            <LogOut size={22} strokeWidth={1.5} />
+          </button>
         </div>
       </aside>
 
       {/* Main Content */}
       <main className={`flex-1 overflow-y-auto relative flex flex-col ${!pathname?.includes('/novo') ? 'pb-20 md:pb-0' : ''}`}>
         <ClientsProvider>
-          {children}
+          <CatalogProvider>
+            <OrdersProvider>
+              {children}
+            </OrdersProvider>
+          </CatalogProvider>
         </ClientsProvider>
       </main>
 
@@ -98,6 +111,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </Link>
             );
           })}
+          <button
+            onClick={logout}
+            className="p-3 transition-colors flex flex-col items-center gap-1 text-gray-400 hover:text-red-500"
+          >
+            <LogOut size={20} />
+            <span className="text-[10px] font-medium">Sair</span>
+          </button>
         </nav>
       )}
     </div>

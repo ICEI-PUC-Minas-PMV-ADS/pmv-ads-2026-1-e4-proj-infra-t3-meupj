@@ -50,6 +50,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = async () => {
     await AuthService.logout();
     setUser(null);
+    router.refresh();
     router.push('/login');
   };
 

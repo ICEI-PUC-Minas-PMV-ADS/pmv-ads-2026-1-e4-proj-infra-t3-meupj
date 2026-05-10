@@ -74,6 +74,7 @@ export const AuthService = {
           'Content-Type': 'application/json'
         },
         credentials: 'include',
+        cache: 'no-store',
       });
 
       if (!response.ok) {
@@ -98,7 +99,11 @@ export const AuthService = {
           'Content-Type': 'application/json'
         },
         credentials: 'include',
+        body: JSON.stringify({}),
       });
+      if (!response.ok) {
+        console.error('Logout falhou na API', await response.text());
+      }
       return response.ok;
     } catch (error) {
       console.error('Erro no AuthService.logout:', error);
