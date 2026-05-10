@@ -80,11 +80,11 @@ export const ClientsService = {
   async list(query: ClientListQuery = {}): Promise<ClientListResponse> {
     const params = new URLSearchParams();
 
-    if (query.page)      params.set('page',      String(query.page));
-    if (query.limit)     params.set('limit',     String(query.limit));
-    if (query.q)         params.set('q',         query.q);
-    if (query.type)      params.set('type',      query.type);
-    if (query.sortBy)    params.set('sortBy',    query.sortBy);
+    if (query.page) params.set('page', String(query.page));
+    if (query.limit) params.set('limit', String(query.limit));
+    if (query.q) params.set('q', query.q);
+    if (query.type) params.set('type', query.type);
+    if (query.sortBy) params.set('sortBy', query.sortBy);
     if (query.sortOrder) params.set('sortOrder', query.sortOrder);
 
     const qs = params.toString();
