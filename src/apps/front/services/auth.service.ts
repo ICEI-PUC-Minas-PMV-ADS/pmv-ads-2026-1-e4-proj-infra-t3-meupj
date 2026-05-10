@@ -1,4 +1,4 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:3002';
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
 export interface LoginCredentials {
   email: string;
   password: string;
@@ -84,6 +84,25 @@ export const AuthService = {
     } catch (error) {
       console.error('Erro no AuthService.getProfile:', error);
       return null;
+    }
+  },
+
+  /**
+   * Realiza o logout do usuário
+   */
+  async logout() {
+    try {
+      const response = await fetch(`${BASE_URL}/api/auth/sign-out`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+      });
+      return response.ok;
+    } catch (error) {
+      console.error('Erro no AuthService.logout:', error);
+      return false;
     }
   }
 };
