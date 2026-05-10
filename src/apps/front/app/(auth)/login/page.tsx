@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/auth.context';
 import { z } from 'zod';
 import { Input, Button, Alert, Divider } from '@/components/ui';
 
@@ -18,6 +19,7 @@ const loginSchema = z.object({
 
 export default function LoginPage() {
   const router = useRouter();
+  const { login } = useAuth();
 
   const [email,        setEmail]        = useState('');
   const [password,     setPassword]     = useState('');
@@ -41,9 +43,7 @@ export default function LoginPage() {
 
     try {
       setLoading(true);
-      // TODO: await AuthService.login(result.data);
-      await new Promise((r) => setTimeout(r, 800));
-      router.push('/dashboard');
+      await login(result.data);
     } catch (err: any) {
       setError(err.message || 'E-mail ou senha incorretos. Tente novamente.');
     } finally {

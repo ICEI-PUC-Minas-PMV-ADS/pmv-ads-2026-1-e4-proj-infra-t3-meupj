@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { Mail, Lock, User, Eye, EyeOff, Building2 } from 'lucide-react';
 import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/auth.context';
 import { z } from 'zod';
 import { Input, Button, Alert, Divider } from '@/components/ui';
 
@@ -30,6 +31,7 @@ type FieldErrors = Partial<Record<keyof Fields, string>>;
 
 export default function CadastroPage() {
   const router = useRouter();
+  const { register } = useAuth();
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -71,9 +73,11 @@ export default function CadastroPage() {
 
     try {
       setLoading(true);
-      // TODO: await AuthService.register(result.data);
-      await new Promise((r) => setTimeout(r, 900));
-      router.push('/dashboard');
+      await register({
+        name: result.data.name,
+        email: result.data.email,
+        password: result.data.password,
+      });
     } catch (err: any) {
       setError(err.message || 'Falha ao criar conta. Tente novamente.');
     } finally {

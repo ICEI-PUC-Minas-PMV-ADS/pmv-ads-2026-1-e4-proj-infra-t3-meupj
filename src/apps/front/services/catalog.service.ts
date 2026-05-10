@@ -1,4 +1,4 @@
-const BASE_URL = '';
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -88,12 +88,12 @@ export const CatalogService = {
   async list(query: CatalogListQuery = {}): Promise<CatalogListResponse> {
     const params = new URLSearchParams();
 
-    if (query.page)      params.set('page',      String(query.page));
-    if (query.limit)     params.set('limit',     String(query.limit));
-    if (query.q)         params.set('q',          query.q);
-    if (query.type)      params.set('type',       query.type);
-    if (query.sortBy)    params.set('sortBy',     query.sortBy);
-    if (query.sortOrder) params.set('sortOrder',  query.sortOrder);
+    if (query.page) params.set('page', String(query.page));
+    if (query.limit) params.set('limit', String(query.limit));
+    if (query.q) params.set('q', query.q);
+    if (query.type) params.set('type', query.type);
+    if (query.sortBy) params.set('sortBy', query.sortBy);
+    if (query.sortOrder) params.set('sortOrder', query.sortOrder);
 
     const qs = params.toString();
     const url = `${BASE_URL}/api/catalog${qs ? `?${qs}` : ''}`;
