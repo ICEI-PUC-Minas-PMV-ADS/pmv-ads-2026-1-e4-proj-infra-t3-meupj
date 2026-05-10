@@ -115,7 +115,7 @@ export default function PedidoDetalhePage() {
         setPaymentTerms(data.paymentTerms ?? '');
         setDiscount(data.discount ?? 0);
         setFees(data.fees ?? 0);
-        
+
         if (data.items && data.items.length > 0) {
           setItems(data.items.map((i, index) => ({
             id: Date.now() + index,
@@ -419,8 +419,8 @@ export default function PedidoDetalhePage() {
                       onClick={() => togglePaymentMethod(method)}
                       disabled={loading}
                       className={`px-4 py-2 rounded-lg text-sm font-medium border transition-all ${active
-                          ? 'bg-indigo-600 border-indigo-600 text-white'
-                          : 'bg-white border-gray-200 text-gray-600 hover:border-indigo-400 hover:text-indigo-600'
+                        ? 'bg-indigo-600 border-indigo-600 text-white'
+                        : 'bg-white border-gray-200 text-gray-600 hover:border-indigo-400 hover:text-indigo-600'
                         }`}
                     >
                       {PAYMENT_METHOD_LABELS[method]}
