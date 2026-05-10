@@ -309,6 +309,43 @@ export const registerCatalogRoutes = (
     },
   );
 
+  
+  app.get(
+    '/api/catalog/:itemId',
+    {
+      schema: {
+        params: CatalogParamsSchema,
+        response: {
+          200: CatalogResponseSchema,
+          401: UnauthorizedSchema,
+          404: NotFoundSchema,
+        },
+      },
+    },
+    async (request, reply) => {
+      const session = await dependencies.authService.getSessionFromHeaders(request.headers);
+
+      if (!session) {
+        return reply.status(401).send(UnauthorizedPayload);
+      }
+
+      const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
+      const params = request.params as CatalogParams;
+      const collection = dependencies.catalogStore.getCollection();
+
+      const item = await collection.findOne({
+        _id: new ObjectId(params.itemId),
+        profileId: profile._id.toHexString(),
+      });
+
+      if (!item) {
+        return reply.status(404).send(NotFoundPayload);
+      }
+
+      return reply.status(200).send(toCatalogResponse(item));
+    },
+  );
+
   app.post(
     '/api/catalog',
     {
