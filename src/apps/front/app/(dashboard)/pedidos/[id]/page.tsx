@@ -2,11 +2,12 @@
 
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { ChevronLeft, Trash2, Plus } from 'lucide-react';
 import { z } from 'zod';
 import { type OrderStatus, type PaymentMethod } from '@/services/orders.service';
 import { Button, Input, Select, Textarea, Alert, Badge } from '@/components/ui';
+import { useClients } from '@/contexts/clients.context';
 
 // ─── Schema ───────────────────────────────────────────────────────────────────
 
@@ -36,25 +37,20 @@ interface LineItem {
 
 const MOCK_CATALOG = [
   { id: 'cat-1', name: 'Serviço de Instalação', unitPrice: 250 },
-  { id: 'cat-2', name: 'Mão de obra (hora)',    unitPrice: 80  },
+  { id: 'cat-2', name: 'Mão de obra (hora)', unitPrice: 80 },
   { id: 'cat-3', name: 'Material elétrico (kit)', unitPrice: 450 },
-  { id: 'cat-4', name: 'Consultoria técnica',   unitPrice: 350 },
+  { id: 'cat-4', name: 'Consultoria técnica', unitPrice: 350 },
 ];
 
-const MOCK_CLIENTS = [
-  { id: 'cli-1', name: 'João Ferreira' },
-  { id: 'cli-2', name: 'Ana Silveira' },
-  { id: 'cli-3', name: 'Construtora Mota Ltda.' },
-];
 
 // TODO: Substituir por OrdersService.getById(id)
 const MOCK_ORDERS: Record<string, any> = {
-  '1': { orderNumber: 'PED-0004-2026', clientId: 'cli-1', status: 'inProgress',      reference: '',          paymentMethods: ['pix'],          paymentTerms: '50% na entrega', discount: 0,  fees: 0,   items: [{ id: 1, catalogItemId: 'cat-1', name: 'Serviço de Instalação', quantity: 2, unitPrice: 250 }, { id: 2, catalogItemId: 'cat-2', name: 'Mão de obra (hora)', quantity: 3, unitPrice: 80 }] },
-  '2': { orderNumber: 'PED-0003-2026', clientId: 'cli-2', status: 'pendingApproval', reference: 'OS-2026-003', paymentMethods: ['creditCard'],  paymentTerms: '',               discount: 50, fees: 0,   items: [{ id: 1, catalogItemId: 'cat-3', name: 'Material elétrico (kit)', quantity: 1, unitPrice: 450 }] },
-  '3': { orderNumber: 'PED-0002-2026', clientId: 'cli-3', status: 'completed',       reference: '',          paymentMethods: ['cash'],          paymentTerms: 'À vista',        discount: 0,  fees: 0,   items: [{ id: 1, catalogItemId: 'cat-4', name: 'Consultoria técnica', quantity: 1, unitPrice: 350 }] },
-  '4': { orderNumber: 'PED-0001-2026', clientId: '',      status: 'draft',           reference: '',          paymentMethods: [],               paymentTerms: '',               discount: 0,  fees: 0,   items: [{ id: 1, catalogItemId: '', name: '', quantity: 1, unitPrice: 0 }] },
-  '5': { orderNumber: 'PED-0005-2026', clientId: 'cli-1', status: 'cancelled',       reference: '',          paymentMethods: ['pix'],          paymentTerms: '',               discount: 0,  fees: 0,   items: [{ id: 1, catalogItemId: 'cat-2', name: 'Mão de obra (hora)', quantity: 4, unitPrice: 80 }] },
-  '6': { orderNumber: 'PED-0006-2026', clientId: 'cli-3', status: 'warranty',        reference: 'GAR-001',   paymentMethods: ['bankTransfer'], paymentTerms: '',               discount: 0,  fees: 100, items: [{ id: 1, catalogItemId: 'cat-1', name: 'Serviço de Instalação', quantity: 6, unitPrice: 250 }, { id: 2, catalogItemId: 'cat-3', name: 'Material elétrico (kit)', quantity: 2, unitPrice: 450 }] },
+  '1': { orderNumber: 'PED-0004-2026', clientId: 'cli-1', status: 'inProgress', reference: '', paymentMethods: ['pix'], paymentTerms: '50% na entrega', discount: 0, fees: 0, items: [{ id: 1, catalogItemId: 'cat-1', name: 'Serviço de Instalação', quantity: 2, unitPrice: 250 }, { id: 2, catalogItemId: 'cat-2', name: 'Mão de obra (hora)', quantity: 3, unitPrice: 80 }] },
+  '2': { orderNumber: 'PED-0003-2026', clientId: 'cli-2', status: 'pendingApproval', reference: 'OS-2026-003', paymentMethods: ['creditCard'], paymentTerms: '', discount: 50, fees: 0, items: [{ id: 1, catalogItemId: 'cat-3', name: 'Material elétrico (kit)', quantity: 1, unitPrice: 450 }] },
+  '3': { orderNumber: 'PED-0002-2026', clientId: 'cli-3', status: 'completed', reference: '', paymentMethods: ['cash'], paymentTerms: 'À vista', discount: 0, fees: 0, items: [{ id: 1, catalogItemId: 'cat-4', name: 'Consultoria técnica', quantity: 1, unitPrice: 350 }] },
+  '4': { orderNumber: 'PED-0001-2026', clientId: '', status: 'draft', reference: '', paymentMethods: [], paymentTerms: '', discount: 0, fees: 0, items: [{ id: 1, catalogItemId: '', name: '', quantity: 1, unitPrice: 0 }] },
+  '5': { orderNumber: 'PED-0005-2026', clientId: 'cli-1', status: 'cancelled', reference: '', paymentMethods: ['pix'], paymentTerms: '', discount: 0, fees: 0, items: [{ id: 1, catalogItemId: 'cat-2', name: 'Mão de obra (hora)', quantity: 4, unitPrice: 80 }] },
+  '6': { orderNumber: 'PED-0006-2026', clientId: 'cli-3', status: 'warranty', reference: 'GAR-001', paymentMethods: ['bankTransfer'], paymentTerms: '', discount: 0, fees: 100, items: [{ id: 1, catalogItemId: 'cat-1', name: 'Serviço de Instalação', quantity: 6, unitPrice: 250 }, { id: 2, catalogItemId: 'cat-3', name: 'Material elétrico (kit)', quantity: 2, unitPrice: 450 }] },
 };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -66,12 +62,12 @@ const STATUS_LABELS: Record<OrderStatus, string> = {
 };
 
 const STATUS_BADGE: Record<OrderStatus, 'default' | 'warning' | 'info' | 'success' | 'danger'> = {
-  draft:           'default',
+  draft: 'default',
   pendingApproval: 'warning',
-  inProgress:      'info',
-  completed:       'success',
-  warranty:        'default',
-  cancelled:       'danger',
+  inProgress: 'info',
+  completed: 'success',
+  warranty: 'default',
+  cancelled: 'danger',
 };
 
 const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
@@ -80,12 +76,12 @@ const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
 };
 
 const STATUS_OPTIONS = [
-  { value: 'draft',           label: 'Rascunho' },
+  { value: 'draft', label: 'Rascunho' },
   { value: 'pendingApproval', label: 'Aguardando aprovação' },
-  { value: 'inProgress',      label: 'Em andamento' },
-  { value: 'completed',       label: 'Concluído' },
-  { value: 'warranty',        label: 'Garantia' },
-  { value: 'cancelled',       label: 'Cancelado' },
+  { value: 'inProgress', label: 'Em andamento' },
+  { value: 'completed', label: 'Concluído' },
+  { value: 'warranty', label: 'Garantia' },
+  { value: 'cancelled', label: 'Cancelado' },
 ];
 
 function formatCurrency(n: number) {
@@ -97,26 +93,31 @@ function formatCurrency(n: number) {
 export default function PedidoDetalhePage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
+  const { clientOptions, loadClientOptions } = useClients();
+
+  useEffect(() => {
+    loadClientOptions();
+  }, [loadClientOptions]);
 
   const mockOrder = MOCK_ORDERS[id]; // TODO: substituir por API
 
-  const [clientId,       setClientId]       = useState(mockOrder?.clientId ?? '');
-  const [status,         setStatus]         = useState<OrderStatus>(mockOrder?.status ?? 'draft');
-  const [reference,      setReference]      = useState(mockOrder?.reference ?? '');
+  const [clientId, setClientId] = useState(mockOrder?.clientId ?? '');
+  const [status, setStatus] = useState<OrderStatus>(mockOrder?.status ?? 'draft');
+  const [reference, setReference] = useState(mockOrder?.reference ?? '');
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>(mockOrder?.paymentMethods ?? []);
-  const [paymentTerms,   setPaymentTerms]   = useState(mockOrder?.paymentTerms ?? '');
-  const [discount,       setDiscount]       = useState(mockOrder?.discount ?? 0);
-  const [fees,           setFees]           = useState(mockOrder?.fees ?? 0);
-  const [items,          setItems]          = useState<LineItem[]>(
+  const [paymentTerms, setPaymentTerms] = useState(mockOrder?.paymentTerms ?? '');
+  const [discount, setDiscount] = useState(mockOrder?.discount ?? 0);
+  const [fees, setFees] = useState(mockOrder?.fees ?? 0);
+  const [items, setItems] = useState<LineItem[]>(
     mockOrder?.items ?? [{ id: Date.now(), catalogItemId: '', name: '', quantity: 1, unitPrice: 0 }]
   );
 
   const [loading, setLoading] = useState(false);
-  const [error,   setError]   = useState('');
+  const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
   const subtotal = items.reduce((sum, i) => sum + i.unitPrice * i.quantity, 0);
-  const total    = subtotal - discount + fees;
+  const total = subtotal - discount + fees;
 
   if (!mockOrder) {
     return (
@@ -159,12 +160,12 @@ export default function PedidoDetalhePage() {
     const payload = {
       clientId: clientId || null,
       status,
-      reference:      reference || undefined,
+      reference: reference || undefined,
       paymentMethods: paymentMethods.length > 0 ? paymentMethods : undefined,
-      paymentTerms:   paymentTerms || undefined,
-      discount:       discount > 0 ? discount : undefined,
-      fees:           fees > 0 ? fees : undefined,
-      items:          items.map((i) => ({ catalogItemId: i.catalogItemId, quantity: i.quantity })),
+      paymentTerms: paymentTerms || undefined,
+      discount: discount > 0 ? discount : undefined,
+      fees: fees > 0 ? fees : undefined,
+      items: items.map((i) => ({ catalogItemId: i.catalogItemId, quantity: i.quantity })),
     };
 
     const validation = orderSchema.safeParse(payload);
@@ -223,7 +224,7 @@ export default function PedidoDetalhePage() {
       {/* ── Body ── */}
       <div className="flex-1 p-4 md:p-10 max-w-4xl mx-auto w-full overflow-y-auto pb-48 md:pb-32">
 
-        {error   && <Alert variant="error"   className="mb-6">{error}</Alert>}
+        {error && <Alert variant="error" className="mb-6">{error}</Alert>}
         {success && <Alert variant="success" className="mb-6">Pedido atualizado com sucesso!</Alert>}
 
         <form className="flex flex-col gap-10" onSubmit={(e) => e.preventDefault()}>
@@ -242,7 +243,7 @@ export default function PedidoDetalhePage() {
                 disabled={loading}
               >
                 <option value="">— Sem cliente —</option>
-                {MOCK_CLIENTS.map((c) => (
+                {clientOptions.map((c) => (
                   <option key={c.id} value={c.id}>{c.name}</option>
                 ))}
               </Select>
@@ -392,11 +393,10 @@ export default function PedidoDetalhePage() {
                       type="button"
                       onClick={() => togglePaymentMethod(method)}
                       disabled={loading}
-                      className={`px-4 py-2 rounded-lg text-sm font-medium border transition-all ${
-                        active
+                      className={`px-4 py-2 rounded-lg text-sm font-medium border transition-all ${active
                           ? 'bg-indigo-600 border-indigo-600 text-white'
                           : 'bg-white border-gray-200 text-gray-600 hover:border-indigo-400 hover:text-indigo-600'
-                      }`}
+                        }`}
                     >
                       {PAYMENT_METHOD_LABELS[method]}
                     </button>

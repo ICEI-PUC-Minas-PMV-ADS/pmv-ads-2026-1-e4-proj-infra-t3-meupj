@@ -1,4 +1,4 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:3002';// ─── Types ────────────────────────────────────────────────────────────────────
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002/';// ─── Types ────────────────────────────────────────────────────────────────────
 
 export type OrderStatus =
   | 'draft'
@@ -105,15 +105,15 @@ export const OrdersService = {
   async list(query: OrderListQuery = {}): Promise<OrderListResponse> {
     const params = new URLSearchParams();
 
-    if (query.page)        params.set('page',        String(query.page));
-    if (query.limit)       params.set('limit',       String(query.limit));
-    if (query.q)           params.set('q',            query.q);
-    if (query.clientId)    params.set('clientId',    query.clientId);
-    if (query.status)      params.set('status',      query.status);
+    if (query.page) params.set('page', String(query.page));
+    if (query.limit) params.set('limit', String(query.limit));
+    if (query.q) params.set('q', query.q);
+    if (query.clientId) params.set('clientId', query.clientId);
+    if (query.status) params.set('status', query.status);
     if (query.createdFrom) params.set('createdFrom', query.createdFrom);
-    if (query.createdTo)   params.set('createdTo',   query.createdTo);
-    if (query.sortBy)      params.set('sortBy',      query.sortBy);
-    if (query.sortOrder)   params.set('sortOrder',   query.sortOrder);
+    if (query.createdTo) params.set('createdTo', query.createdTo);
+    if (query.sortBy) params.set('sortBy', query.sortBy);
+    if (query.sortOrder) params.set('sortOrder', query.sortOrder);
 
     const qs = params.toString();
     const url = `${BASE_URL}/api/orders${qs ? `?${qs}` : ''}`;

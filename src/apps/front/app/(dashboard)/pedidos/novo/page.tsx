@@ -1,8 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { ChevronLeft, Plus, Trash2 } from 'lucide-react';
-import { useState, useCallback } from 'react';
+import { ChevronLeft, Plus, Trash2, Loader2, AlertCircle } from 'lucide-react';
+import { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { z } from 'zod';
 import {
@@ -11,6 +11,7 @@ import {
   type PaymentMethod,
 } from '@/services/orders.service';
 import { Button, Input, Select, Textarea, Alert } from '@/components/ui';
+import { useClients } from '@/contexts/clients.context';
 
 // ─── Schemas & Types ──────────────────────────────────────────────────────────
 
@@ -48,12 +49,6 @@ const MOCK_CATALOG = [
   { id: 'cat-4', name: 'Consultoria técnica', unitPrice: 350, unitMeasure: 'un' },
 ];
 
-// ─── Mock clients (replace with ClientsService.list() when API is ready) ──────
-const MOCK_CLIENTS = [
-  { id: 'cli-1', name: 'João Ferreira' },
-  { id: 'cli-2', name: 'Ana Silveira' },
-  { id: 'cli-3', name: 'Construtora Mota Ltda.' },
-];
 
 const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
   pix: 'Pix',
@@ -74,6 +69,11 @@ function formatCurrency(n: number) {
 
 export default function NovoPedidoPage() {
   const router = useRouter();
+  const { clientOptions, loadClientOptions } = useClients();
+
+  useEffect(() => {
+    loadClientOptions();
+  }, [loadClientOptions]);
 
   // Form state
   const [clientId, setClientId] = useState('');
@@ -199,7 +199,7 @@ export default function NovoPedidoPage() {
                 disabled={loading}
               >
                 <option value="">— Sem cliente —</option>
-                {MOCK_CLIENTS.map((c) => (
+                {clientOptions.map((c) => (
                   <option key={c.id} value={c.id}>{c.name}</option>
                 ))}
               </Select>
@@ -209,9 +209,9 @@ export default function NovoPedidoPage() {
                 value={status}
                 onChange={(e) => setStatus(e.target.value as OrderStatus)}
                 options={[
-                  { value: 'draft',           label: 'Rascunho' },
+                  { value: 'draft', label: 'Rascunho' },
                   { value: 'pendingApproval', label: 'Aguardando aprovação' },
-                  { value: 'inProgress',      label: 'Em andamento' },
+                  { value: 'inProgress', label: 'Em andamento' },
                 ]}
                 disabled={loading}
               />
@@ -355,11 +355,10 @@ export default function NovoPedidoPage() {
                       type="button"
                       onClick={() => togglePaymentMethod(method)}
                       disabled={loading}
-                      className={`px-4 py-2 rounded-lg text-sm font-medium border transition-all ${
-                        active
+                      className={`px-4 py-2 rounded-lg text-sm font-medium border transition-all ${active
                           ? 'bg-indigo-600 border-indigo-600 text-white'
                           : 'bg-white border-gray-200 text-gray-600 hover:border-indigo-400 hover:text-indigo-600'
-                      }`}
+                        }`}
                     >
                       {PAYMENT_METHOD_LABELS[method]}
                     </button>
