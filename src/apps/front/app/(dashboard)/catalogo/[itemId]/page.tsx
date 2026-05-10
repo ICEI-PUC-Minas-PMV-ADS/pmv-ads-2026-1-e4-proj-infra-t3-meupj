@@ -1,10 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useState, useCallback } from 'react';
-import { ChevronLeft, Loader2, AlertCircle } from 'lucide-react';
+import { useParams, useRouter } from 'next/navigation';
+import { useState, useCallback, useEffect } from 'react';
+import { ChevronLeft, Loader2, AlertCircle, Trash2, CheckCircle } from 'lucide-react';
 import { CatalogService, type CatalogUnitMeasure } from '@/services/catalog.service';
+
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const PRODUCT_UNITS: { value: CatalogUnitMeasure; label: string }[] = [
@@ -25,6 +26,11 @@ const SERVICE_UNITS: { value: CatalogUnitMeasure; label: string }[] = [
   { value: 'month', label: 'Mês' },
 ];
 
+const TYPE_BADGE: Record<'product' | 'service', { badge: string; label: string }> = {
+  product: { badge: 'bg-amber-100/50 text-amber-800', label: 'Produto' },
+  service: { badge: 'bg-indigo-50 text-indigo-700',   label: 'Serviço' },
+};
+
 const CHEVRON_SVG = (
   <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-gray-500">
     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -40,6 +46,10 @@ function parseCurrency(value: string): number {
   return parseFloat(cleaned);
 }
 
+function toCurrencyStr(value: number): string {
+  return value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
 function calcMargin(unitPrice: number, costPrice: number): string | null {
   if (unitPrice > 0 && costPrice > 0 && costPrice < unitPrice) {
     return ((unitPrice - costPrice) / unitPrice * 100).toFixed(1);
@@ -49,8 +59,12 @@ function calcMargin(unitPrice: number, costPrice: number): string | null {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export default function NovoItemCatalogo() {
-  const router = useRouter();
+export default function EditarItemCatalogo() {
+  const { itemId } = useParams<{ itemId: string }>();
+  const router     = useRouter();
+
+  const [fetchLoading, setFetchLoading] = useState(true);
+  const [notFound, setNotFound]         = useState(false);
 
   const [type, setType]               = useState<'product' | 'service'>('product');
   const [name, setName]               = useState('');
@@ -59,12 +73,47 @@ export default function NovoItemCatalogo() {
   const [unitMeasure, setUnitMeasure] = useState<CatalogUnitMeasure>('unit');
   const [costPriceStr, setCostPriceStr] = useState('');
 
-  const [loading, setLoading] = useState(false);
-  const [error, setError]     = useState('');
+  const [loading, setLoading]           = useState(false);
+  const [error, setError]               = useState('');
+  const [success, setSuccess]           = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleting, setDeleting]         = useState(false);
+  const [deleteError, setDeleteError]   = useState('');
 
   const unitPrice = parseCurrency(unitPriceStr);
   const costPrice = parseCurrency(costPriceStr);
   const margin    = type === 'product' ? calcMargin(unitPrice, costPrice) : null;
+
+  // Carrega o item na montagem
+  useEffect(() => {
+    const load = async () => {
+      setFetchLoading(true);
+      try {
+        const found = await CatalogService.getById(itemId);
+
+        setType(found.type);
+        setName(found.name);
+        setDescription(found.description ?? '');
+        setUnitPriceStr(toCurrencyStr(found.unitPrice));
+        setUnitMeasure(found.unitMeasure);
+        setCostPriceStr(found.costPrice ? toCurrencyStr(found.costPrice) : '');
+      } catch (err: unknown) {
+        if (err instanceof Error && err.message === 'Não autorizado. Faça login novamente.') {
+          router.replace('/login');
+          return;
+        }
+        if (err instanceof Error && err.message === 'Item não encontrado.') {
+          setNotFound(true);
+          return;
+        }
+        setError('Falha ao carregar o item.');
+      } finally {
+        setFetchLoading(false);
+      }
+    };
+
+    load();
+  }, [itemId]);
 
   const handleTypeChange = (newType: 'product' | 'service') => {
     setType(newType);
@@ -74,6 +123,7 @@ export default function NovoItemCatalogo() {
 
   const handleSave = useCallback(async () => {
     setError('');
+    setSuccess(false);
 
     if (!name.trim()) {
       setError('O nome é obrigatório.');
@@ -100,8 +150,9 @@ export default function NovoItemCatalogo() {
 
     setLoading(true);
     try {
-      await CatalogService.create(payload);
-      router.push('/catalogo');
+      await CatalogService.update(itemId, payload);
+      setSuccess(true);
+      setTimeout(() => router.push('/catalogo'), 1500);
     } catch (err: unknown) {
       if (err instanceof Error && err.message === 'Não autorizado. Faça login novamente.') {
         router.replace('/login');
@@ -111,30 +162,103 @@ export default function NovoItemCatalogo() {
     } finally {
       setLoading(false);
     }
-  }, [type, name, description, unitPriceStr, unitMeasure, costPriceStr, router]);
+  }, [itemId, type, name, description, unitPriceStr, unitMeasure, costPriceStr]);
+
+  const handleDelete = () => {
+    setDeleteError('');
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteConfirm = useCallback(async () => {
+    setDeleting(true);
+    setDeleteError('');
+    try {
+      await CatalogService.delete(itemId);
+      router.push('/catalogo');
+    } catch (err: unknown) {
+      if (err instanceof Error && err.message === 'Não autorizado. Faça login novamente.') {
+        router.replace('/login');
+        return;
+      }
+      setDeleteError(err instanceof Error ? err.message : 'Falha ao excluir item.');
+      setDeleting(false);
+    }
+  }, [itemId, router]);
+
+  // ─── Estado de carregamento inicial ────────────────────────────────────────
+
+  if (fetchLoading) {
+    return (
+      <div className="flex flex-col h-full bg-white items-center justify-center gap-3 text-gray-400">
+        <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+        <p className="text-sm">Carregando item...</p>
+      </div>
+    );
+  }
+
+  if (notFound) {
+    return (
+      <div className="flex flex-col h-full bg-white items-center justify-center gap-4 text-gray-400">
+        <AlertCircle className="h-10 w-10" />
+        <p className="font-medium text-gray-600">Item não encontrado</p>
+        <Link href="/catalogo" className="text-indigo-600 text-sm font-medium hover:underline">
+          Voltar para o catálogo
+        </Link>
+      </div>
+    );
+  }
+
+  const badgeStyle = TYPE_BADGE[type];
 
   return (
     <div className="flex flex-col h-full bg-gray-50/50">
       {/* Header */}
       <div className="bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between sticky top-0 z-20 shadow-sm">
         <div className="flex items-center gap-4">
-          <Link href="/catalogo" className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-500 transition-colors">
+          <Link
+            href="/catalogo"
+            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-500 transition-colors"
+          >
             <ChevronLeft size={20} />
           </Link>
-          <h1 className="text-sm font-bold text-gray-400 tracking-widest uppercase">Novo Item do Catálogo</h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-sm font-bold text-gray-900 tracking-wide truncate max-w-[180px] sm:max-w-xs">
+              {name || 'Editar Item'}
+            </h1>
+            <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full hidden sm:inline-flex ${badgeStyle.badge}`}>
+              {badgeStyle.label}
+            </span>
+          </div>
         </div>
+
+        <button
+          type="button"
+          onClick={handleDelete}
+          disabled={loading}
+          className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-red-500 hover:bg-red-50 transition-colors text-sm font-medium disabled:opacity-40"
+        >
+          <Trash2 size={15} />
+          <span className="hidden sm:inline">Excluir</span>
+        </button>
       </div>
 
       <div className="flex-1 p-6 md:p-10 max-w-3xl mx-auto w-full animate-in fade-in slide-in-from-bottom-4 duration-500 overflow-y-auto pb-48 md:pb-32">
         <form className="flex flex-col gap-10" onSubmit={(e) => e.preventDefault()}>
 
-          {/* Erro geral */}
+          {/* Feedback */}
           {error && (
             <div className="flex items-center gap-3 bg-red-50 border border-red-100 text-red-600 p-4 rounded-xl text-sm">
               <AlertCircle className="h-5 w-5 flex-shrink-0" />
               <span>{error}</span>
             </div>
           )}
+          {success && (
+            <div className="flex items-center gap-3 bg-emerald-50 border border-emerald-100 text-emerald-700 p-4 rounded-xl text-sm">
+              <CheckCircle className="h-5 w-5 flex-shrink-0" />
+              <span>Item atualizado com sucesso!</span>
+            </div>
+          )}
+
 
           {/* Tipo */}
           <section className="flex flex-col gap-4">
@@ -304,7 +428,7 @@ export default function NovoItemCatalogo() {
       </div>
 
       {/* Footer */}
-      <div className="bg-white border-t border-gray-100 px-6 py-4 flex items-center justify-end gap-3 fixed bottom-0 left-0 md:left-[72px] right-0 z-30 pb-safe">
+      <div className="bg-white border-t border-gray-100 px-6 py-4 flex items-center justify-end gap-3 fixed bottom-16 md:bottom-0 left-0 md:left-[72px] right-0 z-30">
         <Link
           href="/catalogo"
           className="px-5 py-2.5 rounded-xl text-sm font-semibold text-gray-600 bg-white border border-gray-200 hover:bg-gray-50 hover:text-gray-900 transition-all active:scale-95"
@@ -318,9 +442,58 @@ export default function NovoItemCatalogo() {
           className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-600/20 transition-all active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2"
         >
           {loading && <Loader2 size={16} className="animate-spin" />}
-          Salvar item
+          Salvar alterações
         </button>
       </div>
+
+      {/* Modal de confirmação de exclusão */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl animate-in zoom-in-95 duration-200">
+            <div className="flex flex-col gap-4">
+              <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mx-auto">
+                <Trash2 className="w-6 h-6 text-red-600" />
+              </div>
+
+              <div className="text-center">
+                <h3 className="text-base font-bold text-gray-900">Excluir item?</h3>
+                <p className="text-sm text-gray-500 mt-1.5 leading-relaxed">
+                  Tem certeza que deseja excluir{' '}
+                  <span className="font-semibold text-gray-700">"{name}"</span>?
+                  {' '}Esta ação não pode ser desfeita.
+                </p>
+              </div>
+
+              {deleteError && (
+                <div className="flex items-center gap-2 bg-red-50 border border-red-100 text-red-600 p-3 rounded-xl text-sm">
+                  <AlertCircle className="h-4 w-4 flex-shrink-0" />
+                  <span>{deleteError}</span>
+                </div>
+              )}
+
+              <div className="flex gap-3 mt-1">
+                <button
+                  type="button"
+                  disabled={deleting}
+                  onClick={() => { setShowDeleteModal(false); setDeleteError(''); }}
+                  className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-gray-600 bg-white border border-gray-200 hover:bg-gray-50 transition-all disabled:opacity-60"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  disabled={deleting}
+                  onClick={handleDeleteConfirm}
+                  className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white bg-red-600 hover:bg-red-700 transition-all disabled:opacity-60 flex items-center justify-center gap-2"
+                >
+                  {deleting && <Loader2 size={14} className="animate-spin" />}
+                  Excluir
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
