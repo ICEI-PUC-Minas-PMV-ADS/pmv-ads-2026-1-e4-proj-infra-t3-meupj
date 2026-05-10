@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { ChevronLeft, Plus, Trash2, Loader2, AlertCircle } from 'lucide-react';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { z } from 'zod';
 import {
@@ -10,6 +10,7 @@ import {
   type OrderStatus,
   type PaymentMethod,
 } from '@/services/orders.service';
+import { useClients } from '@/contexts/clients.context';
 
 // ─── Schemas & Types ──────────────────────────────────────────────────────────
 
@@ -47,12 +48,6 @@ const MOCK_CATALOG = [
   { id: 'cat-4', name: 'Consultoria técnica', unitPrice: 350, unitMeasure: 'un' },
 ];
 
-// ─── Mock clients (replace with ClientsService.list() when API is ready) ──────
-const MOCK_CLIENTS = [
-  { id: 'cli-1', name: 'João Ferreira' },
-  { id: 'cli-2', name: 'Ana Silveira' },
-  { id: 'cli-3', name: 'Construtora Mota Ltda.' },
-];
 
 const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
   pix: 'Pix',
@@ -85,6 +80,11 @@ const ChevronIcon = () => (
 
 export default function NovoPedidoPage() {
   const router = useRouter();
+  const { clientOptions, loadClientOptions } = useClients();
+
+  useEffect(() => {
+    loadClientOptions();
+  }, [loadClientOptions]);
 
   // Form state
   const [clientId, setClientId] = useState('');
@@ -222,8 +222,7 @@ export default function NovoPedidoPage() {
                     disabled={loading}
                   >
                     <option value="">— Sem cliente —</option>
-                    {/* TODO: substituir por ClientsService.list() */}
-                    {MOCK_CLIENTS.map((c) => (
+                    {clientOptions.map((c) => (
                       <option key={c.id} value={c.id}>{c.name}</option>
                     ))}
                   </select>

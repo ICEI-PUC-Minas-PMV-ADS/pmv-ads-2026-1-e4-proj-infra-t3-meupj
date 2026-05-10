@@ -2,10 +2,11 @@
 
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { ChevronLeft, Loader2, AlertCircle, Trash2, Plus, CheckCircle } from 'lucide-react';
 import { z } from 'zod';
 import { OrdersService, type OrderStatus, type PaymentMethod } from '@/services/orders.service';
+import { useClients } from '@/contexts/clients.context';
 
 // ─── Types & Schema ───────────────────────────────────────────────────────────
 
@@ -40,11 +41,6 @@ const MOCK_CATALOG = [
   { id: 'cat-4', name: 'Consultoria técnica', unitPrice: 350, unitMeasure: 'un' },
 ];
 
-const MOCK_CLIENTS = [
-  { id: 'cli-1', name: 'João Ferreira' },
-  { id: 'cli-2', name: 'Ana Silveira' },
-  { id: 'cli-3', name: 'Construtora Mota Ltda.' },
-];
 
 // TODO: Substituir por OrdersService.getById(id) quando a API estiver acessível
 const MOCK_ORDERS: Record<string, any> = {
@@ -98,6 +94,11 @@ const ChevronIcon = () => (
 export default function PedidoDetalhePage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
+  const { clientOptions, loadClientOptions } = useClients();
+
+  useEffect(() => {
+    loadClientOptions();
+  }, [loadClientOptions]);
 
   // TODO: Substituir pelo dado real da API
   const mockOrder = MOCK_ORDERS[id];
@@ -247,7 +248,7 @@ export default function PedidoDetalhePage() {
                 <div className="relative">
                   <select value={clientId} onChange={(e) => setClientId(e.target.value)} className={SELECT_CLS} disabled={loading}>
                     <option value="">— Sem cliente —</option>
-                    {MOCK_CLIENTS.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                    {clientOptions.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
                   </select>
                   <ChevronIcon />
                 </div>

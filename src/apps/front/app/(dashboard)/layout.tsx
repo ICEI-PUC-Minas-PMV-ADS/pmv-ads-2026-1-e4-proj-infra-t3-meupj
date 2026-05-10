@@ -5,6 +5,7 @@ import { LayoutDashboard, Users, Settings, Package, ShoppingCart, Wallet } from 
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
+import { ClientsProvider } from '@/contexts/clients.context';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -54,7 +55,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       {/* Main Content */}
       <main className={`flex-1 overflow-y-auto relative flex flex-col ${!pathname?.includes('/novo') ? 'pb-20 md:pb-0' : ''}`}>
-        {children}
+        <ClientsProvider>
+          {children}
+        </ClientsProvider>
       </main>
 
       {/* Mobile Bottom Navigation */}
