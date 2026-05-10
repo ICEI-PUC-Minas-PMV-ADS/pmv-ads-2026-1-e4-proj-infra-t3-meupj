@@ -96,6 +96,42 @@ export function Alert({
   );
 }
 
+// ─── Toast ────────────────────────────────────────────────────────────────────
+
+export function Toast({
+  variant,
+  message,
+  onClose,
+}: {
+  variant: AlertVariant;
+  message: string;
+  onClose?: () => void;
+}) {
+  const { icon, classes } = alertConfig[variant];
+  
+  return (
+    <div
+      className={[
+        'flex items-center gap-3 border p-4 rounded-xl text-sm shadow-lg animate-in fade-in slide-in-from-right-4 duration-300 pointer-events-auto min-w-[300px]',
+        classes,
+      ].join(' ')}
+    >
+      {icon}
+      <span className="flex-1 font-medium">{message}</span>
+      {onClose && (
+        <button 
+          onClick={onClose}
+          className="hover:opacity-70 transition-opacity"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      )}
+    </div>
+  );
+}
+
 // ─── Divider ──────────────────────────────────────────────────────────────────
 
 export function Divider({
