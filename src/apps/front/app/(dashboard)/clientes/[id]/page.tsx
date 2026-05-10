@@ -3,26 +3,27 @@
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useState, useCallback, useEffect } from 'react';
-import { ChevronLeft, Loader2, AlertCircle, Trash2, CheckCircle } from 'lucide-react';
+import { ChevronLeft, Trash2 } from 'lucide-react';
 import { ClientsService, type PersonType } from '@/services/clients.service';
+import { Input, Select, Textarea, Button, Alert, Badge, Spinner } from '@/components/ui';
 
 const UF_OPTIONS = [
   'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG',
   'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO',
 ];
 
-const TYPE_BADGE: Record<PersonType, { badge: string; label: string }> = {
-  individual: { badge: 'bg-indigo-50 text-indigo-700', label: 'PF' },
-  company: { badge: 'bg-amber-100/50 text-amber-800', label: 'PJ' },
-};
+const ORIGIN_OPTIONS = [
+  { value: '', label: '—' },
+  { value: 'indicacao', label: 'Indicação' },
+  { value: 'redes_sociais', label: 'Redes Sociais' },
+  { value: 'site', label: 'Site' },
+  { value: 'outros', label: 'Outros' },
+];
 
-const CHEVRON_SVG = (
-  <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-gray-500">
-    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-    </svg>
-  </div>
-);
+const TYPE_BADGE: Record<PersonType, { variant: 'indigo' | 'warning'; label: string }> = {
+  individual: { variant: 'indigo', label: 'PF' },
+  company: { variant: 'warning', label: 'PJ' },
+};
 
 export default function EditarClientePage() {
   const { id } = useParams<{ id: string }>();
@@ -176,14 +177,12 @@ export default function EditarClientePage() {
     }
   }, [id, router]);
 
-  const inputClasses = "w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600 outline-none transition-all bg-white disabled:opacity-60";
-
   // ─── Estado de carregamento inicial ────────────────────────────────────────
 
   if (fetchLoading) {
     return (
       <div className="flex flex-col h-full bg-white items-center justify-center gap-3 text-gray-400">
-        <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+        <Spinner size={32} />
         <p className="text-sm">Carregando cliente...</p>
       </div>
     );
@@ -192,7 +191,6 @@ export default function EditarClientePage() {
   if (notFound) {
     return (
       <div className="flex flex-col h-full bg-white items-center justify-center gap-4 text-gray-400">
-        <AlertCircle className="h-10 w-10" />
         <p className="font-medium text-gray-600">Cliente não encontrado</p>
         <Link href="/clientes" className="text-indigo-600 text-sm font-medium hover:underline">
           Voltar para clientes
@@ -201,7 +199,7 @@ export default function EditarClientePage() {
     );
   }
 
-  const badgeStyle = TYPE_BADGE[tipo === 'pf' ? 'individual' : 'company'];
+  const badgeInfo = TYPE_BADGE[tipo === 'pf' ? 'individual' : 'company'];
 
   return (
     <div className="flex flex-col h-full bg-gray-50/50">
@@ -218,108 +216,91 @@ export default function EditarClientePage() {
             <h1 className="text-sm font-bold text-gray-900 tracking-wide truncate max-w-[180px] sm:max-w-xs">
               {name || 'Editar Cliente'}
             </h1>
-            <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full hidden sm:inline-flex ${badgeStyle.badge}`}>
-              {badgeStyle.label}
-            </span>
+            <Badge variant={badgeInfo.variant} className="hidden sm:inline-flex">
+              {badgeInfo.label}
+            </Badge>
           </div>
         </div>
 
-        <button
-          type="button"
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={handleDelete}
           disabled={loading}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-red-500 hover:bg-red-50 transition-colors text-sm font-medium disabled:opacity-40 cursor-pointer"
+          className="text-red-500 hover:bg-red-50 hover:text-red-600"
         >
           <Trash2 size={15} />
           <span className="hidden sm:inline">Excluir</span>
-        </button>
+        </Button>
       </div>
 
       <div className="flex-1 p-6 md:p-10 max-w-4xl mx-auto w-full animate-in fade-in slide-in-from-bottom-4 duration-500 overflow-y-auto pb-48 md:pb-32">
         <form className="flex flex-col gap-10" onSubmit={(e) => e.preventDefault()}>
 
           {/* Feedback */}
-          {error && (
-            <div className="flex items-center gap-3 bg-red-50 border border-red-100 text-red-600 p-4 rounded-xl text-sm">
-              <AlertCircle className="h-5 w-5 flex-shrink-0" />
-              <span>{error}</span>
-            </div>
-          )}
-          {success && (
-            <div className="flex items-center gap-3 bg-emerald-50 border border-emerald-100 text-emerald-700 p-4 rounded-xl text-sm">
-              <CheckCircle className="h-5 w-5 flex-shrink-0" />
-              <span>Cliente atualizado com sucesso!</span>
-            </div>
-          )}
+          {error && <Alert variant="error">{error}</Alert>}
+          {success && <Alert variant="success">Cliente atualizado com sucesso!</Alert>}
 
           {/* Identificação */}
           <section className="flex flex-col gap-5">
             <h2 className="text-xs font-bold tracking-widest text-gray-400 uppercase">Identificação</h2>
 
             <div className="flex flex-col sm:flex-row gap-5">
-              <div className="flex flex-col gap-2 flex-[2]">
-                <label className="text-sm font-medium text-gray-700">Nome <span className="text-red-500">*</span></label>
-                <input
+              <div className="flex-[2]">
+                <Input
+                  label="Nome *"
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   disabled={loading}
-                  className={inputClasses}
-                  placeholder=""
+                  inputSize="lg"
                 />
               </div>
-              <div className="flex flex-col gap-2 flex-1">
-                <label className="text-sm font-medium text-gray-700">Tipo</label>
-                <div className="flex bg-gray-100/80 p-1 rounded-xl h-[48px]">
-                  <button
-                    type="button"
-                    onClick={() => setTipo('pf')}
-                    disabled={loading}
-                    className={`flex-1 text-sm cursor-pointer font-semibold rounded-lg transition-all ${tipo === 'pf' ? 'bg-white text-indigo-600 shadow-sm border border-gray-200/50 ring-1 ring-black/5' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-200/50'}`}
-                  >
-                    PF
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setTipo('pj')}
-                    disabled={loading}
-                    className={`flex-1 text-sm cursor-pointer font-semibold rounded-lg transition-all ${tipo === 'pj' ? 'bg-white text-indigo-600 shadow-sm border border-gray-200/50 ring-1 ring-black/5' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-200/50'}`}
-                  >
-                    PJ
-                  </button>
+              <div className="flex-1">
+                <div className="flex flex-col gap-1.5">
+                  <span className="text-sm font-medium text-gray-600">Tipo</span>
+                  <div className="flex bg-gray-100/80 p-1 rounded-xl h-[44px]">
+                    <button
+                      type="button"
+                      onClick={() => setTipo('pf')}
+                      disabled={loading}
+                      className={`flex-1 text-sm cursor-pointer font-semibold rounded-lg transition-all ${tipo === 'pf' ? 'bg-white text-indigo-600 shadow-sm border border-gray-200/50 ring-1 ring-black/5' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-200/50'}`}
+                    >
+                      PF
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setTipo('pj')}
+                      disabled={loading}
+                      className={`flex-1 text-sm cursor-pointer font-semibold rounded-lg transition-all ${tipo === 'pj' ? 'bg-white text-indigo-600 shadow-sm border border-gray-200/50 ring-1 ring-black/5' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-200/50'}`}
+                    >
+                      PJ
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-5">
-              <div className="flex flex-col gap-2 flex-1">
-                <label className="text-sm font-medium text-gray-700">{tipo === 'pf' ? 'CPF' : 'CNPJ'} <span className="text-red-500">*</span></label>
-                <input
+              <div className="flex-1">
+                <Input
+                  label={`${tipo === 'pf' ? 'CPF' : 'CNPJ'} *`}
                   type="text"
                   value={document}
                   onChange={(e) => setDocument(e.target.value)}
                   disabled={loading}
-                  className={inputClasses}
-                  placeholder=""
+                  inputSize="lg"
                 />
               </div>
-              <div className="flex flex-col gap-2 flex-1">
-                <label className="text-sm font-medium text-gray-700">Como conseguiu esse cliente?</label>
-                <div className="relative">
-                  <select
-                    value={origin}
-                    onChange={(e) => setOrigin(e.target.value)}
-                    disabled={loading}
-                    className={`${inputClasses} appearance-none cursor-pointer text-gray-700 h-[48px]`}
-                  >
-                    <option value="">—</option>
-                    <option value="indicacao">Indicação</option>
-                    <option value="redes_sociais">Redes Sociais</option>
-                    <option value="site">Site</option>
-                    <option value="outros">Outros</option>
-                  </select>
-                  {CHEVRON_SVG}
-                </div>
+              <div className="flex-1">
+                <Select
+                  label="Como conseguiu esse cliente?"
+                  value={origin}
+                  onChange={(e) => setOrigin(e.target.value)}
+                  disabled={loading}
+                  options={ORIGIN_OPTIONS}
+                  selectSize="lg"
+                />
               </div>
             </div>
           </section>
@@ -329,28 +310,22 @@ export default function EditarClientePage() {
             <h2 className="text-xs font-bold tracking-widest text-gray-400 uppercase">Contato</h2>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium text-gray-700">E-mail <span className="text-red-500">*</span></label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  disabled={loading}
-                  className={inputClasses}
-                  placeholder=""
-                />
-              </div>
-              <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium text-gray-700">Telefone <span className="text-red-500">*</span></label>
-                <input
-                  type="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  disabled={loading}
-                  className={inputClasses}
-                  placeholder=""
-                />
-              </div>
+              <Input
+                label="E-mail *"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={loading}
+                inputSize="lg"
+              />
+              <Input
+                label="Telefone *"
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                disabled={loading}
+                inputSize="lg"
+              />
             </div>
           </section>
 
@@ -359,80 +334,72 @@ export default function EditarClientePage() {
             <h2 className="text-xs font-bold tracking-widest text-gray-400 uppercase">Endereço</h2>
 
             <div className="flex flex-col sm:flex-row gap-5">
-              <div className="flex flex-col gap-2 sm:w-1/4">
-                <label className="text-sm font-medium text-gray-700">CEP</label>
-                <input
+              <div className="sm:w-1/4">
+                <Input
+                  label="CEP"
                   type="text"
                   value={zipCode}
                   onChange={(e) => setZipCode(e.target.value)}
                   disabled={loading}
-                  className={inputClasses}
-                  placeholder=""
+                  inputSize="lg"
                 />
               </div>
-              <div className="flex flex-col gap-2 flex-1">
-                <label className="text-sm font-medium text-gray-700">Logradouro</label>
-                <input
+              <div className="flex-1">
+                <Input
+                  label="Logradouro"
                   type="text"
                   value={street}
                   onChange={(e) => setStreet(e.target.value)}
                   disabled={loading}
-                  className={inputClasses}
-                  placeholder=""
+                  inputSize="lg"
                 />
               </div>
-              <div className="flex flex-col gap-2 sm:w-1/6">
-                <label className="text-sm font-medium text-gray-700">Número</label>
-                <input
+              <div className="sm:w-1/6">
+                <Input
+                  label="Número"
                   type="text"
                   value={number}
                   onChange={(e) => setNumber(e.target.value)}
                   disabled={loading}
-                  className={inputClasses}
-                  placeholder=""
+                  inputSize="lg"
                 />
               </div>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-5">
-              <div className="flex flex-col gap-2 flex-2">
-                <label className="text-sm font-medium text-gray-700">Bairro</label>
-                <input
+              <div className="flex-2">
+                <Input
+                  label="Bairro"
                   type="text"
                   value={district}
                   onChange={(e) => setDistrict(e.target.value)}
                   disabled={loading}
-                  className={inputClasses}
-                  placeholder=""
+                  inputSize="lg"
                 />
               </div>
-              <div className="flex flex-col gap-2 flex-2">
-                <label className="text-sm font-medium text-gray-700">Cidade</label>
-                <input
+              <div className="flex-2">
+                <Input
+                  label="Cidade"
                   type="text"
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
                   disabled={loading}
-                  className={inputClasses}
-                  placeholder=""
+                  inputSize="lg"
                 />
               </div>
-              <div className="flex flex-col gap-2 flex-1">
-                <label className="text-sm font-medium text-gray-700">UF</label>
-                <div className="relative">
-                  <select
-                    value={state}
-                    onChange={(e) => setState(e.target.value)}
-                    disabled={loading}
-                    className={`${inputClasses} appearance-none cursor-pointer text-gray-700 h-[48px]`}
-                  >
-                    <option value="">—</option>
-                    {UF_OPTIONS.map((uf) => (
-                      <option key={uf} value={uf}>{uf}</option>
-                    ))}
-                  </select>
-                  {CHEVRON_SVG}
-                </div>
+              <div className="flex-1">
+                <Select
+                  label="UF"
+                  value={state}
+                  onChange={(e) => setState(e.target.value)}
+                  disabled={loading}
+                  selectSize="lg"
+                >
+                  <option value="">—</option>
+                  {UF_OPTIONS.map((uf) => (
+                    <option key={uf} value={uf}>{uf}</option>
+                  ))}
+                </Select>
               </div>
             </div>
           </section>
@@ -441,17 +408,13 @@ export default function EditarClientePage() {
           <section className="flex flex-col gap-5">
             <h2 className="text-xs font-bold tracking-widest text-gray-400 uppercase">Anotações Internas</h2>
 
-            <div className="flex flex-col gap-2">
-              <textarea
-                rows={4}
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                disabled={loading}
-                className={`${inputClasses} resize-none`}
-                placeholder=""
-              ></textarea>
-              <p className="text-[11px] font-medium text-gray-400 pl-1 mt-1">Não visível ao cliente</p>
-            </div>
+            <Textarea
+              rows={4}
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              disabled={loading}
+              hint="Não visível ao cliente"
+            />
           </section>
 
         </form>
@@ -459,21 +422,16 @@ export default function EditarClientePage() {
 
       {/* Footer */}
       <div className="bg-white border-t border-gray-100 px-6 py-4 flex items-center justify-end gap-3 fixed bottom-16 md:bottom-0 left-0 md:left-[72px] right-0 z-30">
-        <Link
-          href="/clientes"
-          className="px-5 py-2.5 rounded-xl text-sm cursor-pointer font-semibold text-gray-600 bg-white border border-gray-200 hover:bg-gray-50 hover:text-gray-900 transition-all active:scale-95"
-        >
+        <Button variant="outline" onClick={() => router.push('/clientes')}>
           Cancelar
-        </Link>
-        <button
-          type="button"
-          disabled={loading}
+        </Button>
+        <Button
+          variant="primary"
+          loading={loading}
           onClick={handleSave}
-          className="px-5 py-2.5 rounded-xl text-sm cursor-pointer font-semibold text-white bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-600/20 transition-all active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2"
         >
-          {loading && <Loader2 size={16} className="animate-spin" />}
           Salvar alterações
-        </button>
+        </Button>
       </div>
 
       {/* Modal de confirmação de exclusão */}
@@ -495,30 +453,26 @@ export default function EditarClientePage() {
               </div>
 
               {deleteError && (
-                <div className="flex items-center gap-2 bg-red-50 border border-red-100 text-red-600 p-3 rounded-xl text-sm">
-                  <AlertCircle className="h-4 w-4 flex-shrink-0" />
-                  <span>{deleteError}</span>
-                </div>
+                <Alert variant="error">{deleteError}</Alert>
               )}
 
               <div className="flex gap-3 mt-1">
-                <button
-                  type="button"
+                <Button
+                  variant="outline"
+                  fullWidth
                   disabled={deleting}
                   onClick={() => { setShowDeleteModal(false); setDeleteError(''); }}
-                  className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-gray-600 bg-white border border-gray-200 hover:bg-gray-50 transition-all disabled:opacity-60"
                 >
                   Cancelar
-                </button>
-                <button
-                  type="button"
-                  disabled={deleting}
+                </Button>
+                <Button
+                  variant="danger"
+                  fullWidth
+                  loading={deleting}
                   onClick={handleDeleteConfirm}
-                  className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white bg-red-600 hover:bg-red-700 transition-all disabled:opacity-60 flex items-center justify-center gap-2"
                 >
-                  {deleting && <Loader2 size={14} className="animate-spin" />}
                   Excluir
-                </button>
+                </Button>
               </div>
             </div>
           </div>

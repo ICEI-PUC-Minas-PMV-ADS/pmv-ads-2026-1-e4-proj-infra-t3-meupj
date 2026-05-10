@@ -2,9 +2,10 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Search, Plus, Loader2, AlertCircle, User, Users, ChevronLeft, ChevronRight, MoreVertical, Pencil, Trash2 } from 'lucide-react';
+import { Search, Plus, User, Users, ChevronLeft, ChevronRight, MoreVertical, Pencil, Trash2 } from 'lucide-react';
 import { useEffect, useState, useCallback } from 'react';
 import { ClientsService, type Client, type PersonType } from '@/services/clients.service';
+import { Input, Button, Alert, EmptyState, Spinner } from '@/components/ui';
 
 const PAGE_LIMIT = 20;
 
@@ -128,22 +129,18 @@ export default function ClientesPage() {
         <div className="flex items-center justify-between gap-2">
           <h1 className="text-xl md:text-2xl font-bold text-gray-900 tracking-tight">Clientes</h1>
 
-          {/* Busca — desktop inline */}
-          <div className="relative max-w-md flex-1 hidden md:block ml-4">
-            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-              <Search className="h-4 w-4 text-gray-400" />
-            </div>
-            <input
+          <div className="max-w-md flex-1 hidden md:block ml-4">
+            <Input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600 outline-none transition-all bg-gray-50/50 focus:bg-white placeholder:text-gray-500 font-medium text-gray-800"
               placeholder="Buscar por nome, e-mail..."
+              leftIcon={<Search className="h-4 w-4" />}
+              inputSize="sm"
             />
           </div>
 
           <div className="flex gap-2">
-            {/* Lupa mobile — toggle */}
             <button
               type="button"
               onClick={() => { setMobileSearch((v) => !v); if (mobileSearch) setSearch(''); }}
@@ -167,17 +164,14 @@ export default function ClientesPage() {
 
         {/* Busca expandida — mobile */}
         {mobileSearch && (
-          <div className="md:hidden relative">
-            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-              <Search className="h-4 w-4 text-gray-400" />
-            </div>
-            <input
+          <div className="md:hidden">
+            <Input
               autoFocus
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 border border-indigo-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600 outline-none transition-all bg-white placeholder:text-gray-400 font-medium text-gray-800"
               placeholder="Buscar por nome, e-mail..."
+              leftIcon={<Search className="h-4 w-4" />}
             />
           </div>
         )}
@@ -218,37 +212,35 @@ export default function ClientesPage() {
         {/* Loading */}
         {loading && (
           <div className="flex flex-col items-center justify-center py-24 gap-3 text-gray-400">
-            <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+            <Spinner size={32} />
             <p className="text-sm">Carregando clientes...</p>
           </div>
         )}
 
         {/* Erro */}
         {!loading && error && (
-          <div className="flex items-center gap-3 bg-red-50 border border-red-100 text-red-600 p-4 rounded-xl text-sm">
-            <AlertCircle className="h-5 w-5 flex-shrink-0" />
-            <span>{error}</span>
+          <Alert variant="error">
+            {error}
             <button
               onClick={() => fetchClients(activeTab, search, page)}
               className="ml-auto text-red-700 underline text-xs font-medium"
             >
               Tentar novamente
             </button>
-          </div>
+          </Alert>
         )}
 
         {/* Estado vazio */}
         {!loading && !error && clients.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-24 gap-3 text-gray-400">
-            <Users className="h-12 w-12 text-gray-200" />
-            <p className="text-sm font-medium text-gray-500">Nenhum cliente encontrado</p>
-            <Link
-              href="/clientes/novo"
-              className="mt-2 text-sm text-indigo-600 font-medium hover:underline"
-            >
-              Adicionar primeiro cliente
-            </Link>
-          </div>
+          <EmptyState
+            icon={<Users className="h-12 w-12" />}
+            title="Nenhum cliente encontrado"
+            action={
+              <Link href="/clientes/novo" className="text-sm text-indigo-600 font-medium hover:underline">
+                Adicionar primeiro cliente
+              </Link>
+            }
+          />
         )}
 
         {/* Conteúdo */}
@@ -384,30 +376,26 @@ export default function ClientesPage() {
               </div>
 
               {deleteError && (
-                <div className="flex items-center gap-2 bg-red-50 border border-red-100 text-red-600 p-3 rounded-xl text-sm">
-                  <AlertCircle className="h-4 w-4 flex-shrink-0" />
-                  <span>{deleteError}</span>
-                </div>
+                <Alert variant="error">{deleteError}</Alert>
               )}
 
               <div className="flex gap-3 mt-1">
-                <button
-                  type="button"
+                <Button
+                  variant="outline"
+                  fullWidth
                   disabled={deleting}
                   onClick={() => { setConfirmDelete(null); setDeleteError(''); }}
-                  className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-gray-600 bg-white border border-gray-200 hover:bg-gray-50 transition-all disabled:opacity-60"
                 >
                   Cancelar
-                </button>
-                <button
-                  type="button"
-                  disabled={deleting}
+                </Button>
+                <Button
+                  variant="danger"
+                  fullWidth
+                  loading={deleting}
                   onClick={handleDeleteConfirm}
-                  className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white bg-red-600 hover:bg-red-700 transition-all disabled:opacity-60 flex items-center justify-center gap-2"
                 >
-                  {deleting && <Loader2 size={14} className="animate-spin" />}
                   Excluir
-                </button>
+                </Button>
               </div>
             </div>
           </div>
