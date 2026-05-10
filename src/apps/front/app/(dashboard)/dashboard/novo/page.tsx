@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { TransactionsService, type PaymentMethod } from '@/services/transactions.service';
 import { OrdersService, type Order } from '@/services/orders.service';
-import { Alert, Toast } from '@/components/ui/Feedback';
+import { Toast } from '@/components/ui/Feedback';
 
 interface ToastState {
   id: number;
@@ -31,6 +31,19 @@ export default function NovoLancamentoPage() {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | ''>('');
   const [reference, setReference] = useState('');
   const [notes, setNotes] = useState('');
+
+  // Fetch orders for the linked order dropdown
+  useEffect(() => {
+    async function fetchOrders() {
+      try {
+        const response = await OrdersService.list();
+        setOrders(response.data || []);
+      } catch (err) {
+        console.error('Falha ao carregar pedidos:', err);
+      }
+    }
+    fetchOrders();
+  }, []);
 
   const addToast = (message: string, variant: 'success' | 'error' | 'warning') => {
     const id = Date.now();
@@ -137,13 +150,14 @@ export default function NovoLancamentoPage() {
               <label className="text-sm font-medium text-gray-700">Valor <span className="text-red-500">*</span></label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <span className="text-gray-500 font-medium">R$</span>
+                  <span className="text-gray-900 font-semibold">R$</span>
                 </div>
                 <input 
                   type="text" 
+                  inputMode="decimal"
                   value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  className="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600 outline-none transition-all bg-white font-medium" 
+                  onChange={(e) => setAmount(e.target.value.replace(/[^0-9,.]/g, ''))}
+                  className="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600 outline-none transition-all bg-white font-bold text-gray-900 text-lg" 
                   placeholder="0,00" 
                   required
                 />
