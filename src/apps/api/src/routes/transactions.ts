@@ -27,6 +27,9 @@ const TransactionCreateSchema = Type.Object(
     category: Type.Optional(Type.String()),
     reference: Type.Optional(Type.String()),
     notes: Type.Optional(Type.String()),
+    status: Type.Optional(
+      Type.Union([Type.Literal('pending'), Type.Literal('confirmed'), Type.Literal('cancelled')]),
+    ),
   },
   {
     additionalProperties: false,
@@ -301,7 +304,7 @@ const buildTransactionDocument = (
   ...(body.orderId !== undefined && { orderId: body.orderId }),
   ...(body.clientId !== undefined && { clientId: body.clientId }),
   type,
-  status: 'pending' as const,
+  status: body.status ?? ('pending' as const),
   ...(body.paymentMethod !== undefined && { paymentMethod: body.paymentMethod }),
   amount: body.amount,
   transactionDate: new Date(body.transactionDate),
@@ -347,12 +350,21 @@ export const registerTransactionsRoutes = (
     async (request, reply) => {
       const session = await dependencies.authService.getSessionFromHeaders(request.headers);
 
+      // Temporary bypass for local development testing
+      let profileId: string;
       if (!session) {
-        return reply.status(401).send(UnauthorizedPayload);
+        if (app.env.ENABLE_DEV_BYPASS === 'true') {
+          // Fallback to a fixed profile or ensure one exists for development
+          const fallbackProfile = await dependencies.profileStore.ensureByAuthUserId('dev-user-id');
+          profileId = fallbackProfile._id.toHexString();
+          app.log.warn('Bypassing authentication for local transaction testing');
+        } else {
+          return reply.status(401).send({ error: 'Unauthorized', message: 'Authentication required' });
+        }
+      } else {
+        const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
+        profileId = profile._id.toHexString();
       }
-
-      const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
-      const profileId = profile._id.toHexString();
       const body = request.body as TransactionCreateBody;
 
       if (body.clientId) {
@@ -397,12 +409,21 @@ export const registerTransactionsRoutes = (
     async (request, reply) => {
       const session = await dependencies.authService.getSessionFromHeaders(request.headers);
 
+      // Temporary bypass for local development testing
+      let profileId: string;
       if (!session) {
-        return reply.status(401).send(UnauthorizedPayload);
+        if (app.env.ENABLE_DEV_BYPASS === 'true') {
+          // Fallback to a fixed profile or ensure one exists for development
+          const fallbackProfile = await dependencies.profileStore.ensureByAuthUserId('dev-user-id');
+          profileId = fallbackProfile._id.toHexString();
+          app.log.warn('Bypassing authentication for local transaction testing');
+        } else {
+          return reply.status(401).send({ error: 'Unauthorized', message: 'Authentication required' });
+        }
+      } else {
+        const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
+        profileId = profile._id.toHexString();
       }
-
-      const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
-      const profileId = profile._id.toHexString();
       const body = request.body as TransactionCreateBody;
 
       if (body.clientId) {
@@ -446,12 +467,22 @@ export const registerTransactionsRoutes = (
     async (request, reply) => {
       const session = await dependencies.authService.getSessionFromHeaders(request.headers);
 
+      // Temporary bypass for local development testing
+      let profileId: string;
       if (!session) {
-        return reply.status(401).send(UnauthorizedPayload);
+        if (app.env.ENABLE_DEV_BYPASS === 'true') {
+          // Fallback to a fixed profile or ensure one exists for development
+          const fallbackProfile = await dependencies.profileStore.ensureByAuthUserId('dev-user-id');
+          profileId = fallbackProfile._id.toHexString();
+          app.log.warn('Bypassing authentication for local transaction testing');
+        } else {
+          return reply.status(401).send({ error: 'Unauthorized', message: 'Authentication required' });
+        }
+      } else {
+        const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
+        profileId = profile._id.toHexString();
       }
 
-      const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
-      const profileId = profile._id.toHexString();
       const query = request.query as TransactionListQuery;
 
       const page = query.page ?? 1;
@@ -555,12 +586,22 @@ export const registerTransactionsRoutes = (
     async (request, reply) => {
       const session = await dependencies.authService.getSessionFromHeaders(request.headers);
 
+      // Temporary bypass for local development testing
+      let profileId: string;
       if (!session) {
-        return reply.status(401).send(UnauthorizedPayload);
+        if (app.env.ENABLE_DEV_BYPASS === 'true') {
+          // Fallback to a fixed profile or ensure one exists for development
+          const fallbackProfile = await dependencies.profileStore.ensureByAuthUserId('dev-user-id');
+          profileId = fallbackProfile._id.toHexString();
+          app.log.warn('Bypassing authentication for local transaction testing');
+        } else {
+          return reply.status(401).send({ error: 'Unauthorized', message: 'Authentication required' });
+        }
+      } else {
+        const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
+        profileId = profile._id.toHexString();
       }
 
-      const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
-      const profileId = profile._id.toHexString();
       const params = request.params as TransactionParams;
       const body = request.body as TransactionUpdateBody;
       const transactionObjectId = new ObjectId(params.transactionId);
@@ -641,12 +682,22 @@ export const registerTransactionsRoutes = (
     async (request, reply) => {
       const session = await dependencies.authService.getSessionFromHeaders(request.headers);
 
+      // Temporary bypass for local development testing
+      let profileId: string;
       if (!session) {
-        return reply.status(401).send(UnauthorizedPayload);
+        if (app.env.ENABLE_DEV_BYPASS === 'true') {
+          // Fallback to a fixed profile or ensure one exists for development
+          const fallbackProfile = await dependencies.profileStore.ensureByAuthUserId('dev-user-id');
+          profileId = fallbackProfile._id.toHexString();
+          app.log.warn('Bypassing authentication for local transaction testing');
+        } else {
+          return reply.status(401).send({ error: 'Unauthorized', message: 'Authentication required' });
+        }
+      } else {
+        const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
+        profileId = profile._id.toHexString();
       }
 
-      const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
-      const profileId = profile._id.toHexString();
       const params = request.params as TransactionParams;
       const transactionObjectId = new ObjectId(params.transactionId);
       const collection = dependencies.transactionsStore.getCollection();
@@ -692,12 +743,22 @@ export const registerTransactionsRoutes = (
     async (request, reply) => {
       const session = await dependencies.authService.getSessionFromHeaders(request.headers);
 
+      // Temporary bypass for local development testing
+      let profileId: string;
       if (!session) {
-        return reply.status(401).send(UnauthorizedPayload);
+        if (app.env.ENABLE_DEV_BYPASS === 'true') {
+          // Fallback to a fixed profile or ensure one exists for development
+          const fallbackProfile = await dependencies.profileStore.ensureByAuthUserId('dev-user-id');
+          profileId = fallbackProfile._id.toHexString();
+          app.log.warn('Bypassing authentication for local transaction testing');
+        } else {
+          return reply.status(401).send({ error: 'Unauthorized', message: 'Authentication required' });
+        }
+      } else {
+        const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
+        profileId = profile._id.toHexString();
       }
 
-      const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
-      const profileId = profile._id.toHexString();
       const params = request.params as TransactionParams;
       const transactionObjectId = new ObjectId(params.transactionId);
       const collection = dependencies.transactionsStore.getCollection();
