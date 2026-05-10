@@ -1,82 +1,51 @@
 'use client';
 
 import Link from 'next/link';
-import { Search, Plus, Loader2, AlertCircle, FileText } from 'lucide-react';
+import { Search, Plus, FileText } from 'lucide-react';
 import { useEffect, useState, useCallback } from 'react';
-import { OrdersService, type Order, type OrderStatus } from '@/services/orders.service';
-
-// ─── Mock Data ─────────────────────────────────────────────────────────────────
-// TODO: Remover quando a API estiver acessível e descomentar a chamada real em fetchOrders
-
-const MOCK_ORDERS: Order[] = [
-  {
-    _id: '1', profileId: 'p1', clientId: 'João Ferreira',
-    orderNumber: 'PED-0004-2026', status: 'inProgress',
-    paymentMethods: ['pix'], items: [], total: 1200,
-    createdAt: '2026-03-14T10:00:00Z', updatedAt: '2026-03-14T10:00:00Z',
-  },
-  {
-    _id: '2', profileId: 'p1', clientId: 'Ana Silveira',
-    orderNumber: 'PED-0003-2026', status: 'pendingApproval',
-    paymentMethods: ['creditCard'], items: [], total: 800,
-    createdAt: '2026-03-10T10:00:00Z', updatedAt: '2026-03-10T10:00:00Z',
-  },
-  {
-    _id: '3', profileId: 'p1', clientId: 'Carlos Mota',
-    orderNumber: 'PED-0002-2026', status: 'completed',
-    paymentMethods: ['cash'], items: [], total: 450,
-    createdAt: '2026-03-01T10:00:00Z', updatedAt: '2026-03-01T10:00:00Z',
-  },
-  {
-    _id: '4', profileId: 'p1', clientId: null,
-    orderNumber: 'PED-0001-2026', status: 'draft',
-    paymentMethods: [], items: [], total: 0,
-    createdAt: '2026-02-28T10:00:00Z', updatedAt: '2026-02-28T10:00:00Z',
-  },
-  {
-    _id: '5', profileId: 'p1', clientId: 'Maria Santos',
-    orderNumber: 'PED-0005-2026', status: 'cancelled',
-    paymentMethods: ['pix'], items: [], total: 320,
-    createdAt: '2026-03-20T10:00:00Z', updatedAt: '2026-03-20T10:00:00Z',
-  },
-  {
-    _id: '6', profileId: 'p1', clientId: 'Roberto Lima',
-    orderNumber: 'PED-0006-2026', status: 'warranty',
-    paymentMethods: ['bankTransfer'], items: [], total: 2100,
-    createdAt: '2026-04-01T10:00:00Z', updatedAt: '2026-04-01T10:00:00Z',
-  },
-];
+import { type Order, type OrderStatus } from '@/services/orders.service';
+import { useOrders } from '@/contexts/orders.context';
+import { Alert, Badge, Spinner, EmptyState } from '@/components/ui';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const STATUS_LABELS: Record<OrderStatus, string> = {
-  draft:           'Rascunho',
+  draft: 'Rascunho',
   pendingApproval: 'Aguard. aprovação',
-  inProgress:      'Em andamento',
-  completed:       'Concluído',
-  warranty:        'Garantia',
-  cancelled:       'Cancelado',
+  inProgress: 'Em andamento',
+  completed: 'Concluído',
+  warranty: 'Garantia',
+  cancelled: 'Cancelado',
 };
 
 const STATUS_STYLE: Record<OrderStatus, { dot: string; badge: string }> = {
-  draft:           { dot: 'bg-gray-400',    badge: 'bg-gray-100 text-gray-600' },
-  pendingApproval: { dot: 'bg-amber-500',   badge: 'bg-amber-50 text-amber-700' },
-  inProgress:      { dot: 'bg-blue-500',    badge: 'bg-blue-50 text-blue-700' },
-  completed:       { dot: 'bg-emerald-500', badge: 'bg-emerald-50 text-emerald-700' },
-  warranty:        { dot: 'bg-purple-500',  badge: 'bg-purple-50 text-purple-700' },
-  cancelled:       { dot: 'bg-red-400',     badge: 'bg-red-50 text-red-600' },
+  draft: { dot: 'bg-gray-400', badge: 'bg-gray-100 text-gray-600' },
+  pendingApproval: { dot: 'bg-amber-500', badge: 'bg-amber-50 text-amber-700' },
+  inProgress: { dot: 'bg-blue-500', badge: 'bg-blue-50 text-blue-700' },
+  completed: { dot: 'bg-emerald-500', badge: 'bg-emerald-50 text-emerald-700' },
+  warranty: { dot: 'bg-purple-500', badge: 'bg-purple-50 text-purple-700' },
+  cancelled: { dot: 'bg-red-400', badge: 'bg-red-50 text-red-600' },
+};
+
+const STATUS_BADGE: Record<OrderStatus, 'default' | 'warning' | 'info' | 'success' | 'danger'> = {
+  draft: 'default',
+  pendingApproval: 'warning',
+  inProgress: 'info',
+  completed: 'success',
+  warranty: 'default',
+  cancelled: 'danger',
 };
 
 type TabKey = 'all' | OrderStatus;
 
 const TABS: { key: TabKey; label: string }[] = [
-  { key: 'all',             label: 'Todos' },
-  { key: 'draft',           label: 'Rascunho' },
+  { key: 'all', label: 'Todos' },
+  { key: 'draft', label: 'Rascunho' },
   { key: 'pendingApproval', label: 'Aguard. aprovação' },
-  { key: 'inProgress',      label: 'Em andamento' },
-  { key: 'completed',       label: 'Concluído' },
-  { key: 'warranty',        label: 'Garantia' },
-  { key: 'cancelled',       label: 'Cancelado' },
+  { key: 'inProgress', label: 'Em andamento' },
+  { key: 'completed', label: 'Concluído' },
+  { key: 'warranty', label: 'Garantia' },
+  { key: 'cancelled', label: 'Cancelado' },
 ];
 
 function formatCurrency(value: number) {
@@ -90,64 +59,23 @@ function formatDate(iso: string) {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function PedidosPage() {
-  const [orders, setOrders]         = useState<Order[]>([]);
-  const [total, setTotal]           = useState(0);
-  const [loading, setLoading]       = useState(true);
-  const [error, setError]           = useState('');
-  const [search, setSearch]         = useState('');
-  const [activeTab, setActiveTab]   = useState<TabKey>('all');
-  const [counts, setCounts]         = useState<Record<string, number>>({});
+  const { orders, loading, error, fetchOrders } = useOrders();
+
+  const [search, setSearch] = useState('');
+  const [activeTab, setActiveTab] = useState<TabKey>('all');
   const [mobileSearch, setMobileSearch] = useState(false);
-
-  const fetchOrders = useCallback(async (tab: TabKey, q: string) => {
-    setLoading(true);
-    setError('');
-    try {
-      // TODO: Descomentar quando a API estiver acessível
-      // const result = await OrdersService.list({
-      //   status: tab !== 'all' ? tab as OrderStatus : undefined,
-      //   q: q.trim() || undefined,
-      //   sortBy: 'createdAt',
-      //   sortOrder: 'desc',
-      //   limit: 50,
-      // });
-      // setOrders(result.data);
-      // setTotal(result.total);
-
-      // --- Mock temporário ---
-      await new Promise((r) => setTimeout(r, 300)); // simula latência
-      let filtered = MOCK_ORDERS;
-      if (tab !== 'all') filtered = filtered.filter((o) => o.status === tab);
-      if (q.trim())      filtered = filtered.filter((o) =>
-        o.orderNumber.toLowerCase().includes(q.toLowerCase()) ||
-        (o.clientId ?? '').toLowerCase().includes(q.toLowerCase())
-      );
-      setOrders(filtered);
-      setTotal(filtered.length);
-
-      // Conta por status sempre sobre todos os itens (sem filtro de tab/busca)
-      const allForCount = q.trim()
-        ? MOCK_ORDERS.filter((o) =>
-            o.orderNumber.toLowerCase().includes(q.toLowerCase()) ||
-            (o.clientId ?? '').toLowerCase().includes(q.toLowerCase())
-          )
-        : MOCK_ORDERS;
-      const newCounts: Record<string, number> = { all: allForCount.length };
-      for (const o of allForCount) {
-        newCounts[o.status] = (newCounts[o.status] ?? 0) + 1;
-      }
-      setCounts(newCounts);
-      // -----------------------
-    } catch (err: any) {
-      setError(err.message || 'Erro ao carregar pedidos.');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
 
   // Debounced search
   useEffect(() => {
-    const timer = setTimeout(() => fetchOrders(activeTab, search), 400);
+    const timer = setTimeout(() => {
+      fetchOrders({
+        status: activeTab !== 'all' ? activeTab as OrderStatus : undefined,
+        q: search.trim() || undefined,
+        sortBy: 'createdAt',
+        sortOrder: 'desc',
+        limit: 50,
+      });
+    }, 400);
     return () => clearTimeout(timer);
   }, [search, activeTab, fetchOrders]);
 
@@ -181,11 +109,10 @@ export default function PedidosPage() {
             <button
               type="button"
               onClick={() => { setMobileSearch((v) => !v); if (mobileSearch) setSearch(''); }}
-              className={`md:hidden p-2 rounded-lg border transition-colors ${
-                mobileSearch
+              className={`md:hidden p-2 rounded-lg border transition-colors ${mobileSearch
                   ? 'bg-indigo-50 border-indigo-300 text-indigo-600'
                   : 'border-gray-200 text-gray-500 hover:bg-gray-50'
-              }`}
+                }`}
             >
               <Search size={18} />
             </button>
@@ -224,22 +151,12 @@ export default function PedidosPage() {
               <button
                 key={tab.key}
                 onClick={() => handleTabChange(tab.key)}
-                className={`border-b-2 pb-4 text-sm font-semibold px-1 whitespace-nowrap flex items-center gap-2 transition-colors ${
-                  isActive
+                className={`border-b-2 pb-4 text-sm font-semibold px-1 whitespace-nowrap flex items-center gap-2 transition-colors ${isActive
                     ? 'border-indigo-600 text-indigo-600'
                     : 'border-transparent text-gray-500 hover:text-gray-900 hover:border-gray-300 font-medium'
-                }`}
+                  }`}
               >
                 {tab.label}
-                {(counts[tab.key] ?? 0) > 0 && (
-                  <span className={`py-0.5 px-2 rounded-full text-[10px] font-bold ${
-                    isActive
-                      ? 'bg-indigo-100 text-indigo-700'
-                      : 'bg-gray-100 text-gray-600'
-                  }`}>
-                    {counts[tab.key]}
-                  </span>
-                )}
               </button>
             );
           })}
@@ -252,37 +169,30 @@ export default function PedidosPage() {
           {/* Loading */}
           {loading && (
             <div className="flex flex-col items-center justify-center py-24 gap-3 text-gray-400">
-              <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+              <Spinner size={32} />
               <p className="text-sm">Carregando pedidos...</p>
             </div>
           )}
 
           {/* Error */}
           {!loading && error && (
-            <div className="flex items-center gap-3 bg-red-50 border border-red-100 text-red-600 p-4 rounded-xl text-sm">
-              <AlertCircle className="h-5 w-5 flex-shrink-0" />
-              <span>{error}</span>
-              <button
-                onClick={() => fetchOrders(activeTab, search)}
-                className="ml-auto text-red-700 underline text-xs font-medium"
-              >
-                Tentar novamente
-              </button>
-            </div>
+            <Alert variant="error">
+              {error}
+            </Alert>
           )}
 
           {/* Empty state */}
           {!loading && !error && orders.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-24 gap-3 text-gray-400">
-              <FileText className="h-12 w-12 text-gray-200" />
-              <p className="text-sm font-medium text-gray-500">Nenhum pedido encontrado</p>
-              <Link
-                href="/pedidos/novo"
-                className="mt-2 text-sm text-indigo-600 font-medium hover:underline"
-              >
-                Criar primeiro pedido
-              </Link>
-            </div>
+            <EmptyState
+              icon={<FileText size={48} />}
+              title="Nenhum pedido encontrado"
+              description="Crie o primeiro pedido para começar."
+              action={
+                <Link href="/pedidos/novo" className="text-sm text-indigo-600 font-medium hover:underline">
+                  Criar primeiro pedido
+                </Link>
+              }
+            />
           )}
 
           {/* List */}
@@ -302,9 +212,7 @@ export default function PedidosPage() {
                   <div className="flex items-center gap-2 sm:gap-3">
                     <div className={`w-2 h-2 rounded-full ${style.dot} flex-shrink-0`} />
                     <h3 className="font-bold text-gray-900 text-[15px]">{order.orderNumber}</h3>
-                    <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full ${style.badge}`}>
-                      {label}
-                    </span>
+                    <Badge variant={STATUS_BADGE[order.status] ?? 'default'}>{label}</Badge>
                   </div>
                   <p className="text-[13px] font-medium text-gray-500 mt-1 pl-4 sm:pl-5 truncate">
                     {order.clientId ? order.clientId : '— sem cliente —'}
