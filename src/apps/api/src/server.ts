@@ -5,6 +5,10 @@ const app = await buildApp();
 const host = app.env.HOST ?? '0.0.0.0';
 const port = app.env.PORT ?? 3000;
 
+if (app.env.ENABLE_DEV_BYPASS === 'true') {
+  app.log.warn('DEVELOPMENT MODE: Authentication bypass is ENABLED');
+}
+
 try {
   await app.listen({ host, port });
   app.log.info({ host, port }, 'API server started');

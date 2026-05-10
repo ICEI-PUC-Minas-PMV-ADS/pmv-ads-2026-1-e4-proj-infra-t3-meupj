@@ -18,7 +18,7 @@ export const registerSecurityPlugins = async (app: FastifyInstance): Promise<voi
   await app.register(helmet);
 
   const corsOrigins = parseCorsOrigins(app.env.CORS_ORIGIN);
-
+  
   await app.register(cors, {
     origin: corsOrigins.length > 0 ? corsOrigins : false,
     credentials: corsOrigins.length > 0,

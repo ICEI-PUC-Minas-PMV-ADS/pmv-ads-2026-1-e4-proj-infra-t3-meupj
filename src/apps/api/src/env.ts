@@ -24,6 +24,7 @@ export const AppEnvSchema = Type.Object(
     BETTER_AUTH_SECRET: Type.String({ minLength: 32 }),
     BETTER_AUTH_URL: Type.String({ minLength: 1 }),
     CORS_ORIGIN: Type.Optional(Type.String({ minLength: 1 })),
+    ENABLE_DEV_BYPASS: Type.Optional(Type.Union([Type.Literal('true'), Type.Literal('false')])),
     RATE_LIMIT_MAX: Type.Optional(Type.Integer({ minimum: 1 })),
     RATE_LIMIT_TIME_WINDOW: Type.Optional(Type.String({ minLength: 1 })),
   },
