@@ -353,10 +353,14 @@ export const registerTransactionsRoutes = (
       // Temporary bypass for local development testing
       let profileId: string;
       if (!session) {
-        // Fallback to a fixed profile or ensure one exists for development
-        const fallbackProfile = await dependencies.profileStore.ensureByAuthUserId('dev-user-id');
-        profileId = fallbackProfile._id.toHexString();
-        app.log.warn('Bypassing authentication for local transaction testing');
+        if (app.env.ENABLE_DEV_BYPASS === 'true') {
+          // Fallback to a fixed profile or ensure one exists for development
+          const fallbackProfile = await dependencies.profileStore.ensureByAuthUserId('dev-user-id');
+          profileId = fallbackProfile._id.toHexString();
+          app.log.warn('Bypassing authentication for local transaction testing');
+        } else {
+          return reply.status(401).send({ error: 'Unauthorized', message: 'Authentication required' });
+        }
       } else {
         const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
         profileId = profile._id.toHexString();
@@ -408,10 +412,14 @@ export const registerTransactionsRoutes = (
       // Temporary bypass for local development testing
       let profileId: string;
       if (!session) {
-        // Fallback to a fixed profile or ensure one exists for development
-        const fallbackProfile = await dependencies.profileStore.ensureByAuthUserId('dev-user-id');
-        profileId = fallbackProfile._id.toHexString();
-        app.log.warn('Bypassing authentication for local transaction testing');
+        if (app.env.ENABLE_DEV_BYPASS === 'true') {
+          // Fallback to a fixed profile or ensure one exists for development
+          const fallbackProfile = await dependencies.profileStore.ensureByAuthUserId('dev-user-id');
+          profileId = fallbackProfile._id.toHexString();
+          app.log.warn('Bypassing authentication for local transaction testing');
+        } else {
+          return reply.status(401).send({ error: 'Unauthorized', message: 'Authentication required' });
+        }
       } else {
         const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
         profileId = profile._id.toHexString();
@@ -462,10 +470,14 @@ export const registerTransactionsRoutes = (
       // Temporary bypass for local development testing
       let profileId: string;
       if (!session) {
-        // Fallback to a fixed profile or ensure one exists for development
-        const fallbackProfile = await dependencies.profileStore.ensureByAuthUserId('dev-user-id');
-        profileId = fallbackProfile._id.toHexString();
-        app.log.warn('Bypassing authentication for local transaction testing');
+        if (app.env.ENABLE_DEV_BYPASS === 'true') {
+          // Fallback to a fixed profile or ensure one exists for development
+          const fallbackProfile = await dependencies.profileStore.ensureByAuthUserId('dev-user-id');
+          profileId = fallbackProfile._id.toHexString();
+          app.log.warn('Bypassing authentication for local transaction testing');
+        } else {
+          return reply.status(401).send({ error: 'Unauthorized', message: 'Authentication required' });
+        }
       } else {
         const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
         profileId = profile._id.toHexString();
@@ -577,10 +589,14 @@ export const registerTransactionsRoutes = (
       // Temporary bypass for local development testing
       let profileId: string;
       if (!session) {
-        // Fallback to a fixed profile or ensure one exists for development
-        const fallbackProfile = await dependencies.profileStore.ensureByAuthUserId('dev-user-id');
-        profileId = fallbackProfile._id.toHexString();
-        app.log.warn('Bypassing authentication for local transaction testing');
+        if (app.env.ENABLE_DEV_BYPASS === 'true') {
+          // Fallback to a fixed profile or ensure one exists for development
+          const fallbackProfile = await dependencies.profileStore.ensureByAuthUserId('dev-user-id');
+          profileId = fallbackProfile._id.toHexString();
+          app.log.warn('Bypassing authentication for local transaction testing');
+        } else {
+          return reply.status(401).send({ error: 'Unauthorized', message: 'Authentication required' });
+        }
       } else {
         const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
         profileId = profile._id.toHexString();
@@ -669,10 +685,14 @@ export const registerTransactionsRoutes = (
       // Temporary bypass for local development testing
       let profileId: string;
       if (!session) {
-        // Fallback to a fixed profile or ensure one exists for development
-        const fallbackProfile = await dependencies.profileStore.ensureByAuthUserId('dev-user-id');
-        profileId = fallbackProfile._id.toHexString();
-        app.log.warn('Bypassing authentication for local transaction testing');
+        if (app.env.ENABLE_DEV_BYPASS === 'true') {
+          // Fallback to a fixed profile or ensure one exists for development
+          const fallbackProfile = await dependencies.profileStore.ensureByAuthUserId('dev-user-id');
+          profileId = fallbackProfile._id.toHexString();
+          app.log.warn('Bypassing authentication for local transaction testing');
+        } else {
+          return reply.status(401).send({ error: 'Unauthorized', message: 'Authentication required' });
+        }
       } else {
         const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
         profileId = profile._id.toHexString();
@@ -726,10 +746,14 @@ export const registerTransactionsRoutes = (
       // Temporary bypass for local development testing
       let profileId: string;
       if (!session) {
-        // Fallback to a fixed profile or ensure one exists for development
-        const fallbackProfile = await dependencies.profileStore.ensureByAuthUserId('dev-user-id');
-        profileId = fallbackProfile._id.toHexString();
-        app.log.warn('Bypassing authentication for local transaction testing');
+        if (app.env.ENABLE_DEV_BYPASS === 'true') {
+          // Fallback to a fixed profile or ensure one exists for development
+          const fallbackProfile = await dependencies.profileStore.ensureByAuthUserId('dev-user-id');
+          profileId = fallbackProfile._id.toHexString();
+          app.log.warn('Bypassing authentication for local transaction testing');
+        } else {
+          return reply.status(401).send({ error: 'Unauthorized', message: 'Authentication required' });
+        }
       } else {
         const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
         profileId = profile._id.toHexString();

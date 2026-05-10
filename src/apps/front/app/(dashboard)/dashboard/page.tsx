@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { ChevronDown, Plus, Loader2 } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
-import { TransactionsService, type Transaction } from '@/services/transactions.service';
+import { TransactionsService, type Transaction, type TransactionListQuery } from '@/services/transactions.service';
 
 export default function FinanceiroPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -16,7 +16,7 @@ export default function FinanceiroPage() {
       try {
         setLoading(true);
         
-        const query: any = {};
+        const query: TransactionListQuery = {};
         
         if (dateRange === 'month') {
           const now = new Date();
@@ -64,33 +64,44 @@ export default function FinanceiroPage() {
   }, [transactions]);
 
   const chartData = useMemo(() => {
-    // Pegar o último dia do mês atual
     const now = new Date();
     const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-    const segments = 10; // Manter 10 barras como no design original
-    const daysPerSegment = daysInMonth / segments;
+    // Agrupar por semanas (aprox. 4 ou 5 segmentos dependendo do mês)
+    const segments = Math.ceil(daysInMonth / 7);
     
     const incomeBySegment = Array(segments).fill(0);
+    const expenseBySegment = Array(segments).fill(0);
     
-    // Filtrar apenas receitas confirmadas do mês atual
-    const currentMonthIncomes = transactions.filter(tx => {
+    // Filtrar lançamentos confirmados do mês atual
+    const currentMonthTransactions = transactions.filter(tx => {
       const date = new Date(tx.transactionDate);
-      return tx.type === 'income' && 
-             tx.status === 'confirmed' && 
+      return tx.status === 'confirmed' && 
              date.getMonth() === now.getMonth() && 
              date.getFullYear() === now.getFullYear();
     });
 
-    currentMonthIncomes.forEach(tx => {
+    currentMonthTransactions.forEach(tx => {
       const day = new Date(tx.transactionDate).getDate();
-      const segmentIndex = Math.min(Math.floor((day - 1) / daysPerSegment), segments - 1);
-      incomeBySegment[segmentIndex] += (Number(tx.amount) || 0);
+      const segmentIndex = Math.min(Math.floor((day - 1) / 7), segments - 1);
+      if (tx.type === 'income') {
+        incomeBySegment[segmentIndex] += (Number(tx.amount) || 0);
+      } else {
+        expenseBySegment[segmentIndex] += (Number(tx.amount) || 0);
+      }
     });
 
-    const maxIncome = Math.max(...incomeBySegment, 1);
-    return incomeBySegment.map(value => ({
-      height: Math.max((value / maxIncome) * 100, 5), // Mínimo de 5% para visibilidade
-      value: value
+    const maxVal = Math.max(...incomeBySegment, ...expenseBySegment, 1);
+    
+    return incomeBySegment.map((income, i) => ({
+      week: i + 1,
+      income: {
+        height: Math.max((income / maxVal) * 100, 4),
+        value: income
+      },
+      expense: {
+        height: Math.max((expenseBySegment[i] / maxVal) * 100, 4),
+        value: expenseBySegment[i]
+      }
     }));
   }, [transactions]);
 
@@ -186,18 +197,40 @@ export default function FinanceiroPage() {
         </div>
 
         {/* Chart dynamic */}
-        <div className="w-full h-24 flex flex-col items-center justify-end pb-2 relative opacity-70">
-           <div className="flex items-end gap-1.5 sm:gap-3 h-16">
+        <div className="w-full h-32 flex flex-col items-center justify-end pb-2 relative">
+           <div className="flex items-end gap-6 sm:gap-10 h-20">
               {chartData.map((data, i) => (
-                <div 
-                  key={i} 
-                  title={formatCurrency(data.value)}
-                  className={`w-3 sm:w-6 rounded-t-sm transition-all duration-500 ${i % 2 === 0 ? 'bg-emerald-400/40' : 'bg-emerald-500/60'}`} 
-                  style={{ height: `${data.height}%` }}
-                ></div>
+                <div key={i} className="flex flex-col items-center gap-2 h-full">
+                  <div className="flex items-end gap-1 flex-1">
+                    {/* Barra de Receita */}
+                    <div 
+                      title={`Receita: ${formatCurrency(data.income.value)}`}
+                      className="w-2 sm:w-4 bg-emerald-500/80 rounded-t-sm transition-all duration-500 hover:bg-emerald-500" 
+                      style={{ height: `${data.income.height}%` }}
+                    ></div>
+                    {/* Barra de Custo */}
+                    <div 
+                      title={`Custo: ${formatCurrency(data.expense.value)}`}
+                      className="w-2 sm:w-4 bg-red-400/80 rounded-t-sm transition-all duration-500 hover:bg-red-500" 
+                      style={{ height: `${data.expense.height}%` }}
+                    ></div>
+                  </div>
+                  <span className="text-[10px] text-gray-400 font-medium">Sem {data.week}</span>
+                </div>
               ))}
            </div>
-           <span className="text-[10px] text-gray-400 mt-2">Receitas do mês atual</span>
+           
+           {/* Legenda simples */}
+           <div className="flex gap-4 mt-4">
+              <div className="flex items-center gap-1.5">
+                <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+                <span className="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Receitas</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <div className="w-2 h-2 rounded-full bg-red-400"></div>
+                <span className="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Custos</span>
+              </div>
+           </div>
         </div>
 
         {/* Tabs */}

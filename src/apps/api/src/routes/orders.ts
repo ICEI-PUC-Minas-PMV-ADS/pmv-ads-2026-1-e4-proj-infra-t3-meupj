@@ -255,8 +255,12 @@ export const registerOrdersRoutes = (
       // Temporary bypass for local development testing
       let profileId: string;
       if (!session) {
-        const fallbackProfile = await dependencies.profileStore.ensureByAuthUserId('dev-user-id');
-        profileId = fallbackProfile._id.toHexString();
+        if (app.env.ENABLE_DEV_BYPASS === 'true') {
+          const fallbackProfile = await dependencies.profileStore.ensureByAuthUserId('dev-user-id');
+          profileId = fallbackProfile._id.toHexString();
+        } else {
+          return reply.status(401).send({ error: 'Unauthorized', message: 'Authentication required' });
+        }
       } else {
         const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
         profileId = profile._id.toHexString();
@@ -342,8 +346,12 @@ export const registerOrdersRoutes = (
       // Temporary bypass for local development testing
       let profileId: string;
       if (!session) {
-        const fallbackProfile = await dependencies.profileStore.ensureByAuthUserId('dev-user-id');
-        profileId = fallbackProfile._id.toHexString();
+        if (app.env.ENABLE_DEV_BYPASS === 'true') {
+          const fallbackProfile = await dependencies.profileStore.ensureByAuthUserId('dev-user-id');
+          profileId = fallbackProfile._id.toHexString();
+        } else {
+          return reply.status(401).send({ error: 'Unauthorized', message: 'Authentication required' });
+        }
       } else {
         const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
         profileId = profile._id.toHexString();
@@ -482,8 +490,12 @@ export const registerOrdersRoutes = (
       // Temporary bypass for local development testing
       let profileId: string;
       if (!session) {
-        const fallbackProfile = await dependencies.profileStore.ensureByAuthUserId('dev-user-id');
-        profileId = fallbackProfile._id.toHexString();
+        if (app.env.ENABLE_DEV_BYPASS === 'true') {
+          const fallbackProfile = await dependencies.profileStore.ensureByAuthUserId('dev-user-id');
+          profileId = fallbackProfile._id.toHexString();
+        } else {
+          return reply.status(401).send({ error: 'Unauthorized', message: 'Authentication required' });
+        }
       } else {
         const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
         profileId = profile._id.toHexString();
