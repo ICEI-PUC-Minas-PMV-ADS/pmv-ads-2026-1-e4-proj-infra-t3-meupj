@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useState, useCallback } from 'react';
 import { ChevronLeft, Loader2, AlertCircle } from 'lucide-react';
 import { ClientsService, type PersonType, type ClientCreatePayload } from '@/services/clients.service';
+import { useClients } from '@/contexts/clients.context';
 
 const UF_OPTIONS = [
   'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG',
@@ -21,6 +22,8 @@ const CHEVRON_SVG = (
 
 export default function NovoClientePage() {
   const router = useRouter();
+  const { refreshClients } = useClients();
+  const [error, setError] = useState<string | null>(null);
 
   // Identificação
   const [tipo, setTipo] = useState<'pf' | 'pj'>('pf');
@@ -45,7 +48,6 @@ export default function NovoClientePage() {
 
   // UI
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
 
   const handleSave = useCallback(async () => {
     setError('');
