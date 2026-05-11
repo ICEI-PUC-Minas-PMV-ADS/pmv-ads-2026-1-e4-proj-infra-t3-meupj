@@ -333,6 +333,26 @@ describe('CORS config', () => {
     expect(blocked.headers['access-control-allow-origin']).toBeUndefined();
     expect(blocked.headers['access-control-allow-credentials']).toBeUndefined();
   });
+
+  it('allows all origins when wildcard is used, supporting credentials by mirroring', async () => {
+    app = await buildTestApp({
+      envData: {
+        CORS_ORIGIN: '*',
+      },
+    });
+
+    const origin = 'https://any-origin.com';
+    const response = await app.inject({
+      method: 'GET',
+      url: '/api/health',
+      headers: {
+        origin,
+      },
+    });
+
+    expect(response.headers['access-control-allow-origin']).toBe(origin);
+    expect(response.headers['access-control-allow-credentials']).toBe('true');
+  });
 });
 
 describe('TypeBox validation', () => {

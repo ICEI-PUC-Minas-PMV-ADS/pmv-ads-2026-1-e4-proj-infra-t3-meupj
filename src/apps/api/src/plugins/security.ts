@@ -18,10 +18,11 @@ export const registerSecurityPlugins = async (app: FastifyInstance): Promise<voi
   await app.register(helmet);
 
   const corsOrigins = parseCorsOrigins(app.env.CORS_ORIGIN);
+  const isWildcard = corsOrigins.includes('*');
   
   await app.register(cors, {
-    origin: corsOrigins.length > 0 ? corsOrigins : false,
-    credentials: corsOrigins.length > 0,
+    origin: isWildcard ? true : corsOrigins.length > 0 ? corsOrigins : false,
+    credentials: isWildcard || corsOrigins.length > 0,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   });
