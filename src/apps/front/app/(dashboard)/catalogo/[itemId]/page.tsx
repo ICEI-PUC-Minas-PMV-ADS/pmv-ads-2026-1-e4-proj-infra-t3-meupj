@@ -1,9 +1,9 @@
 import EditItemClient from './EditItemClient';
 
-export const dynamicParams = false;
+export const dynamicParams = true;
 
 export async function generateStaticParams() {
-  return [{ itemId: 'static' }];
+  return [];
 }
 
 export default function Page() {

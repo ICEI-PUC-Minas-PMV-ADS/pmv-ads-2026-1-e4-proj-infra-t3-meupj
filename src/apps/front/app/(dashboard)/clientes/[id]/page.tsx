@@ -1,9 +1,9 @@
 import EditClientClient from './EditClientClient';
 
-export const dynamicParams = false;
+export const dynamicParams = true;
 
 export async function generateStaticParams() {
-  return [{ id: 'static' }];
+  return [];
 }
 
 export default function Page() {
