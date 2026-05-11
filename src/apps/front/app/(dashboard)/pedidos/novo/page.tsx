@@ -385,7 +385,7 @@ export default function NovoPedidoPage() {
         <Button
           variant="primary"
           loading={loading}
-          onClick={() => handleSubmit('inProgress')}
+          onClick={() => handleSubmit(status)}
           className="w-full sm:w-auto"
         >
           Criar pedido

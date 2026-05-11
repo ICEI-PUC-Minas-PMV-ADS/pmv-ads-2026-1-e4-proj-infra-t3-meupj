@@ -65,19 +65,19 @@ export default function PedidosPage() {
   const [activeTab, setActiveTab] = useState<TabKey>('all');
   const [mobileSearch, setMobileSearch] = useState(false);
 
-  // Debounced search
+  const filtered = orders.filter((order) => {
+    const matchesTab = activeTab === 'all' || order.status === activeTab;
+    const q = search.trim().toLowerCase();
+    const matchesSearch = !q ||
+      order.orderNumber.toLowerCase().includes(q) ||
+      (order.reference ?? '').toLowerCase().includes(q) ||
+      order.items.some((i) => i.name.toLowerCase().includes(q));
+    return matchesTab && matchesSearch;
+  });
+
   useEffect(() => {
-    const timer = setTimeout(() => {
-      fetchOrders({
-        status: activeTab !== 'all' ? activeTab as OrderStatus : undefined,
-        q: search.trim() || undefined,
-        sortBy: 'createdAt',
-        sortOrder: 'desc',
-        limit: 50,
-      });
-    }, 400);
-    return () => clearTimeout(timer);
-  }, [search, activeTab, fetchOrders]);
+    fetchOrders({ sortBy: 'createdAt', sortOrder: 'desc', limit: 100 });
+  }, [fetchOrders]);
 
   const handleTabChange = (tab: TabKey) => {
     setActiveTab(tab);
@@ -110,8 +110,8 @@ export default function PedidosPage() {
               type="button"
               onClick={() => { setMobileSearch((v) => !v); if (mobileSearch) setSearch(''); }}
               className={`md:hidden p-2 rounded-lg border transition-colors ${mobileSearch
-                  ? 'bg-indigo-50 border-indigo-300 text-indigo-600'
-                  : 'border-gray-200 text-gray-500 hover:bg-gray-50'
+                ? 'bg-indigo-50 border-indigo-300 text-indigo-600'
+                : 'border-gray-200 text-gray-500 hover:bg-gray-50'
                 }`}
             >
               <Search size={18} />
@@ -152,8 +152,8 @@ export default function PedidosPage() {
                 key={tab.key}
                 onClick={() => handleTabChange(tab.key)}
                 className={`border-b-2 pb-4 text-sm font-semibold px-1 whitespace-nowrap flex items-center gap-2 transition-colors ${isActive
-                    ? 'border-indigo-600 text-indigo-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-900 hover:border-gray-300 font-medium'
+                  ? 'border-indigo-600 text-indigo-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-900 hover:border-gray-300 font-medium'
                   }`}
               >
                 {tab.label}
@@ -196,7 +196,7 @@ export default function PedidosPage() {
           )}
 
           {/* List */}
-          {!loading && !error && orders.map((order) => {
+          {!loading && !error && filtered.map((order) => {
             const style = STATUS_STYLE[order.status] ?? STATUS_STYLE.draft;
             const label = STATUS_LABELS[order.status] ?? order.status;
 

@@ -1,4 +1,4 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002';
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002/';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -138,6 +138,7 @@ export const ClientsService = {
 
     if (!response.ok) {
       if (response.status === 401) throw new Error('Não autorizado. Faça login novamente.');
+      if (response.status === 409) throw new Error('Já existe um cliente cadastrado com este CPF/CNPJ.');
       const err = await response.json().catch(() => ({}));
       throw new Error(err.message || 'Falha ao criar cliente.');
     }

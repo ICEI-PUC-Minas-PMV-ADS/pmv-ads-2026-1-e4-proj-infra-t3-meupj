@@ -469,6 +469,99 @@ export const registerOrdersRoutes = (
     },
   );
 
+  
+  app.get(
+    '/api/orders/:orderId',
+    {
+      schema: {
+        params: OrderParamsSchema,
+        response: {
+          200: OrderResponseSchema,
+          400: BadRequestSchema,
+          401: UnauthorizedSchema,
+          404: NotFoundSchema,
+        },
+      },
+    },
+    async (request, reply) => {
+      const session = await dependencies.authService.getSessionFromHeaders(request.headers);
+
+      // Temporary bypass for local development testing
+      let profileId: string;
+      if (!session) {
+        if (app.env.ENABLE_DEV_BYPASS === 'true') {
+          const fallbackProfile = await dependencies.profileStore.ensureByAuthUserId('dev-user-id');
+          profileId = fallbackProfile._id.toHexString();
+        } else {
+          return reply.status(401).send({ error: 'Unauthorized', message: 'Authentication required' });
+        }
+      } else {
+        const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
+        profileId = profile._id.toHexString();
+      }
+      const params = request.params as OrderParams;
+      const orderObjectId = new ObjectId(params.orderId);
+
+      const ordersCollection = dependencies.ordersStore.getCollection();
+      const existingOrder = await ordersCollection.findOne({
+        _id: orderObjectId,
+        profileId,
+      });
+
+      if (!existingOrder) {
+        return reply.status(404).send(NotFoundPayload);
+      }
+
+        const itemIds = existingOrder.items.map((i) => new ObjectId(i.catalogItemId));
+        const catalogCollection = dependencies.catalogStore.getCollection();
+
+        const foundCatalogItems = await catalogCollection
+          .find({
+            _id: { $in: itemIds },
+            profileId,
+          })
+          .toArray();
+
+          return reply.status(200).send({
+            foundCatalogItems,
+          });
+        }
+      
+
+      const updateResult = await ordersCollection.updateOne(
+        {
+          _id: orderObjectId,
+          profileId,
+        },
+        {
+          $set: setPayload,
+        },
+      );
+
+      if (updateResult.matchedCount === 0) {
+        return reply.status(404).send(NotFoundPayload);
+      }
+
+      const updatedOrder = await ordersCollection.findOne({
+        _id: orderObjectId,
+        profileId,
+      });
+
+      if (!updatedOrder) {
+        return reply.status(404).send(NotFoundPayload);
+      }
+
+      return reply.status(200).send({
+        ...updatedOrder,
+        _id: updatedOrder._id.toHexString(),
+        createdAt: updatedOrder.createdAt.toISOString(),
+        updatedAt: updatedOrder.updatedAt.toISOString(),
+      });
+    },
+  );
+
+
+
   app.put(
     '/api/orders/:orderId',
     {

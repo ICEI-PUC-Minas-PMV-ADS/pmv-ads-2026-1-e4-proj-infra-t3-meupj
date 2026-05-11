@@ -116,7 +116,7 @@ export const OrdersService = {
     if (query.sortOrder) params.set('sortOrder', query.sortOrder);
 
     const qs = params.toString();
-    const url = `${BASE_URL}/api/orders${qs ? `?${qs}` : ''}`;
+    const url = `${BASE_URL}/api/orders`;
 
     const response = await fetch(url, {
       method: 'GET',
