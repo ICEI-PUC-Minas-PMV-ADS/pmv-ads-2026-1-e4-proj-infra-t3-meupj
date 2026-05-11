@@ -1,4 +1,4 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:3002';
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://pmv-ads-2026-1-e4-proj-infra-t3-meupj.onrender.com';
 export type TransactionType = 'income' | 'expense';
 export type TransactionStatus = 'pending' | 'confirmed' | 'cancelled';
 

@@ -1,4 +1,5 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002/';// ─── Types ────────────────────────────────────────────────────────────────────
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://pmv-ads-2026-1-e4-proj-infra-t3-meupj.onrender.com';
+// ─── Types ────────────────────────────────────────────────────────────────────
 
 export type OrderStatus =
   | 'draft'
