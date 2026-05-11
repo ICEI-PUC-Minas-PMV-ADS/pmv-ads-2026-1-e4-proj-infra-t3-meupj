@@ -105,6 +105,7 @@ export default function PedidoDetalhePage() {
 
   useEffect(() => {
     async function loadOrder() {
+      if (id === 'static') return;
       try {
         const data = await OrdersService.getById(id);
         setOrder(data);

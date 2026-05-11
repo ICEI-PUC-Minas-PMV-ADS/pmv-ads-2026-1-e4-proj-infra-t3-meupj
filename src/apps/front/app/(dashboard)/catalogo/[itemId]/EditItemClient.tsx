@@ -87,6 +87,7 @@ export default function EditarItemCatalogo() {
   // Carrega o item na montagem
   useEffect(() => {
     const load = async () => {
+      if (itemId === 'static') return;
       setFetchLoading(true);
       try {
         const found = await CatalogService.getById(itemId);

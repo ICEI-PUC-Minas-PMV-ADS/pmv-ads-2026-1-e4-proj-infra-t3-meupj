@@ -64,6 +64,7 @@ export default function EditarClientePage() {
   // Carrega o cliente na montagem
   useEffect(() => {
     const load = async () => {
+      if (id === 'static') return;
       setFetchLoading(true);
       try {
         const found = await ClientsService.getById(id);
