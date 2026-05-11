@@ -107,6 +107,12 @@ export const registerAuthRoutes = (
       const authRequest = new Request(resolveRequestUrl(request), requestInit);
       const authResponse = await dependencies.authService.handleRequest(authRequest);
 
+      if (authResponse.status >= 400) {
+        const clonedResponse = authResponse.clone();
+        const errorText = await clonedResponse.text();
+        console.error(`[AuthRoute] BetterAuth erro (${authResponse.status}):`, errorText);
+      }
+
       reply.status(authResponse.status);
 
       const setCookieHeaders = extractSetCookieHeaders(authResponse.headers);

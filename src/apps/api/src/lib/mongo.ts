@@ -146,7 +146,7 @@ const connect = async (): Promise<void> => {
   try {
     runtime.client ??= new MongoClient(runtime.uri, {
       retryReads: true,
-      retryWrites: true,
+      retryWrites: false,
       serverSelectionTimeoutMS: 5_000,
     });
 

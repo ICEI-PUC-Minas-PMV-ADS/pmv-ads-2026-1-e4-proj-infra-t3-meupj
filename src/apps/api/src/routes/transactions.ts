@@ -454,6 +454,54 @@ export const registerTransactionsRoutes = (
   );
 
   app.get(
+    '/api/transactions/:transactionId',
+    {
+      schema: {
+        params: TransactionParamsSchema,
+        response: {
+          200: TransactionResponseSchema,
+          401: UnauthorizedSchema,
+          404: NotFoundSchema,
+        },
+      },
+    },
+    async (request, reply) => {
+      const session = await dependencies.authService.getSessionFromHeaders(request.headers);
+
+      // Temporary bypass for local development testing
+      let profileId: string;
+      if (!session) {
+        if (app.env.ENABLE_DEV_BYPASS === 'true') {
+          // Fallback to a fixed profile or ensure one exists for development
+          const fallbackProfile = await dependencies.profileStore.ensureByAuthUserId('dev-user-id');
+          profileId = fallbackProfile._id.toHexString();
+          app.log.warn('Bypassing authentication for local transaction testing');
+        } else {
+          return reply.status(401).send(UnauthorizedPayload);
+        }
+      } else {
+        const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
+        profileId = profile._id.toHexString();
+      }
+
+      const params = request.params as TransactionParams;
+      const transactionObjectId = new ObjectId(params.transactionId);
+      const collection = dependencies.transactionsStore.getCollection();
+
+      const transaction = await collection.findOne({
+        _id: transactionObjectId,
+        profileId,
+      });
+
+      if (!transaction) {
+        return reply.status(404).send(NotFoundPayload);
+      }
+
+      return reply.status(200).send(transactionToResponse(transaction));
+    },
+  );
+
+  app.get(
     '/api/transactions',
     {
       schema: {

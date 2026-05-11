@@ -154,6 +154,56 @@ export const TransactionsService = {
   },
 
   /**
+   * Busca um lançamento pelo ID
+   */
+  async getById(transactionId: string): Promise<Transaction> {
+    const url = `${BASE_URL}/api/transactions/${transactionId}`;
+    
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || 'Falha ao buscar lançamento.');
+    }
+
+    return response.json();
+  },
+
+  /**
+   * Atualiza um lançamento existente
+   */
+  async update(transactionId: string, payload: Partial<TransactionCreatePayload>): Promise<Transaction> {
+    const url = `${BASE_URL}/api/transactions/${transactionId}`;
+    
+    try {
+      const response = await fetch(url, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `Falha ao atualizar lançamento (Status: ${response.status}).`);
+      }
+
+      return response.json();
+    } catch (error) {
+      console.error(`Erro ao chamar ${url}:`, error);
+      throw error;
+    }
+  },
+
+  /**
    * Exclui um lançamento (somente se não estiver confirmado)
    */
   async delete(transactionId: string): Promise<void> {

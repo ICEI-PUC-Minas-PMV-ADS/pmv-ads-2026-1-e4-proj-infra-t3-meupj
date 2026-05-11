@@ -102,14 +102,23 @@ export const createOnUserCreatedHook = (
 ): ((user: unknown) => Promise<void>) => {
   return async (user: unknown): Promise<void> => {
     const authUserId = resolveAuthUserId(user);
+    console.log('[AuthService] Novo usuário detectado pelo hook! Criando perfil para:', authUserId);
     await profileStore.ensureByAuthUserId(authUserId);
+    console.log('[AuthService] Perfil criado com sucesso para:', authUserId);
   };
 };
 
 export const createAuthService = (options: CreateAuthServiceOptions): AuthService => {
   const trustedOrigins = Array.from(
     new Set(
-      [options.baseURL, ...options.trustedOrigins]
+      [
+        options.baseURL,
+        'http://localhost:3000',
+        'http://127.0.0.1:3000',
+        'http://localhost:3001',
+        'http://127.0.0.1:3001',
+        ...options.trustedOrigins,
+      ]
         .map((origin) => origin.trim())
         .filter((origin) => origin.length > 0),
     ),
@@ -124,6 +133,7 @@ export const createAuthService = (options: CreateAuthServiceOptions): AuthServic
     trustedOrigins,
     database: mongodbAdapter(options.db, {
       client: options.client,
+      transaction: false,
     }),
     emailAndPassword: {
       enabled: true,
@@ -135,14 +145,28 @@ export const createAuthService = (options: CreateAuthServiceOptions): AuthServic
         },
       },
     },
+    advanced: {
+      defaultCookieAttributes: {
+        path: '/',
+        sameSite: 'lax',
+        secure: false,
+      },
+    },
   });
 
   return {
     handleRequest: (request: Request) => auth.handler(request),
     getSessionFromHeaders: async (headers: IncomingHttpHeaders) => {
+      const nodeHeaders = fromNodeHeaders(headers);
       const session = await auth.api.getSession({
-        headers: fromNodeHeaders(headers),
+        headers: nodeHeaders,
       });
+
+      if (!session) {
+        console.log(`[AuthService] Sessão NÃO encontrada para os headers enviados.`);
+      } else {
+        console.log('[AuthService] Sessão validada para:', (session as any).user?.email);
+      }
 
       return parseAuthSession(session);
     },

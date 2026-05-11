@@ -68,6 +68,7 @@ export const AuthService = {
    */
   async getProfile() {
     try {
+      console.log('AuthService.getProfile: Iniciando busca de perfil...');
       const response = await fetch(`${BASE_URL}/api/profile`, {
         method: 'GET',
         headers: {
@@ -77,11 +78,16 @@ export const AuthService = {
         cache: 'no-store',
       });
 
+      console.log('AuthService.getProfile: Status da resposta:', response.status);
+
       if (!response.ok) {
+        console.warn('AuthService.getProfile: Resposta não ok, retornando null');
         return null; // Usuário não autenticado
       }
 
-      return await response.json().catch(() => null);
+      const data = await response.json().catch(() => null);
+      console.log('AuthService.getProfile: Perfil carregado com sucesso:', data?.user?.id);
+      return data;
     } catch (error) {
       console.error('Erro no AuthService.getProfile:', error);
       return null;

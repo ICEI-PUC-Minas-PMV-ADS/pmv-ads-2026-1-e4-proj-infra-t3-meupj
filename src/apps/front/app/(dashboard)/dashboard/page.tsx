@@ -273,12 +273,16 @@ export default function FinanceiroPage() {
              </div>
            ) : (
              filteredTransactions.map((tx, index) => (
-                <div key={tx._id} className={`flex items-center gap-4 py-4 ${index !== filteredTransactions.length - 1 ? 'border-b border-gray-100' : ''}`}>
+                <Link 
+                   key={tx._id} 
+                   href={`/dashboard/editar/${tx._id}`}
+                   className={`flex items-center gap-4 py-4 hover:bg-gray-50/50 transition-colors cursor-pointer group px-2 -mx-2 rounded-xl ${index !== filteredTransactions.length - 1 ? 'border-b border-gray-100' : ''}`}
+                >
                    <div className={`w-2 h-2 rounded-full flex-shrink-0 mt-1 self-start sm:self-center ${
                      tx.type === 'income' ? 'bg-emerald-500' : 'bg-red-500'
                    }`}></div>
                    <div className="flex-1 min-w-0 flex flex-col">
-                      <h3 className="font-bold text-gray-900 text-sm truncate">
+                      <h3 className="font-bold text-gray-900 text-sm truncate group-hover:text-indigo-600 transition-colors">
                         {tx.category ? (tx.category.charAt(0).toUpperCase() + tx.category.slice(1)) : 'Sem categoria'} 
                         {tx.reference ? ` — ${tx.reference}` : ''}
                       </h3>
@@ -300,7 +304,7 @@ export default function FinanceiroPage() {
                           {tx.type === 'income' ? '+' : '-'}{formatCurrency(tx.amount)}
                       </span>
                    </div>
-                </div>
+                </Link>
              ))
            )}
            
