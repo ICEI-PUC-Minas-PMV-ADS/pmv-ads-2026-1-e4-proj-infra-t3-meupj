@@ -9,6 +9,7 @@ import type { ProfileStore } from './profile.js';
 export type AuthSession = {
   user: {
     id: string;
+    name: string | null;
     email: string | null;
   };
 };
@@ -58,6 +59,7 @@ const parseAuthSession = (session: unknown): AuthSession | null => {
   return {
     user: {
       id: user.id,
+      name: typeof user.name === 'string' ? user.name : null,
       email: typeof user.email === 'string' ? user.email : null,
     },
   };

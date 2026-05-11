@@ -16,7 +16,7 @@
 - [x] MPJ-25 - Criar schema e model de perfil do negócio
 - [x] MPJ-26 - Criar endpoint de leitura do perfil autenticado
 - [ ] MPJ-27 - Definir política de exclusão em cascata do domínio
-- [ ] MPJ-28 - Criar endpoint de edição do perfil do negócio
+- [x] MPJ-28 - Criar endpoint de edição do perfil do negócio
 - [ ] MPJ-29 - Criar schema e índices da collection clientes
 - [ ] MPJ-30 - Implementar criação de cliente
 - [ ] MPJ-31 - Implementar edição e exclusão de cliente
@@ -68,3 +68,4 @@
 - [x] Padronizar configuração de ambiente local para execução conjunta de frontend (3000) e API (3001)
 - [x] Corrigir paginação da listagem de pedidos para aceitar `page`/`limit` como querystring numérica e adicionar teste de regressão
 - [x] Corrigir abertura de detalhe em clientes e pedidos com inclusão dos endpoints `GET /api/clients/:clientId` e `GET /api/orders/:orderId`, além de ajuste de hook-order em `pedidos/[id]`
+- [x] Implementar módulo de configurações no frontend com edição de usuário/empresa e alteração de senha integrada ao Better Auth

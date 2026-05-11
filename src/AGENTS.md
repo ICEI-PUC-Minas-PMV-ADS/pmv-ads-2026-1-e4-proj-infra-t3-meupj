@@ -17,7 +17,8 @@
 - Hook pós-cadastro para criação automática e idempotente do perfil de negócio.
 - Model de domínio `profile` com índice único em `authUserId`.
 - Model de domínio `catalog` com índices em `profileId` para itens de produto e serviço.
-- Endpoint autenticado `GET /api/profile` com resposta sanitizada (sem campos internos de auth).
+- Endpoint autenticado `GET /api/profile` com resposta consolidada e sanitizada de `user` e `business` para a tela de configurações.
+- Endpoint autenticado `PUT /api/profile` com resposta consolidada de `user` e `business` após edição do perfil do negócio.
 - Endpoint autenticado `POST /api/catalog` para criação de itens de catálogo.
 - Endpoint autenticado `PUT /api/catalog/:itemId` para edição de itens de catálogo no escopo do perfil.
 - Endpoint autenticado `DELETE /api/catalog/:itemId` para exclusão de itens de catálogo com validação de vínculo em pedidos.
@@ -57,7 +58,8 @@
   - Recuperação de sessão autenticada para proteção de endpoints.
   - Store de domínio `profile` com índice único em `authUserId`.
   - Store de domínio `catalog` com índices em `profileId` para itens de produto e serviço.
-  - Endpoint `GET /api/profile` com leitura de perfil do usuário autenticado.
+  - Endpoint `GET /api/profile` com leitura consolidada (`user` + `business`) do perfil autenticado.
+  - Endpoint `PUT /api/profile` com edição de dados do negócio e retorno consolidado (`user` + `business`).
   - Coleção Bruno (`apps/api/bruno/meupj`) com requests de health, sign-up, sign-in e profile.
   - Endpoint `POST /api/catalog` com criação de item de catálogo autenticado.
   - Endpoint `PUT /api/catalog/:itemId` com edição de item de catálogo autenticado.
@@ -75,6 +77,7 @@
 - Recursos operacionais:
   - Scripts de desenvolvimento, build, lint e teste por workspace.
   - Scripts de formatação e validação de formatação (`format` e `format:check`) por workspace.
+  - Frontend com rota autenticada `/configuracoes` para edição de perfil do usuário, dados da empresa e alteração de senha.
   - Padrão local para execução simultânea: frontend em `http://localhost:3000` e API em `http://localhost:3001`.
   - Frontend deve definir `NEXT_PUBLIC_API_URL=http://localhost:3001` em `apps/front/.env.local` para alinhar todas as chamadas HTTP.
   - Execução isolada por filtro: `pnpm --filter <projeto> <comando>`.

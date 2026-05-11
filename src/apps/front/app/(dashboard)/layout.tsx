@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { LayoutDashboard, Users, Settings, Package, ShoppingCart, Wallet, LogOut } from 'lucide-react';
+import { LayoutDashboard, Users, Settings, Package, ShoppingCart, LogOut } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
@@ -43,7 +43,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     <div className="flex h-screen bg-gray-50 overflow-hidden">
       {/* Sidebar Desktop */}
       <aside className="hidden md:flex flex-col w-[72px] bg-zinc-900 items-center py-6 gap-6 border-r border-zinc-800 z-20">
-        <Link href="/dashboard" className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center mb-4 transition-transform hover:scale-105">
+        <Link
+          href="/dashboard"
+          className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center mb-4 transition-transform hover:scale-105"
+        >
           <Image src="/logo.svg" alt="Logo" width={50} height={50} />
         </Link>
 
@@ -69,8 +72,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </nav>
 
         <div className="mt-auto flex flex-col gap-2">
-          <Link href="#" className="w-12 h-12 rounded-xl flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors" title="Configurações">
+          <Link
+            href="/configuracoes"
+            className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors relative ${
+              pathname?.startsWith('/configuracoes')
+                ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20'
+                : 'text-zinc-400 hover:text-white hover:bg-zinc-800'
+            }`}
+            title="Configurações"
+          >
             <Settings size={22} strokeWidth={1.5} />
+            {pathname?.startsWith('/configuracoes') && (
+              <div className="absolute -left-3 top-1/2 -translate-y-1/2 w-1.5 h-6 bg-indigo-500 rounded-r-full"></div>
+            )}
           </Link>
           <button
             onClick={logout}
@@ -83,12 +97,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </aside>
 
       {/* Main Content */}
-      <main className={`flex-1 overflow-y-auto relative flex flex-col ${!pathname?.includes('/novo') ? 'pb-20 md:pb-0' : ''}`}>
+      <main
+        className={`flex-1 overflow-y-auto relative flex flex-col ${!pathname?.includes('/novo') ? 'pb-20 md:pb-0' : ''}`}
+      >
         <ClientsProvider>
           <CatalogProvider>
-            <OrdersProvider>
-              {children}
-            </OrdersProvider>
+            <OrdersProvider>{children}</OrdersProvider>
           </CatalogProvider>
         </ClientsProvider>
       </main>
@@ -111,6 +125,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </Link>
             );
           })}
+          <Link
+            href="/configuracoes"
+            className={`p-3 transition-colors flex flex-col items-center gap-1 ${
+              pathname?.startsWith('/configuracoes')
+                ? 'text-indigo-600'
+                : 'text-gray-400 hover:text-indigo-600'
+            }`}
+          >
+            <Settings size={20} />
+            <span className="text-[10px] font-medium">Config</span>
+          </Link>
           <button
             onClick={logout}
             className="p-3 transition-colors flex flex-col items-center gap-1 text-gray-400 hover:text-red-500"
