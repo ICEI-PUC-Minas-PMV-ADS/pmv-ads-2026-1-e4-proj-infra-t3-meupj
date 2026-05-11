@@ -9,6 +9,7 @@ import type { ProfileStore } from './profile.js';
 export type AuthSession = {
   user: {
     id: string;
+    name: string | null;
     email: string | null;
   };
 };
@@ -30,14 +31,40 @@ type CreateAuthServiceOptions = {
 const isObject = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null;
 
+const normalizeAuthUserId = (value: unknown): string | null => {
+  if (typeof value === 'string' && value.length > 0) {
+    return value;
+  }
+
+  if (!isObject(value)) {
+    return null;
+  }
+
+  if (typeof value.toHexString === 'function') {
+    const parsed = value.toHexString();
+    if (typeof parsed === 'string' && parsed.length > 0) {
+      return parsed;
+    }
+  }
+
+  if (typeof value.toString === 'function') {
+    const parsed = value.toString();
+    if (typeof parsed === 'string' && parsed.length > 0 && parsed !== '[object Object]') {
+      return parsed;
+    }
+  }
+
+  return null;
+};
+
 const resolveAuthUserId = (value: unknown): string => {
   if (!isObject(value)) {
     throw new Error('Invalid user payload from Better Auth hook');
   }
 
-  const userId = value.id;
+  const userId = normalizeAuthUserId(value.id) ?? normalizeAuthUserId(value._id);
 
-  if (typeof userId !== 'string' || userId.length === 0) {
+  if (!userId) {
     throw new Error('Better Auth hook did not provide a valid user id');
   }
 
@@ -51,13 +78,20 @@ const parseAuthSession = (session: unknown): AuthSession | null => {
 
   const user = session.user;
 
-  if (!isObject(user) || typeof user.id !== 'string' || user.id.length === 0) {
+  if (!isObject(user)) {
+    return null;
+  }
+
+  const userId = normalizeAuthUserId(user.id) ?? normalizeAuthUserId(user._id);
+
+  if (!userId) {
     return null;
   }
 
   return {
     user: {
-      id: user.id,
+      id: userId,
+      name: typeof user.name === 'string' ? user.name : null,
       email: typeof user.email === 'string' ? user.email : null,
     },
   };

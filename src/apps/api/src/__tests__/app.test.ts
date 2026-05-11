@@ -40,7 +40,7 @@ const createProfileFixture = (authUserId = 'auth-user-1'): WithId<ProfileDocumen
   updatedAt: new Date('2026-01-01T00:00:00.000Z'),
 });
 
-  const createProfileStoreMock = (profile = createProfileFixture()): ProfileStore => ({
+const createProfileStoreMock = (profile = createProfileFixture()): ProfileStore => ({
   ensureIndexes: () => Promise.resolve(undefined),
   getByAuthUserId: () => Promise.resolve(profile),
   ensureByAuthUserId: () => Promise.resolve(profile),
@@ -126,52 +126,54 @@ const createFakeProfileDb = (): {
       return Promise.resolve('profile_authUserId_unique');
     }),
     updateOne: vi.fn((filter, update, options) => {
-  const authUserId = (filter as { authUserId: string }).authUserId;
-  const existing = records.get(authUserId);
-  const shouldUpsert = Boolean(options && (options as { upsert?: boolean }).upsert);
-  const setOnInsert = (update as { $setOnInsert?: ProfileDocument }).$setOnInsert;
-  const setPayload = (update as {
-    $set?: {
-      business?: ProfileDocument['business'];
-      updatedAt?: Date;
-    };
-  }).$set;
+      const authUserId = (filter as { authUserId: string }).authUserId;
+      const existing = records.get(authUserId);
+      const shouldUpsert = Boolean(options && (options as { upsert?: boolean }).upsert);
+      const setOnInsert = (update as { $setOnInsert?: ProfileDocument }).$setOnInsert;
+      const setPayload = (
+        update as {
+          $set?: {
+            business?: ProfileDocument['business'];
+            updatedAt?: Date;
+          };
+        }
+      ).$set;
 
-  if (!existing && shouldUpsert && setOnInsert) {
-    records.set(authUserId, {
-      _id: new ObjectId(),
-      authUserId: setOnInsert.authUserId,
-      business: {
-        ...setOnInsert.business,
-        address: { ...setOnInsert.business.address },
-      },
-      createdAt: setOnInsert.createdAt,
-      updatedAt: setOnInsert.updatedAt,
-    });
-  }
+      if (!existing && shouldUpsert && setOnInsert) {
+        records.set(authUserId, {
+          _id: new ObjectId(),
+          authUserId: setOnInsert.authUserId,
+          business: {
+            ...setOnInsert.business,
+            address: { ...setOnInsert.business.address },
+          },
+          createdAt: setOnInsert.createdAt,
+          updatedAt: setOnInsert.updatedAt,
+        });
+      }
 
-  const current = records.get(authUserId);
+      const current = records.get(authUserId);
 
-  if (current && setPayload) {
-    records.set(authUserId, {
-      ...current,
-      business: setPayload.business
-        ? {
-            ...setPayload.business,
-            address: { ...setPayload.business.address },
-          }
-        : current.business,
-      updatedAt: setPayload.updatedAt ?? current.updatedAt,
-    });
-  }
+      if (current && setPayload) {
+        records.set(authUserId, {
+          ...current,
+          business: setPayload.business
+            ? {
+                ...setPayload.business,
+                address: { ...setPayload.business.address },
+              }
+            : current.business,
+          updatedAt: setPayload.updatedAt ?? current.updatedAt,
+        });
+      }
 
-  return {
-    acknowledged: true,
-    matchedCount: current ? 1 : 0,
-    modifiedCount: setPayload ? 1 : 0,
-    upsertedCount: existing ? 0 : shouldUpsert && !existing ? 1 : 0,
-  };
-}),
+      return {
+        acknowledged: true,
+        matchedCount: current ? 1 : 0,
+        modifiedCount: setPayload ? 1 : 0,
+        upsertedCount: existing ? 0 : shouldUpsert && !existing ? 1 : 0,
+      };
+    }),
     findOne: vi.fn((filter) => {
       const authUserId = (filter as { authUserId: string }).authUserId;
       return Promise.resolve(records.get(authUserId) ?? null);
@@ -490,6 +492,55 @@ describe('auth routes', () => {
       statusCode: 401,
     });
   });
+
+  it('forwards change-password payloads to Better Auth handler', async () => {
+    const handleRequest = vi.fn<(request: Request) => Promise<Response>>(() =>
+      Promise.resolve(
+        new Response(JSON.stringify({ token: null, user: { id: 'auth-user-42' } }), {
+          status: 200,
+          headers: {
+            'content-type': 'application/json',
+          },
+        }),
+      ),
+    );
+
+    app = await buildTestApp({
+      authService: createAuthServiceMock({
+        handleRequest,
+      }),
+    });
+
+    const payload = {
+      currentPassword: 'Current123!',
+      newPassword: 'NewPassword456!',
+    };
+
+    const response = await app.inject({
+      method: 'POST',
+      url: '/api/auth/change-password',
+      payload,
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual({
+      token: null,
+      user: {
+        id: 'auth-user-42',
+      },
+    });
+    expect(handleRequest).toHaveBeenCalledTimes(1);
+
+    const [forwardedRequest] = handleRequest.mock.calls[0] ?? [];
+
+    if (!(forwardedRequest instanceof Request)) {
+      throw new Error('Expected forwarded request to be available');
+    }
+
+    expect(forwardedRequest.method).toBe('POST');
+    expect(new URL(forwardedRequest.url).pathname).toBe('/api/auth/change-password');
+    expect(await forwardedRequest.json()).toEqual(payload);
+  });
 });
 
 describe('profile hook', () => {
@@ -498,6 +549,20 @@ describe('profile hook', () => {
     const hook = createOnUserCreatedHook({ ensureByAuthUserId });
 
     await hook({ id: 'new-auth-user' });
+
+    expect(ensureByAuthUserId).toHaveBeenCalledTimes(1);
+    expect(ensureByAuthUserId).toHaveBeenCalledWith('new-auth-user');
+  });
+
+  it('creates profile when hook payload provides ObjectId-like _id', async () => {
+    const ensureByAuthUserId = vi.fn().mockResolvedValue(createProfileFixture('new-auth-user'));
+    const hook = createOnUserCreatedHook({ ensureByAuthUserId });
+
+    await hook({
+      _id: {
+        toHexString: () => 'new-auth-user',
+      },
+    });
 
     expect(ensureByAuthUserId).toHaveBeenCalledTimes(1);
     expect(ensureByAuthUserId).toHaveBeenCalledWith('new-auth-user');
@@ -525,75 +590,79 @@ describe('profile route', () => {
   });
 
   it('updates profile for authenticated user', async () => {
-  const profileFixture = createProfileFixture('auth-user-77');
+    const profileFixture = createProfileFixture('auth-user-77');
 
-  const updateBusinessByAuthUserId = vi.fn(
-    async (_authUserId: string, business) => ({
+    const updateBusinessByAuthUserId = vi.fn(async (_authUserId: string, business) => ({
       ...profileFixture,
       business: {
         ...business,
         address: { ...business.address },
       },
       updatedAt: new Date('2026-01-02T00:00:00.000Z'),
-    }),
-  );
+    }));
 
-  const profileStore: ProfileStore = {
-    ensureIndexes: () => Promise.resolve(undefined),
-    getByAuthUserId: () => Promise.resolve(profileFixture),
-    ensureByAuthUserId: () => Promise.resolve(profileFixture),
-    updateBusinessByAuthUserId,
-  };
+    const profileStore: ProfileStore = {
+      ensureIndexes: () => Promise.resolve(undefined),
+      getByAuthUserId: () => Promise.resolve(profileFixture),
+      ensureByAuthUserId: () => Promise.resolve(profileFixture),
+      updateBusinessByAuthUserId,
+    };
 
-  const authService = createAuthServiceMock({
-    getSessionFromHeaders: vi.fn().mockResolvedValue({
+    const authService = createAuthServiceMock({
+      getSessionFromHeaders: vi.fn().mockResolvedValue({
+        user: {
+          id: 'auth-user-77',
+          name: 'Owner 77',
+          email: 'owner@meupj.com',
+        },
+      }),
+    });
+
+    app = await buildTestApp({
+      authService,
+      profileStore,
+    });
+
+    const payload = {
+      name: 'Meu PJ Atualizado',
+      document: '12345678000199',
+      phone: '31999999999',
+      email: 'contato@meupj.com',
+      logo: null,
+      color: '#111827',
+      footer: 'Obrigado pela preferência.',
+      address: {
+        zipCode: '30110000',
+        street: 'Rua A',
+        number: '100',
+        complement: null,
+        district: 'Centro',
+        city: 'Belo Horizonte',
+        state: 'MG',
+        country: 'Brasil',
+      },
+    };
+
+    const response = await app.inject({
+      method: 'PUT',
+      url: '/api/profile',
+      payload,
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(updateBusinessByAuthUserId).toHaveBeenCalledTimes(1);
+    expect(updateBusinessByAuthUserId).toHaveBeenCalledWith('auth-user-77', payload);
+    expect(response.json()).toEqual({
       user: {
         id: 'auth-user-77',
+        name: 'Owner 77',
         email: 'owner@meupj.com',
       },
-    }),
+      business: payload,
+      createdAt: profileFixture.createdAt.toISOString(),
+      updatedAt: '2026-01-02T00:00:00.000Z',
+    });
   });
-
-  app = await buildTestApp({
-    authService,
-    profileStore,
-  });
-
-  const payload = {
-    name: 'Meu PJ Atualizado',
-    document: '12345678000199',
-    phone: '31999999999',
-    email: 'contato@meupj.com',
-    logo: null,
-    color: '#111827',
-    footer: 'Obrigado pela preferência.',
-    address: {
-      zipCode: '30110000',
-      street: 'Rua A',
-      number: '100',
-      complement: null,
-      district: 'Centro',
-      city: 'Belo Horizonte',
-      state: 'MG',
-      country: 'Brasil',
-    },
-  };
-
-  const response = await app.inject({
-    method: 'PUT',
-    url: '/api/profile',
-    payload,
-  });
-
-  expect(response.statusCode).toBe(200);
-  expect(updateBusinessByAuthUserId).toHaveBeenCalledTimes(1);
-  expect(updateBusinessByAuthUserId).toHaveBeenCalledWith('auth-user-77', payload);
-  expect(response.json()).toEqual({
-    business: payload,
-    createdAt: profileFixture.createdAt.toISOString(),
-    updatedAt: '2026-01-02T00:00:00.000Z',
-  });
-});
 
   it('returns sanitized profile for authenticated user', async () => {
     const profileFixture = createProfileFixture('auth-user-42');
@@ -618,6 +687,7 @@ describe('profile route', () => {
       getSessionFromHeaders: vi.fn().mockResolvedValue({
         user: {
           id: 'auth-user-42',
+          name: 'Owner 42',
           email: 'owner@meupj.com',
         },
       }),
@@ -633,6 +703,11 @@ describe('profile route', () => {
     expect(response.statusCode).toBe(200);
     expect(ensureByAuthUserId).toHaveBeenCalledWith('auth-user-42');
     expect(response.json()).toEqual({
+      user: {
+        id: 'auth-user-42',
+        name: 'Owner 42',
+        email: 'owner@meupj.com',
+      },
       business: {
         name: 'Meu PJ',
         document: '12345678000199',
@@ -664,50 +739,50 @@ describe('profile route', () => {
 
 describe('profile store', () => {
   it('updates business data by authUserId', async () => {
-  const fakeDb = createFakeProfileDb();
-  const profileStore = createProfileStore(() => fakeDb.db);
+    const fakeDb = createFakeProfileDb();
+    const profileStore = createProfileStore(() => fakeDb.db);
 
-  await profileStore.ensureByAuthUserId('auth-user-200');
+    await profileStore.ensureByAuthUserId('auth-user-200');
 
-  const updated = await profileStore.updateBusinessByAuthUserId('auth-user-200', {
-    name: 'Meu PJ Atualizado',
-    document: '12345678000199',
-    phone: '31999999999',
-    email: 'contato@meupj.com',
-    logo: null,
-    color: '#111827',
-    footer: 'Obrigado pela preferência.',
-    address: {
-      zipCode: '30110000',
-      street: 'Rua A',
-      number: '100',
-      complement: null,
-      district: 'Centro',
-      city: 'Belo Horizonte',
-      state: 'MG',
-      country: 'Brasil',
-    },
+    const updated = await profileStore.updateBusinessByAuthUserId('auth-user-200', {
+      name: 'Meu PJ Atualizado',
+      document: '12345678000199',
+      phone: '31999999999',
+      email: 'contato@meupj.com',
+      logo: null,
+      color: '#111827',
+      footer: 'Obrigado pela preferência.',
+      address: {
+        zipCode: '30110000',
+        street: 'Rua A',
+        number: '100',
+        complement: null,
+        district: 'Centro',
+        city: 'Belo Horizonte',
+        state: 'MG',
+        country: 'Brasil',
+      },
+    });
+
+    expect(updated.business).toEqual({
+      name: 'Meu PJ Atualizado',
+      document: '12345678000199',
+      phone: '31999999999',
+      email: 'contato@meupj.com',
+      logo: null,
+      color: '#111827',
+      footer: 'Obrigado pela preferência.',
+      address: {
+        zipCode: '30110000',
+        street: 'Rua A',
+        number: '100',
+        complement: null,
+        district: 'Centro',
+        city: 'Belo Horizonte',
+        state: 'MG',
+        country: 'Brasil',
+      },
+    });
+    expect(updated.updatedAt.getTime()).toBeGreaterThanOrEqual(updated.createdAt.getTime());
   });
-
-  expect(updated.business).toEqual({
-    name: 'Meu PJ Atualizado',
-    document: '12345678000199',
-    phone: '31999999999',
-    email: 'contato@meupj.com',
-    logo: null,
-    color: '#111827',
-    footer: 'Obrigado pela preferência.',
-    address: {
-      zipCode: '30110000',
-      street: 'Rua A',
-      number: '100',
-      complement: null,
-      district: 'Centro',
-      city: 'Belo Horizonte',
-      state: 'MG',
-      country: 'Brasil',
-    },
-  });
-  expect(updated.updatedAt.getTime()).toBeGreaterThanOrEqual(updated.createdAt.getTime());
-});
 });

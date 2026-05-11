@@ -106,6 +106,8 @@ const createProfileStoreMock = (profile = createProfileFixture()): ProfileStore 
 });
 
 type FakeCollection = {
+  indexes: ReturnType<typeof vi.fn>;
+  dropIndex: ReturnType<typeof vi.fn>;
   createIndex: ReturnType<typeof vi.fn>;
   insertOne: ReturnType<typeof vi.fn>;
   findOne: ReturnType<typeof vi.fn>;
@@ -127,6 +129,15 @@ const createFakeClientsDb = (): {
   let createIndexCalls = 0;
 
   const clientsCollection: FakeCollection = {
+    indexes: vi.fn(() =>
+      Promise.resolve([
+        { name: '_id_' },
+        { name: 'clients_profileId' },
+        { name: 'clients_profileId_name' },
+        { name: 'clients_profileId_email' },
+      ]),
+    ),
+    dropIndex: vi.fn(() => Promise.resolve(undefined)),
     createIndex: vi.fn(() => {
       createIndexCalls += 1;
       return Promise.resolve('index_created');
@@ -360,7 +371,11 @@ afterEach(async () => {
 describe('clients store', () => {
   it('should create indexes correctly', async () => {
     const createIndexMock = vi.fn().mockResolvedValue('index_created');
-    const collectionMock = { createIndex: createIndexMock };
+    const collectionMock = {
+      indexes: vi.fn().mockResolvedValue([{ name: '_id_' }]),
+      dropIndex: vi.fn().mockResolvedValue(undefined),
+      createIndex: createIndexMock,
+    };
     const dbMock = { collection: vi.fn(() => collectionMock) } as unknown as Db;
     const store = createClientsStore(() => dbMock);
 
@@ -369,8 +384,8 @@ describe('clients store', () => {
     expect(createIndexMock).toHaveBeenCalledWith({ profileId: 1 }, { name: 'clients_profileId' });
     expect(createIndexMock).toHaveBeenCalledWith({ profileId: 1, name: 1 }, { name: 'clients_profileId_name' });
     expect(createIndexMock).toHaveBeenCalledWith(
-      { profileId: 1, documento: 1 },
-      { name: 'clients_profileId_documento', unique: true, sparse: true },
+      { profileId: 1, document: 1 },
+      { name: 'clients_profileId_document', unique: true, sparse: true },
     );
     expect(createIndexMock).toHaveBeenCalledWith(
       { profileId: 1, email: 1 },
@@ -465,6 +480,54 @@ describe('clients GET /api/clients', () => {
     const data = response.json();
     expect(data.total).toBe(2);
     expect(data.data.length).toBe(2);
+  });
+});
+
+// ===== GET /api/clients/:clientId TESTS =====
+describe('clients GET /api/clients/:clientId', () => {
+  it('should return a client by id when it belongs to the authenticated profile', async () => {
+    const profile = createProfileFixture('auth-user-1');
+    const fakeDb = createFakeClientsDb();
+    const item = createClientFixture(profile._id.toHexString(), { name: 'Cliente Detalhe' });
+    fakeDb.records.set(item._id.toHexString(), item);
+
+    app = await buildTestApp({
+      authService: createAuthServiceMock({
+        getSessionFromHeaders: vi.fn().mockResolvedValue({ user: { id: 'auth-user-1' } }),
+      }),
+      profileStore: createProfileStoreMock(profile),
+      fakeDb,
+    });
+
+    const response = await app.inject({
+      method: 'GET',
+      url: `/api/clients/${item._id.toHexString()}`,
+    });
+
+    expect(response.statusCode).toBe(200);
+    const data = response.json();
+    expect(data._id).toBe(item._id.toHexString());
+    expect(data.name).toBe('Cliente Detalhe');
+  });
+
+  it('should return 404 when client does not exist for the authenticated profile', async () => {
+    const profile = createProfileFixture('auth-user-1');
+    const fakeDb = createFakeClientsDb();
+
+    app = await buildTestApp({
+      authService: createAuthServiceMock({
+        getSessionFromHeaders: vi.fn().mockResolvedValue({ user: { id: 'auth-user-1' } }),
+      }),
+      profileStore: createProfileStoreMock(profile),
+      fakeDb,
+    });
+
+    const response = await app.inject({
+      method: 'GET',
+      url: `/api/clients/${new ObjectId().toHexString()}`,
+    });
+
+    expect(response.statusCode).toBe(404);
   });
 });
 
