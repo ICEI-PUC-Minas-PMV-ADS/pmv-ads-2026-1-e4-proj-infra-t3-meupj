@@ -148,8 +148,8 @@ export const createAuthService = (options: CreateAuthServiceOptions): AuthServic
     advanced: {
       defaultCookieAttributes: {
         path: '/',
-        sameSite: 'lax',
-        secure: false,
+        sameSite: options.baseURL.startsWith('https') ? 'none' : 'lax',
+        secure: options.baseURL.startsWith('https'),
       },
     },
   });
