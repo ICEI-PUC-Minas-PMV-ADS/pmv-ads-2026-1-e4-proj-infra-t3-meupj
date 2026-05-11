@@ -2,8 +2,8 @@
 
 import Link from 'next/link';
 import { Search, Plus, FileText } from 'lucide-react';
-import { useEffect, useState, useCallback } from 'react';
-import { type Order, type OrderStatus } from '@/services/orders.service';
+import { useEffect, useState } from 'react';
+import { type OrderStatus } from '@/services/orders.service';
 import { useOrders } from '@/contexts/orders.context';
 import { Alert, Badge, Spinner, EmptyState } from '@/components/ui';
 
@@ -234,6 +234,8 @@ export default function PedidosPage() {
           {/* Mobile FAB */}
           <Link
             href="/pedidos/novo"
+            aria-label="Novo pedido"
+            title="Novo pedido"
             className="sm:hidden fixed bottom-20 right-6 w-14 h-14 bg-indigo-600 text-white rounded-full flex items-center justify-center shadow-lg shadow-indigo-600/30 hover:bg-indigo-700 transition-colors active:scale-95 z-40"
           >
             <Plus size={24} />

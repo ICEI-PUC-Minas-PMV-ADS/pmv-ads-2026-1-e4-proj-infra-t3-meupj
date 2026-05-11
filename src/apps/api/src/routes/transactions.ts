@@ -359,7 +359,7 @@ export const registerTransactionsRoutes = (
           profileId = fallbackProfile._id.toHexString();
           app.log.warn('Bypassing authentication for local transaction testing');
         } else {
-          return reply.status(401).send({ error: 'Unauthorized', message: 'Authentication required' });
+          return reply.status(401).send(UnauthorizedPayload);
         }
       } else {
         const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
@@ -418,7 +418,7 @@ export const registerTransactionsRoutes = (
           profileId = fallbackProfile._id.toHexString();
           app.log.warn('Bypassing authentication for local transaction testing');
         } else {
-          return reply.status(401).send({ error: 'Unauthorized', message: 'Authentication required' });
+          return reply.status(401).send(UnauthorizedPayload);
         }
       } else {
         const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
@@ -476,7 +476,7 @@ export const registerTransactionsRoutes = (
           profileId = fallbackProfile._id.toHexString();
           app.log.warn('Bypassing authentication for local transaction testing');
         } else {
-          return reply.status(401).send({ error: 'Unauthorized', message: 'Authentication required' });
+          return reply.status(401).send(UnauthorizedPayload);
         }
       } else {
         const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
@@ -595,7 +595,7 @@ export const registerTransactionsRoutes = (
           profileId = fallbackProfile._id.toHexString();
           app.log.warn('Bypassing authentication for local transaction testing');
         } else {
-          return reply.status(401).send({ error: 'Unauthorized', message: 'Authentication required' });
+          return reply.status(401).send(UnauthorizedPayload);
         }
       } else {
         const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
@@ -691,7 +691,7 @@ export const registerTransactionsRoutes = (
           profileId = fallbackProfile._id.toHexString();
           app.log.warn('Bypassing authentication for local transaction testing');
         } else {
-          return reply.status(401).send({ error: 'Unauthorized', message: 'Authentication required' });
+          return reply.status(401).send(UnauthorizedPayload);
         }
       } else {
         const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
@@ -752,7 +752,7 @@ export const registerTransactionsRoutes = (
           profileId = fallbackProfile._id.toHexString();
           app.log.warn('Bypassing authentication for local transaction testing');
         } else {
-          return reply.status(401).send({ error: 'Unauthorized', message: 'Authentication required' });
+          return reply.status(401).send(UnauthorizedPayload);
         }
       } else {
         const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);

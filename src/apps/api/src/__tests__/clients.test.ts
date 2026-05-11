@@ -106,6 +106,8 @@ const createProfileStoreMock = (profile = createProfileFixture()): ProfileStore 
 });
 
 type FakeCollection = {
+  indexes: ReturnType<typeof vi.fn>;
+  dropIndex: ReturnType<typeof vi.fn>;
   createIndex: ReturnType<typeof vi.fn>;
   insertOne: ReturnType<typeof vi.fn>;
   findOne: ReturnType<typeof vi.fn>;
@@ -127,6 +129,15 @@ const createFakeClientsDb = (): {
   let createIndexCalls = 0;
 
   const clientsCollection: FakeCollection = {
+    indexes: vi.fn(() =>
+      Promise.resolve([
+        { name: '_id_' },
+        { name: 'clients_profileId' },
+        { name: 'clients_profileId_name' },
+        { name: 'clients_profileId_email' },
+      ]),
+    ),
+    dropIndex: vi.fn(() => Promise.resolve(undefined)),
     createIndex: vi.fn(() => {
       createIndexCalls += 1;
       return Promise.resolve('index_created');
@@ -360,7 +371,11 @@ afterEach(async () => {
 describe('clients store', () => {
   it('should create indexes correctly', async () => {
     const createIndexMock = vi.fn().mockResolvedValue('index_created');
-    const collectionMock = { createIndex: createIndexMock };
+    const collectionMock = {
+      indexes: vi.fn().mockResolvedValue([{ name: '_id_' }]),
+      dropIndex: vi.fn().mockResolvedValue(undefined),
+      createIndex: createIndexMock,
+    };
     const dbMock = { collection: vi.fn(() => collectionMock) } as unknown as Db;
     const store = createClientsStore(() => dbMock);
 
@@ -369,8 +384,8 @@ describe('clients store', () => {
     expect(createIndexMock).toHaveBeenCalledWith({ profileId: 1 }, { name: 'clients_profileId' });
     expect(createIndexMock).toHaveBeenCalledWith({ profileId: 1, name: 1 }, { name: 'clients_profileId_name' });
     expect(createIndexMock).toHaveBeenCalledWith(
-      { profileId: 1, documento: 1 },
-      { name: 'clients_profileId_documento', unique: true, sparse: true },
+      { profileId: 1, document: 1 },
+      { name: 'clients_profileId_document', unique: true, sparse: true },
     );
     expect(createIndexMock).toHaveBeenCalledWith(
       { profileId: 1, email: 1 },

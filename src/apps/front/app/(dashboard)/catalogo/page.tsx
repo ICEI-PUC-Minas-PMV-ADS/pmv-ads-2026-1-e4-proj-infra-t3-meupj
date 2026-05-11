@@ -165,6 +165,8 @@ export default function CatalogoPage() {
             <button
               type="button"
               onClick={() => { setMobileSearch((v) => !v); if (mobileSearch) setSearch(''); }}
+              aria-label={mobileSearch ? 'Fechar busca' : 'Abrir busca'}
+              title={mobileSearch ? 'Fechar busca' : 'Abrir busca'}
               className={`md:hidden p-2 rounded-lg border transition-colors ${
                 mobileSearch
                   ? 'bg-indigo-50 border-indigo-300 text-indigo-600'
@@ -389,6 +391,8 @@ export default function CatalogoPage() {
                         e.stopPropagation();
                         setOpenMenuId(openMenuId === item._id ? null : item._id);
                       }}
+                      aria-label={`Abrir ações de ${item.name}`}
+                      title={`Abrir ações de ${item.name}`}
                       className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors flex-shrink-0"
                     >
                       <MoreVertical size={18} />
@@ -456,6 +460,8 @@ export default function CatalogoPage() {
         {/* FAB mobile */}
         <Link
           href="/catalogo/novo"
+          aria-label="Novo item"
+          title="Novo item"
           className="sm:hidden fixed bottom-20 right-6 w-14 h-14 bg-indigo-600 text-white rounded-full flex items-center justify-center shadow-lg shadow-indigo-600/30 hover:bg-indigo-700 transition-colors active:scale-95 z-40"
         >
           <Plus size={24} />
@@ -475,7 +481,7 @@ export default function CatalogoPage() {
                 <h3 className="text-base font-bold text-gray-900">Excluir item?</h3>
                 <p className="text-sm text-gray-500 mt-1.5 leading-relaxed">
                   Tem certeza que deseja excluir{' '}
-                  <span className="font-semibold text-gray-700">"{confirmDelete.name}"</span>?
+                  <span className="font-semibold text-gray-700">&quot;{confirmDelete.name}&quot;</span>?
                   {' '}Esta ação não pode ser desfeita.
                 </p>
               </div>

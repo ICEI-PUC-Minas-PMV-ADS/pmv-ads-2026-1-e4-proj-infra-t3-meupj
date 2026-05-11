@@ -144,6 +144,8 @@ export default function ClientesPage() {
             <button
               type="button"
               onClick={() => { setMobileSearch((v) => !v); if (mobileSearch) setSearch(''); }}
+              aria-label={mobileSearch ? 'Fechar busca' : 'Abrir busca'}
+              title={mobileSearch ? 'Fechar busca' : 'Abrir busca'}
               className={`md:hidden p-2 rounded-lg border transition-colors ${mobileSearch
                 ? 'bg-indigo-50 border-indigo-300 text-indigo-600'
                 : 'border-gray-200 text-gray-500 hover:bg-gray-50'
@@ -273,6 +275,8 @@ export default function ClientesPage() {
                         e.stopPropagation();
                         setOpenMenuId(openMenuId === client._id ? null : client._id);
                       }}
+                      aria-label={`Abrir ações de ${client.name}`}
+                      title={`Abrir ações de ${client.name}`}
                       className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors flex-shrink-0"
                     >
                       <MoreVertical size={16} />
@@ -351,6 +355,8 @@ export default function ClientesPage() {
         {/* FAB mobile */}
         <Link
           href="/clientes/novo"
+          aria-label="Novo cliente"
+          title="Novo cliente"
           className="sm:hidden fixed bottom-20 right-6 w-14 h-14 bg-indigo-600 text-white rounded-full flex items-center justify-center shadow-lg shadow-indigo-600/30 hover:bg-indigo-700 transition-colors active:scale-95 z-40"
         >
           <Plus size={24} />

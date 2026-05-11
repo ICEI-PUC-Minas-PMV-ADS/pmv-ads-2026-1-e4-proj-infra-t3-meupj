@@ -305,7 +305,12 @@ export default function FinanceiroPage() {
            )}
            
            {/* Mobile FAB */}
-           <Link href="/dashboard/novo" className="sm:hidden fixed bottom-20 right-6 w-14 h-14 bg-indigo-600 text-white rounded-full flex items-center justify-center shadow-lg shadow-indigo-600/30 hover:bg-indigo-700 transition-colors active:scale-95 z-40">
+           <Link
+             href="/dashboard/novo"
+             aria-label="Novo lançamento"
+             title="Novo lançamento"
+             className="sm:hidden fixed bottom-20 right-6 w-14 h-14 bg-indigo-600 text-white rounded-full flex items-center justify-center shadow-lg shadow-indigo-600/30 hover:bg-indigo-700 transition-colors active:scale-95 z-40"
+           >
               <Plus size={24} />
            </Link>
         </div>

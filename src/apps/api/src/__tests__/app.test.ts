@@ -553,6 +553,20 @@ describe('profile hook', () => {
     expect(ensureByAuthUserId).toHaveBeenCalledTimes(1);
     expect(ensureByAuthUserId).toHaveBeenCalledWith('new-auth-user');
   });
+
+  it('creates profile when hook payload provides ObjectId-like _id', async () => {
+    const ensureByAuthUserId = vi.fn().mockResolvedValue(createProfileFixture('new-auth-user'));
+    const hook = createOnUserCreatedHook({ ensureByAuthUserId });
+
+    await hook({
+      _id: {
+        toHexString: () => 'new-auth-user',
+      },
+    });
+
+    expect(ensureByAuthUserId).toHaveBeenCalledTimes(1);
+    expect(ensureByAuthUserId).toHaveBeenCalledWith('new-auth-user');
+  });
 });
 
 describe('profile route', () => {

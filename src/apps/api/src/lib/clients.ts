@@ -46,6 +46,12 @@ const ensureClientsIndexes = async (db: Db): Promise<void> => {
   }
 
   const collection = getClientsCollection(db);
+  const indexes = await collection.indexes();
+
+  const hasLegacyDocumentoIndex = indexes.some((index) => index.name === 'clients_profileId_documento');
+  if (hasLegacyDocumentoIndex) {
+    await collection.dropIndex('clients_profileId_documento');
+  }
 
   await collection.createIndex(
     { profileId: 1 },
@@ -62,9 +68,9 @@ const ensureClientsIndexes = async (db: Db): Promise<void> => {
   );
 
   await collection.createIndex(
-    { profileId: 1, documento: 1 },
+    { profileId: 1, document: 1 },
     {
-      name: 'clients_profileId_documento',
+      name: 'clients_profileId_document',
       unique: true,
       sparse: true,
     },

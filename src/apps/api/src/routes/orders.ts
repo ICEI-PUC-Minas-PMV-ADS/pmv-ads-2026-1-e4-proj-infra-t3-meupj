@@ -158,7 +158,7 @@ const UnauthorizedSchema = Type.Object({
 const BadRequestSchema = Type.Object({
   error: Type.Literal('Bad Request'),
   message: Type.String(),
-  statusCode: Type.Literal(401),
+  statusCode: Type.Literal(400),
 });
 
 const NotFoundSchema = Type.Object({
@@ -169,7 +169,7 @@ const NotFoundSchema = Type.Object({
 
 const ConflictSchema = Type.Object({
   error: Type.Literal('Conflict'),
-  message: Type.Literal('Order has confirmed transactions and cannot be deleted'),
+  message: Type.String(),
   statusCode: Type.Literal(409),
 });
 
@@ -303,7 +303,7 @@ export const registerOrdersRoutes = (
           const fallbackProfile = await dependencies.profileStore.ensureByAuthUserId('dev-user-id');
           profileId = fallbackProfile._id.toHexString();
         } else {
-          return reply.status(401).send({ error: 'Unauthorized', message: 'Authentication required' });
+          return reply.status(401).send(UnauthorizedPayload);
         }
       } else {
         const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
@@ -394,7 +394,7 @@ export const registerOrdersRoutes = (
           const fallbackProfile = await dependencies.profileStore.ensureByAuthUserId('dev-user-id');
           profileId = fallbackProfile._id.toHexString();
         } else {
-          return reply.status(401).send({ error: 'Unauthorized', message: 'Authentication required' });
+          return reply.status(401).send(UnauthorizedPayload);
         }
       } else {
         const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
@@ -588,7 +588,7 @@ export const registerOrdersRoutes = (
           const fallbackProfile = await dependencies.profileStore.ensureByAuthUserId('dev-user-id');
           profileId = fallbackProfile._id.toHexString();
         } else {
-          return reply.status(401).send({ error: 'Unauthorized', message: 'Authentication required' });
+          return reply.status(401).send(UnauthorizedPayload);
         }
       } else {
         const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);

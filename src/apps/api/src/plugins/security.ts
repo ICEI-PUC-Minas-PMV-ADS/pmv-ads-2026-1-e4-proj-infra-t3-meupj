@@ -22,6 +22,8 @@ export const registerSecurityPlugins = async (app: FastifyInstance): Promise<voi
   await app.register(cors, {
     origin: corsOrigins.length > 0 ? corsOrigins : false,
     credentials: corsOrigins.length > 0,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   });
 
   app.addHook('onSend', async (_request, reply, payload) => {
