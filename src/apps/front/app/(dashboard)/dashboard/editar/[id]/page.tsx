@@ -1,9 +1,9 @@
 import EditTransactionClient from './EditTransactionClient';
 
-export const dynamicParams = true;
+export const dynamicParams = false;
 
 export async function generateStaticParams() {
-  return [];
+  return [{ id: 'static' }];
 }
 
 export default function Page({ params }: { params: Promise<{ id: string }> }) {

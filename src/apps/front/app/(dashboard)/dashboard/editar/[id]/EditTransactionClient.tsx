@@ -42,6 +42,8 @@ export default function EditTransactionClient({ params }: EditTransactionClientP
   // Fetch initial data
   useEffect(() => {
     async function fetchData() {
+      if (id === 'static') return;
+      
       try {
         setLoading(true);
         const [transaction, ordersResponse] = await Promise.all([

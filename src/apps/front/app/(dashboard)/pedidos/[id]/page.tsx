@@ -1,9 +1,9 @@
 import OrderDetailClient from './OrderDetailClient';
 
-export const dynamicParams = true;
+export const dynamicParams = false;
 
 export async function generateStaticParams() {
-  return [];
+  return [{ id: 'static' }];
 }
 
 export default function Page() {
