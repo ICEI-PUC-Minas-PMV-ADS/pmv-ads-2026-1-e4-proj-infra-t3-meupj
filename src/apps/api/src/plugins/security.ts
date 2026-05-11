@@ -26,7 +26,15 @@ export const registerSecurityPlugins = async (app: FastifyInstance): Promise<voi
   const isWildcard = corsOrigins.includes('*');
   
   await app.register(cors, {
-    origin: isWildcard ? true : corsOrigins.length > 0 ? corsOrigins : false,
+    origin: isWildcard 
+      ? (origin, cb) => {
+          // If wildcard is set, allow any origin by mirroring it
+          // This is necessary for credentials: true to work
+          cb(null, origin || true);
+        }
+      : corsOrigins.length > 0 
+        ? corsOrigins 
+        : false,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
