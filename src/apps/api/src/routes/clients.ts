@@ -428,6 +428,43 @@ export const registerClientsRoutes = (
     },
   );
 
+  app.get(
+    '/api/clients/:clientId',
+    {
+      schema: {
+        params: ClientParamsSchema,
+        response: {
+          200: ClientResponseSchema,
+          401: UnauthorizedSchema,
+          404: NotFoundSchema,
+        },
+      },
+    },
+    async (request, reply) => {
+      const session = await dependencies.authService.getSessionFromHeaders(request.headers);
+
+      if (!session) {
+        return reply.status(401).send(UnauthorizedPayload);
+      }
+
+      const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
+      const params = request.params as ClientParams;
+      const clientObjectId = new ObjectId(params.clientId);
+
+      const collection = dependencies.clientsStore.getCollection();
+      const client = await collection.findOne({
+        _id: clientObjectId,
+        profileId: profile._id.toHexString(),
+      });
+
+      if (!client) {
+        return reply.status(404).send(NotFoundPayload);
+      }
+
+      return reply.status(200).send(toClientResponse(client));
+    },
+  );
+
   app.put(
     '/api/clients/:clientId',
     {

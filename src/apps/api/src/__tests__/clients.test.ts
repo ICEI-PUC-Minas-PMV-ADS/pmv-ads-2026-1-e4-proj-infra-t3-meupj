@@ -468,6 +468,54 @@ describe('clients GET /api/clients', () => {
   });
 });
 
+// ===== GET /api/clients/:clientId TESTS =====
+describe('clients GET /api/clients/:clientId', () => {
+  it('should return a client by id when it belongs to the authenticated profile', async () => {
+    const profile = createProfileFixture('auth-user-1');
+    const fakeDb = createFakeClientsDb();
+    const item = createClientFixture(profile._id.toHexString(), { name: 'Cliente Detalhe' });
+    fakeDb.records.set(item._id.toHexString(), item);
+
+    app = await buildTestApp({
+      authService: createAuthServiceMock({
+        getSessionFromHeaders: vi.fn().mockResolvedValue({ user: { id: 'auth-user-1' } }),
+      }),
+      profileStore: createProfileStoreMock(profile),
+      fakeDb,
+    });
+
+    const response = await app.inject({
+      method: 'GET',
+      url: `/api/clients/${item._id.toHexString()}`,
+    });
+
+    expect(response.statusCode).toBe(200);
+    const data = response.json();
+    expect(data._id).toBe(item._id.toHexString());
+    expect(data.name).toBe('Cliente Detalhe');
+  });
+
+  it('should return 404 when client does not exist for the authenticated profile', async () => {
+    const profile = createProfileFixture('auth-user-1');
+    const fakeDb = createFakeClientsDb();
+
+    app = await buildTestApp({
+      authService: createAuthServiceMock({
+        getSessionFromHeaders: vi.fn().mockResolvedValue({ user: { id: 'auth-user-1' } }),
+      }),
+      profileStore: createProfileStoreMock(profile),
+      fakeDb,
+    });
+
+    const response = await app.inject({
+      method: 'GET',
+      url: `/api/clients/${new ObjectId().toHexString()}`,
+    });
+
+    expect(response.statusCode).toBe(404);
+  });
+});
+
 // ===== POST /api/clients TESTS =====
 describe('clients POST /api/clients', () => {
   it('should return 401 when session is missing', async () => {

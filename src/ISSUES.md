@@ -65,3 +65,6 @@
 - [x] Criar script sign-in no Bruno para capturar e persistir cookie de sessão
 - [x] Atualizar descrições das issues abertas da Etapa 2 no Linear com lógica técnica em inglês e padronização de contexto atual
 - [x] Configurar validação de formatação com Prettier no pipeline Turborepo (scripts `format` e `format:check`)
+- [x] Padronizar configuração de ambiente local para execução conjunta de frontend (3000) e API (3001)
+- [x] Corrigir paginação da listagem de pedidos para aceitar `page`/`limit` como querystring numérica e adicionar teste de regressão
+- [x] Corrigir abertura de detalhe em clientes e pedidos com inclusão dos endpoints `GET /api/clients/:clientId` e `GET /api/orders/:orderId`, além de ajuste de hook-order em `pedidos/[id]`

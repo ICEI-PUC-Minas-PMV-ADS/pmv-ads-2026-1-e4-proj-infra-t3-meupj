@@ -22,6 +22,9 @@
 - Endpoint autenticado `PUT /api/catalog/:itemId` para edição de itens de catálogo no escopo do perfil.
 - Endpoint autenticado `DELETE /api/catalog/:itemId` para exclusão de itens de catálogo com validação de vínculo em pedidos.
 - Endpoint autenticado `GET /api/catalog` para listagem com paginação, busca, filtros e ordenação.
+- Endpoint autenticado `GET /api/clients/:clientId` para detalhamento de cliente no escopo do perfil.
+- Endpoint autenticado `GET /api/orders` com paginação robusta (aceita `page` e `limit` como string numérica de querystring ou inteiro).
+- Endpoint autenticado `GET /api/orders/:orderId` para detalhamento de pedido no escopo do perfil.
 - Camada base HTTP com CORS, error handler global e endpoint de health (`GET /api/health`).
 - Base de qualidade com lint, build, testes automatizados (Vitest) e validação de formatação (Prettier).
 - Regras de formatação padronizadas no monorepo (`.prettierignore` e `.prettierrc.json`).
@@ -60,6 +63,9 @@
   - Endpoint `PUT /api/catalog/:itemId` com edição de item de catálogo autenticado.
   - Endpoint `DELETE /api/catalog/:itemId` com exclusão de item de catálogo autenticado e validação de vínculos.
   - Endpoint `GET /api/catalog` com listagem autenticada, busca, filtros, ordenação e paginação.
+  - Endpoint `GET /api/clients/:clientId` com leitura de cliente autenticado por id no escopo do perfil.
+  - Endpoint `GET /api/orders` com listagem autenticada e normalização segura de `page`/`limit` vindos da querystring.
+  - Endpoint `GET /api/orders/:orderId` com leitura de pedido autenticado por id no escopo do perfil.
   - Coleção Bruno (`apps/api/bruno/meupj`) com requests de health, sign-up, sign-in, profile e catalog.
   - Variáveis obrigatórias de auth: `BETTER_AUTH_SECRET` e `BETTER_AUTH_URL`.
   - Endpoint de health para status de aplicação e dependências.
@@ -69,6 +75,8 @@
 - Recursos operacionais:
   - Scripts de desenvolvimento, build, lint e teste por workspace.
   - Scripts de formatação e validação de formatação (`format` e `format:check`) por workspace.
+  - Padrão local para execução simultânea: frontend em `http://localhost:3000` e API em `http://localhost:3001`.
+  - Frontend deve definir `NEXT_PUBLIC_API_URL=http://localhost:3001` em `apps/front/.env.local` para alinhar todas as chamadas HTTP.
   - Execução isolada por filtro: `pnpm --filter <projeto> <comando>`.
   - Referência prática da API: `pnpm --filter @repo/api <comando>`.
   - Execução global via Turborepo a partir da raiz `/src`.

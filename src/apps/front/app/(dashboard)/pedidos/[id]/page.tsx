@@ -137,26 +137,6 @@ export default function PedidoDetalhePage() {
   const subtotal = items.reduce((sum, i) => sum + i.unitPrice * i.quantity, 0);
   const total = subtotal - discount + fees;
 
-  if (loadingInitial) {
-    return (
-      <div className="flex flex-col h-full bg-white items-center justify-center gap-4 text-gray-400">
-        <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
-        <p className="font-medium">Carregando pedido...</p>
-      </div>
-    );
-  }
-
-  if (!order) {
-    return (
-      <div className="flex flex-col h-full bg-white items-center justify-center gap-4 text-gray-400">
-        <p className="font-medium">Pedido não encontrado</p>
-        <Link href="/pedidos" className="text-indigo-600 text-sm font-medium hover:underline">
-          Voltar para pedidos
-        </Link>
-      </div>
-    );
-  }
-
   const addItem = () =>
     setItems((p) => [...p, { id: Date.now(), catalogItemId: '', name: '', quantity: 1, unitPrice: 0 }]);
 
@@ -221,6 +201,26 @@ export default function PedidoDetalhePage() {
       setLoading(false);
     }
   }, [id, router]);
+
+  if (loadingInitial) {
+    return (
+      <div className="flex flex-col h-full bg-white items-center justify-center gap-4 text-gray-400">
+        <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+        <p className="font-medium">Carregando pedido...</p>
+      </div>
+    );
+  }
+
+  if (!order) {
+    return (
+      <div className="flex flex-col h-full bg-white items-center justify-center gap-4 text-gray-400">
+        <p className="font-medium">Pedido não encontrado</p>
+        <Link href="/pedidos" className="text-indigo-600 text-sm font-medium hover:underline">
+          Voltar para pedidos
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-full bg-white">
