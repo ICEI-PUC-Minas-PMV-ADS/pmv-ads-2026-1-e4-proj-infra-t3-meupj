@@ -3,30 +3,24 @@
 import Link from 'next/link';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { useState, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/auth.context';
 import { z } from 'zod';
 import { Input, Button, Alert, Divider } from '@/components/ui';
 
-// ─── Schema ───────────────────────────────────────────────────────────────────
-
 const loginSchema = z.object({
-  email:    z.string().email('E-mail inválido'),
+  email: z.string().email('E-mail inválido'),
   password: z.string().min(1, 'Informe sua senha'),
 });
 
-// ─── Component ────────────────────────────────────────────────────────────────
-
 export default function LoginPage() {
-  const router = useRouter();
   const { login } = useAuth();
 
-  const [email,        setEmail]        = useState('');
-  const [password,     setPassword]     = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [loading,      setLoading]      = useState(false);
-  const [error,        setError]        = useState('');
-  const [fieldErrors,  setFieldErrors]  = useState<{ email?: string; password?: string }>({});
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({});
 
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,9 +28,12 @@ export default function LoginPage() {
     setFieldErrors({});
 
     const result = loginSchema.safeParse({ email, password });
+
     if (!result.success) {
       const errs: Record<string, string> = {};
-      result.error.issues.forEach((i) => { if (i.path[0]) errs[i.path[0] as string] = i.message; });
+      result.error.issues.forEach((issue) => {
+        if (issue.path[0]) errs[issue.path[0] as string] = issue.message;
+      });
       setFieldErrors(errs);
       return;
     }
@@ -49,13 +46,17 @@ export default function LoginPage() {
     } finally {
       setLoading(false);
     }
-  }, [email, password, router]);
+  }, [email, password, login]);
 
   return (
-    <div className="flex flex-col gap-8 w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Entrar</h1>
-        <p className="mt-2 text-gray-500">Acesse sua conta para continuar</p>
+    <div className="flex w-full flex-col gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="space-y-2">
+        <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+          Entrar
+        </h1>
+        <p className="text-sm leading-6 text-gray-500">
+          Acesse sua conta para continuar gerenciando seus clientes, pedidos e serviços.
+        </p>
       </div>
 
       {error && <Alert variant="error">{error}</Alert>}
@@ -87,8 +88,9 @@ export default function LoginPage() {
               <button
                 type="button"
                 tabIndex={-1}
-                onClick={() => setShowPassword((v) => !v)}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
+                onClick={() => setShowPassword((value) => !value)}
+                className="rounded-md p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
+                aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
               >
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
@@ -97,10 +99,11 @@ export default function LoginPage() {
             autoComplete="current-password"
             disabled={loading}
           />
+
           <div className="flex justify-end">
             <Link
               href="/recuperacao-senha"
-              className="text-sm font-medium text-indigo-600 hover:text-indigo-700 hover:underline transition-all"
+              className="text-sm font-medium text-indigo-600 transition-all hover:text-indigo-700 hover:underline"
             >
               Esqueci minha senha
             </Link>
@@ -122,7 +125,10 @@ export default function LoginPage() {
 
         <p className="text-center text-sm text-gray-600">
           Não tem conta?{' '}
-          <Link href="/cadastro" className="font-semibold text-indigo-600 hover:text-indigo-700 hover:underline transition-all">
+          <Link
+            href="/cadastro"
+            className="font-semibold text-indigo-600 transition-all hover:text-indigo-700 hover:underline"
+          >
             Cadastre-se
           </Link>
         </p>
