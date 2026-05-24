@@ -12,7 +12,9 @@ import {
   SettingsScreen,
   LoginScreen,
   SignUpScreen,
-  NewTransactionScreen
+  NewTransactionScreen,
+  NewOrderScreen,
+  OrderDetailScreen,
 } from '../screens';
 
 const Tab = createBottomTabNavigator();
@@ -97,6 +99,16 @@ export default function AppNavigator() {
         <Stack.Screen name="SignUp" component={SignUpScreen} />
         <Stack.Screen name="Main" component={MainTabNavigator} />
         <Stack.Screen name="NewTransaction" component={NewTransactionScreen} />
+        <Stack.Screen 
+          name="NewOrder" 
+          component={NewOrderScreen}
+          options={{ title: 'Novo Pedido', headerShown: false }}
+        />
+        <Stack.Screen 
+          name="OrderDetail" 
+          component={OrderDetailScreen}
+          options={{ title: 'Detalhes do Pedido', headerShown: false }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );

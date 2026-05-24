@@ -5,4 +5,6 @@ export { default as NewTransactionScreen } from './dashboard/novo/NewTransaction
 export { default as ClientsScreen } from './clients/ClientsScreen';
 export { default as CatalogScreen } from './catalog/CatalogScreen';
 export { default as OrdersScreen } from './orders/OrdersScreen';
+export { default as NewOrderScreen } from './orders/NewOrderScreen';
+export { default as OrderDetailScreen } from './orders/OrderDetailScreen';
 export { default as SettingsScreen } from './settings/SettingsScreen';
