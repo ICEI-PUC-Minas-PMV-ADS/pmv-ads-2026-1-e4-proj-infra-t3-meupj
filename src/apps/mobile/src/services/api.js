@@ -7,11 +7,15 @@ import { CONFIG } from '../config';
 export const apiFetch = async (endpoint, options = {}) => {
   const url = `${CONFIG.API_URL}${endpoint}`;
   
+  // Só inclui Content-Type quando há body (ex: POST/PUT). Requests sem body como DELETE
+  // recebem 400 do servidor se esse header for enviado com body vazio.
+  const contentType = options.body !== undefined ? { 'Content-Type': 'application/json' } : {};
+
   const defaultOptions = {
     headers: {
-      'Content-Type': 'application/json',
-      // No mobile, os cookies não são automáticos como na Web se não usarmos credentials
+      ...contentType,
     },
+    credentials: 'include',
     ...options,
   };
 

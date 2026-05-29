@@ -15,6 +15,8 @@ import {
   NewTransactionScreen,
   NewOrderScreen,
   OrderDetailScreen,
+  CatalogDetailScreen,
+  NewCatalogScreen,
 } from '../screens';
 
 const Tab = createBottomTabNavigator();
@@ -108,6 +110,16 @@ export default function AppNavigator() {
           name="OrderDetail" 
           component={OrderDetailScreen}
           options={{ title: 'Detalhes do Pedido', headerShown: false }}
+        />
+        <Stack.Screen
+          name="CatalogDetail"
+          component={CatalogDetailScreen}
+          options={{ title: 'Item do Catálogo', headerShown: false }}
+        />
+        <Stack.Screen
+          name="NewCatalog"
+          component={NewCatalogScreen}
+          options={{ title: 'Novo Item', headerShown: false }}
         />
       </Stack.Navigator>
     </NavigationContainer>
