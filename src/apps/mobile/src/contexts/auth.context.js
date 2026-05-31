@@ -1,49 +1,88 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+
 import { AuthService } from '../services/auth.service';
+import { setUnauthorizedHandler } from '../services/api';
 
 const AuthContext = createContext({});
 
-/**
- * Provedor de Autenticação
- * Gerencia o estado global do usuário no App
- */
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    // Aqui os colegas podem implementar a verificação de token persistente (AsyncStorage)
-    checkAuth();
-  }, []);
-
-  const checkAuth = async () => {
+  const refreshProfile = useCallback(async () => {
     try {
       const profile = await AuthService.getProfile();
-      if (profile) setUser(profile.user);
-    } catch (error) {
+      setUser(profile?.user ?? null);
+      return profile;
+    } catch {
       setUser(null);
-    } finally {
-      setLoading(false);
+      return null;
     }
-  };
+  }, []);
 
-  const login = async (credentials) => {
-    const data = await AuthService.login(credentials);
-    // Lógica para salvar usuário no estado e persistir token
-    // setUser(data.user);
-    return data;
-  };
+  useEffect(() => {
+    let mounted = true;
 
-  const logout = async () => {
+    const loadAuthState = async () => {
+      setLoading(true);
+
+      try {
+        const profile = await AuthService.getProfile();
+        if (mounted) {
+          setUser(profile?.user ?? null);
+        }
+      } catch {
+        if (mounted) {
+          setUser(null);
+        }
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    const disposeUnauthorizedHandler = setUnauthorizedHandler(() => {
+      setUser(null);
+      setLoading(false);
+    });
+
+    loadAuthState();
+
+    return () => {
+      mounted = false;
+      disposeUnauthorizedHandler();
+    };
+  }, []);
+
+  const login = useCallback(async (credentials) => {
+    const profile = await AuthService.login(credentials);
+    setUser(profile?.user ?? null);
+  }, []);
+
+  const register = useCallback(async (payload) => {
+    const profile = await AuthService.register(payload);
+    setUser(profile?.user ?? null);
+  }, []);
+
+  const logout = useCallback(async () => {
     await AuthService.logout();
     setUser(null);
-  };
+  }, []);
 
-  return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
-      {children}
-    </AuthContext.Provider>
+  const contextValue = useMemo(
+    () => ({
+      user,
+      loading,
+      login,
+      register,
+      logout,
+      refreshProfile,
+    }),
+    [user, loading, login, register, logout, refreshProfile],
   );
+
+  return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => useContext(AuthContext);

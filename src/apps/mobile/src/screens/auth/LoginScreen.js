@@ -1,9 +1,40 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { Mail, Lock, Eye } from 'lucide-react-native';
+import { Mail, Lock } from 'lucide-react-native';
+
 import { Input, Button } from '../../components/ui';
+import { useAuth } from '../../contexts/auth.context';
 
 const LoginScreen = ({ navigation }) => {
+  const { login } = useAuth();
+
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleSubmit = async () => {
+    setError('');
+
+    if (!email.trim() || !password.trim()) {
+      setError('Informe e-mail e senha.');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      await login({
+        email: email.trim(),
+        password,
+      });
+    } catch (submitError) {
+      setError(submitError instanceof Error ? submitError.message : 'Falha ao autenticar.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -12,30 +43,30 @@ const LoginScreen = ({ navigation }) => {
       </View>
 
       <View style={styles.form}>
-        <Input 
+        {error ? <Text style={styles.errorText}>{error}</Text> : null}
+
+        <Input
           label="E-mail"
           placeholder="seu@email.com"
           icon={Mail}
           keyboardType="email-address"
           autoCapitalize="none"
+          value={email}
+          onChangeText={setEmail}
+          editable={!loading}
         />
 
-        <View style={styles.passwordContainer}>
-          <Input 
-            label="Senha"
-            placeholder="••••••••"
-            icon={Lock}
-            secureTextEntry
-          />
-          <TouchableOpacity style={styles.forgotPassword}>
-            <Text style={styles.forgotPasswordText}>Esqueci minha senha</Text>
-          </TouchableOpacity>
-        </View>
-
-        <Button 
-          title="Entrar"
-          onPress={() => navigation.navigate('Main')}
+        <Input
+          label="Senha"
+          placeholder="••••••••"
+          icon={Lock}
+          secureTextEntry
+          value={password}
+          onChangeText={setPassword}
+          editable={!loading}
         />
+
+        <Button title="Entrar" onPress={handleSubmit} loading={loading} disabled={loading} />
 
         <View style={styles.footer}>
           <Text style={styles.footerText}>Não tem conta? </Text>
@@ -71,16 +102,10 @@ const styles = StyleSheet.create({
   form: {
     gap: 20,
   },
-  passwordContainer: {
-    gap: 4,
-  },
-  forgotPassword: {
-    alignSelf: 'flex-end',
-  },
-  forgotPasswordText: {
-    fontSize: 14,
+  errorText: {
+    color: '#DC2626',
+    fontSize: 13,
     fontWeight: '500',
-    color: '#4F46E5',
   },
   footer: {
     flexDirection: 'row',
