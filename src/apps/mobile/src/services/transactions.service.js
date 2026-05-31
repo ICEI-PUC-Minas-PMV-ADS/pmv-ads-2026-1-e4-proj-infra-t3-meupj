@@ -24,7 +24,13 @@ export const TransactionsService = {
     
     Object.entries(query).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
-        params.set(key, String(value));
+        // Se for limit ou page, garante que estamos tentando enviar como número 
+        // (embora URLSearchParams sempre converta para string, o objetivo é ser explícito)
+        if (key === 'limit' || key === 'page') {
+          params.set(key, Number(value).toString());
+        } else {
+          params.set(key, String(value));
+        }
       }
     });
 
