@@ -181,8 +181,8 @@ const TransactionSortOrderSchema = Type.Union([Type.Literal('asc'), Type.Literal
 
 const TransactionListQuerySchema = Type.Object(
   {
-    page: Type.Optional(Type.Integer({ minimum: 1 })),
-    limit: Type.Optional(Type.Integer({ minimum: 1 })),
+    page: Type.Optional(Type.Any()),
+    limit: Type.Optional(Type.Any()),
     q: Type.Optional(Type.String()),
     type: Type.Optional(Type.Union([Type.Literal('income'), Type.Literal('expense')])),
     status: Type.Optional(Type.Union([
@@ -531,10 +531,10 @@ export const registerTransactionsRoutes = (
         profileId = profile._id.toHexString();
       }
 
-      const query = request.query as TransactionListQuery;
+      const query = request.query as any;
 
-      const page = query.page ?? 1;
-      const limit = query.limit ?? 20;
+      const page = Math.max(1, parseInt(query.page ?? '1', 10));
+      const limit = Math.max(1, parseInt(query.limit ?? '20', 10));
       const sortBy = query.sortBy ?? 'createdAt';
       const sortOrder = query.sortOrder ?? 'desc';
       const skip = (page - 1) * limit;
