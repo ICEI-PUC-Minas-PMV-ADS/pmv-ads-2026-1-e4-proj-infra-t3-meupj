@@ -69,3 +69,8 @@
 - [x] Corrigir paginação da listagem de pedidos para aceitar `page`/`limit` como querystring numérica e adicionar teste de regressão
 - [x] Corrigir abertura de detalhe em clientes e pedidos com inclusão dos endpoints `GET /api/clients/:clientId` e `GET /api/orders/:orderId`, além de ajuste de hook-order em `pedidos/[id]`
 - [x] Implementar módulo de configurações no frontend com edição de usuário/empresa e alteração de senha integrada ao Better Auth
+- [x] Implementar módulo de configurações no mobile com Better Auth Expo (auth guard, sessão por cookie manual, edição de usuário/empresa e alteração de senha)
+- [x] Corrigir falha de lint na API por resolução de `typescript-eslint`, alinhar preset compartilhado de ESLint ao estado atual do projeto e remover símbolos não utilizados bloqueantes
+- [x] Habilitar smoke de execução/build web do app mobile Expo com inclusão de `react-native-web` e alinhamento de versão entre `react` e `react-dom`
+- [x] Corrigir autenticação web no mobile Expo usando Better Auth sem plugin Expo no browser e validar fluxo E2E (cadastro, login, persistência de sessão, logout, novo login) via plugin Navegador
+- [x] Corrigir fetches concorrentes em `Clientes` e `Catálogo` no mobile (debounce/race condition), ajustar fallback de `EXPO_PUBLIC_API_URL` por plataforma e validar navegação autenticada na porta `8081` sem erros HTTP

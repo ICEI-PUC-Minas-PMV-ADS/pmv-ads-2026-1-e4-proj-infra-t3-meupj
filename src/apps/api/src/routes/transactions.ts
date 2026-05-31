@@ -322,8 +322,6 @@ type TransactionUpdateBody = Static<typeof TransactionUpdateSchema>;
 
 type TransactionParams = Static<typeof TransactionParamsSchema>;
 
-type TransactionListQuery = Static<typeof TransactionListQuerySchema>;
-
 export type TransactionsRouteDependencies = {
   authService: AuthService;
   profileStore: ProfileStore;

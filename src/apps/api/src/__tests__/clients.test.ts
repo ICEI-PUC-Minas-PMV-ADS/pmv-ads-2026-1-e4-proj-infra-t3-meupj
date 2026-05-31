@@ -7,7 +7,6 @@ import type { AuthService } from '../lib/auth.js';
 import { createClientsStore, type Client, type ClientStore } from '../lib/clients.js';
 import type { MongoService } from '../lib/mongo.js';
 import {
-  createProfileStore,
   type ProfileDocument,
   type ProfileStore,
 } from '../lib/profile.js';

@@ -213,12 +213,6 @@ const BadRequestSchema = Type.Object({
   statusCode: Type.Literal(400),
 });
 
-const BadRequestPayload = Object.freeze({
-  error: 'BadRequest',
-  message: 'Bad request',
-  statusCode: 400,
-});
-
 type ClientCreateBody = Static<typeof ClientCreateSchema>;
 type ClientUpdateBody = Static<typeof ClientUpdateSchema>;
 type ClientParams = Static<typeof ClientParamsSchema>;

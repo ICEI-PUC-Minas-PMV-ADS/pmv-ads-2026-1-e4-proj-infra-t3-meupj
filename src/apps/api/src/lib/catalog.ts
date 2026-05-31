@@ -1,4 +1,4 @@
-import type { Collection, Db, WithId } from 'mongodb';
+import type { Collection, Db } from 'mongodb';
 
 export const CATALOG_COLLECTION_NAME = 'catalog';
 

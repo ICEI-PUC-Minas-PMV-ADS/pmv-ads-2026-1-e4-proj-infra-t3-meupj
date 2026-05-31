@@ -1,3 +1,4 @@
+import { expo } from '@better-auth/expo';
 import { betterAuth } from 'better-auth';
 import { mongodbAdapter } from 'better-auth/adapters/mongodb';
 import { fromNodeHeaders } from 'better-auth/node';
@@ -27,6 +28,17 @@ type CreateAuthServiceOptions = {
   trustedOrigins: string[];
   profileStore: Pick<ProfileStore, 'ensureByAuthUserId'>;
 };
+
+const EXPO_SCHEME_ORIGIN = 'meupj://';
+
+const EXPO_DEV_TRUSTED_ORIGINS = [
+  'exp://',
+  'exp://**',
+  'exp://192.168.*.*:*/**',
+  'exp://10.*.*.*:*/**',
+  'exp://127.0.0.1:*/**',
+  'exp://localhost:*/**',
+];
 
 const isObject = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null;
@@ -117,6 +129,8 @@ export const createAuthService = (options: CreateAuthServiceOptions): AuthServic
         'http://127.0.0.1:3000',
         'http://localhost:3001',
         'http://127.0.0.1:3001',
+        EXPO_SCHEME_ORIGIN,
+        ...(process.env.NODE_ENV === 'development' ? EXPO_DEV_TRUSTED_ORIGINS : []),
         ...options.trustedOrigins,
       ]
         .map((origin) => origin.trim())
@@ -135,6 +149,7 @@ export const createAuthService = (options: CreateAuthServiceOptions): AuthServic
       client: options.client,
       transaction: false,
     }),
+    plugins: [expo()],
     emailAndPassword: {
       enabled: true,
     },
