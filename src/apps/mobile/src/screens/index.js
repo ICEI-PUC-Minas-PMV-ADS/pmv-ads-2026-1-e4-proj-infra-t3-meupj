@@ -3,6 +3,8 @@ export { default as SignUpScreen } from './auth/SignUpScreen';
 export { default as DashboardScreen } from './dashboard/DashboardScreen';
 export { default as NewTransactionScreen } from './dashboard/novo/NewTransactionScreen';
 export { default as ClientsScreen } from './clients/ClientsScreen';
+export { default as ClientDetailScreen } from './clients/ClientDetailScreen';
+export { default as NewClientScreen } from './clients/NewClientScreen';
 export { default as CatalogScreen } from './catalog/CatalogScreen';
 export { default as CatalogDetailScreen } from './catalog/CatalogDetailScreen';
 export { default as NewCatalogScreen } from './catalog/NewCatalogScreen';

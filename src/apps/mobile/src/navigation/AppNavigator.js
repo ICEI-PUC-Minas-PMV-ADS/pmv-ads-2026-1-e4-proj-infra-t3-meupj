@@ -7,6 +7,8 @@ import { LayoutDashboard, Users, Package, ShoppingCart, Settings } from 'lucide-
 import { 
   DashboardScreen, 
   ClientsScreen, 
+  ClientDetailScreen,
+  NewClientScreen,
   CatalogScreen, 
   OrdersScreen, 
   SettingsScreen,
@@ -110,6 +112,16 @@ export default function AppNavigator() {
           name="OrderDetail" 
           component={OrderDetailScreen}
           options={{ title: 'Detalhes do Pedido', headerShown: false }}
+        />
+        <Stack.Screen
+          name="ClientDetail"
+          component={ClientDetailScreen}
+          options={{ title: 'Detalhes do Cliente', headerShown: false }}
+        />
+        <Stack.Screen
+          name="NewClient"
+          component={NewClientScreen}
+          options={{ title: 'Novo Cliente', headerShown: false }}
         />
         <Stack.Screen
           name="CatalogDetail"
