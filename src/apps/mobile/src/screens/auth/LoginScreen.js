@@ -74,6 +74,9 @@ const LoginScreen = ({ navigation }) => {
             <Text style={styles.footerLink}>Cadastre-se</Text>
           </TouchableOpacity>
         </View>
+        <TouchableOpacity onPress={() => navigation.navigate('About')}>
+            <Text style={styles.aboutLink}>Sobre o Projeto</Text>
+          </TouchableOpacity>
       </View>
     </View>
   );
@@ -121,6 +124,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: 'bold',
   },
+  aboutLink: {
+  color: '#4F46E5',
+  fontSize: 14,
+  fontWeight: 'bold',
+  textAlign: 'center',
+  marginTop: 20,
+},
 });
 
 export default LoginScreen;

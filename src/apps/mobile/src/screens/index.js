@@ -12,3 +12,5 @@ export { default as OrdersScreen } from './orders/OrdersScreen';
 export { default as NewOrderScreen } from './orders/NewOrderScreen';
 export { default as OrderDetailScreen } from './orders/OrderDetailScreen';
 export { default as SettingsScreen } from './settings/SettingsScreen';
+export { default as AboutScreen } from './about/AboutScreen';
+export { default as CategorySummaryScreen } from './dashboard/category-summary/CategorySummaryScreen';
