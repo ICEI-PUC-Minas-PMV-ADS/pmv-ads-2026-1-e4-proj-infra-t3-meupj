@@ -8,24 +8,13 @@ const AboutScreen = () => {
       <Text style={styles.subtitle}>Meu PJ</Text>
 
       <Text style={styles.paragraph}>
-        O Meu PJ é uma aplicação distribuída voltada para auxiliar profissionais autônomos
-        e pequenos empreendedores na gestão de clientes, catálogo, pedidos e informações
-        financeiras.
+        O projeto propõe o desenvolvimento de um aplicativo para organização comercial e financeira de profissionais autônomos e pequenos prestadores de serviço, reunindo em um só lugar recursos para formalizar vendas e acompanhar o caixa de forma prática. A ideia surge da dificuldade que muitos pequenos negócios têm em organizar propostas, pedidos, ordens de serviço, recebimentos e despesas usando anotações soltas, planilhas ou conversas, o que gera descontrole e reduz a percepção de profissionalismo diante do cliente.
       </Text>
 
-      <Text style={styles.sectionTitle}>Etapa 4 - Front-end Mobile</Text>
+      <Text style={styles.sectionTitle}>Solução</Text>
 
       <Text style={styles.paragraph}>
-        Nesta etapa, foi desenvolvido o front-end mobile da aplicação utilizando Expo e
-        React Native, contemplando autenticação, telas principais, integração com a API
-        e funcionalidades relacionadas aos módulos do sistema.
-      </Text>
-
-      <Text style={styles.sectionTitle}>Contribuição</Text>
-
-      <Text style={styles.paragraph}>
-        Esta tela foi implementada como parte da documentação visual do aplicativo mobile,
-        apresentando o objetivo do projeto e apoiando a entrega da Etapa 4.
+        Como solução, o aplicativo permitirá emitir e registrar documentos comerciais, personalizar a apresentação do negócio e acompanhar informações financeiras básicas, como faturamento, recebimentos, valores em aberto, atrasos, custos e despesas, com apoio de gráficos comparativos. O objetivo é oferecer uma ferramenta simples, acessível e útil para dar mais organização à operação, melhorar o controle financeiro e apoiar a gestão de autônomos, microempreendedores e pequenos negócios.
       </Text>
     </ScrollView>
   );
