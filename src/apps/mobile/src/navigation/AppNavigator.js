@@ -20,6 +20,8 @@ import {
   OrderDetailScreen,
   CatalogDetailScreen,
   NewCatalogScreen,
+  AboutScreen,
+  CategorySummaryScreen,
 } from '../screens';
 import { useAuth } from '../contexts/auth.context';
 
@@ -116,6 +118,7 @@ export default function AppNavigator() {
           <>
             <Stack.Screen name="Main" component={MainTabNavigator} />
             <Stack.Screen name="NewTransaction" component={NewTransactionScreen} />
+            <Stack.Screen name="CategorySummary" component={CategorySummaryScreen} />
             <Stack.Screen
               name="NewOrder"
               component={NewOrderScreen}
@@ -151,6 +154,7 @@ export default function AppNavigator() {
           <>
             <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="SignUp" component={SignUpScreen} />
+            <Stack.Screen name="About" component={AboutScreen} />
           </>
         )}
       </Stack.Navigator>
