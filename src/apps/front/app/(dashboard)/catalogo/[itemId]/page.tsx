@@ -1,9 +1,9 @@
 import EditItemClient from './EditItemClient';
 
-export const dynamicParams = false;
-
+// Necessário para output: 'export' (Next.js exige ao menos uma entrada).
+// O roteamento real acontece via 404.html fallback do GitHub Pages.
 export async function generateStaticParams() {
-  return [{ itemId: 'static' }];
+  return [{ itemId: '_' }];
 }
 
 export default function Page() {
