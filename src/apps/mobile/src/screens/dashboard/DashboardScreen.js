@@ -129,6 +129,10 @@ const DashboardScreen = ({ navigation }) => {
 
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>Lançamentos recentes</Text>
+
+        <TouchableOpacity onPress={() => navigation.navigate('CategorySummary')}>
+          <Text style={styles.summaryLink}>Ver resumo por categoria</Text>
+        </TouchableOpacity>
       </View>
 
       <View style={styles.transactionList}>
@@ -218,6 +222,12 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: '#111827',
+  },
+  summaryLink: {
+  fontSize: 14,
+  color: '#4F46E5',
+  fontWeight: 'bold',
+  marginTop: 6,
   },
   transactionList: {
     flex: 1,
