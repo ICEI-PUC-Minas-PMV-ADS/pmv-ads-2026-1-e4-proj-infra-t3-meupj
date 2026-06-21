@@ -4,6 +4,14 @@ import { ObjectId, type Filter, type WithId, type Document } from 'mongodb';
 
 import type { AuthService } from '../lib/auth.js';
 import type { Client, ClientStore, PersonType, ClientAddress } from '../lib/clients.js';
+import {
+  LIMIT_DEFAULT,
+  MAX_LIMIT,
+  MAX_PAGE,
+  PAGE_DEFAULT,
+  PositiveIntegerStringSchema,
+  toBoundedPositiveInteger,
+} from '../lib/pagination.js';
 import type { ProfileStore } from '../lib/profile.js';
 
 type ClientRouteDependencies = {
@@ -117,8 +125,12 @@ const ClientSortOrderSchema = Type.Union([Type.Literal('asc'), Type.Literal('des
 
 const ClientListQuerySchema = Type.Object(
   {
-    page: Type.Optional(Type.Integer({ minimum: 1 })),
-    limit: Type.Optional(Type.Integer({ minimum: 1 })),
+    page: Type.Optional(
+      Type.Union([Type.Integer({ minimum: 1, maximum: MAX_PAGE }), PositiveIntegerStringSchema]),
+    ),
+    limit: Type.Optional(
+      Type.Union([Type.Integer({ minimum: 1, maximum: MAX_LIMIT }), PositiveIntegerStringSchema]),
+    ),
     q: Type.Optional(Type.String()),
     type: Type.Optional(PersonTypeSchema),
     sortBy: Type.Optional(ClientSortBySchema),
@@ -204,12 +216,6 @@ const BadRequestSchema = Type.Object({
   statusCode: Type.Literal(400),
 });
 
-const BadRequestPayload = Object.freeze({
-  error: 'BadRequest',
-  message: 'Bad request',
-  statusCode: 400,
-});
-
 type ClientCreateBody = Static<typeof ClientCreateSchema>;
 type ClientUpdateBody = Static<typeof ClientUpdateSchema>;
 type ClientParams = Static<typeof ClientParamsSchema>;
@@ -283,8 +289,8 @@ export const registerClientsRoutes = (
       const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
       const query = request.query as ClientListQuery;
 
-      const page = query.page ?? 1;
-      const limit = query.limit ?? 20;
+      const page = toBoundedPositiveInteger(query.page, PAGE_DEFAULT, MAX_PAGE);
+      const limit = toBoundedPositiveInteger(query.limit, LIMIT_DEFAULT, MAX_LIMIT);
       const sortBy = query.sortBy ?? 'createdAt';
       const sortOrder = query.sortOrder ?? 'desc';
       const skip = (page - 1) * limit;
@@ -385,6 +391,43 @@ export const registerClientsRoutes = (
       }
 
       return reply.status(201).send(toClientResponse(createdClient));
+    },
+  );
+
+  app.get(
+    '/api/clients/:clientId',
+    {
+      schema: {
+        params: ClientParamsSchema,
+        response: {
+          200: ClientResponseSchema,
+          401: UnauthorizedSchema,
+          404: NotFoundSchema,
+        },
+      },
+    },
+    async (request, reply) => {
+      const session = await dependencies.authService.getSessionFromHeaders(request.headers);
+
+      if (!session) {
+        return reply.status(401).send(UnauthorizedPayload);
+      }
+
+      const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
+      const params = request.params as ClientParams;
+      const clientObjectId = new ObjectId(params.clientId);
+
+      const collection = dependencies.clientsStore.getCollection();
+      const client = await collection.findOne({
+        _id: clientObjectId,
+        profileId: profile._id.toHexString(),
+      });
+
+      if (!client) {
+        return reply.status(404).send(NotFoundPayload);
+      }
+
+      return reply.status(200).send(toClientResponse(client));
     },
   );
 

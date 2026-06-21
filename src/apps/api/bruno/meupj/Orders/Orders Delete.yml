@@ -1,14 +1,14 @@
 info:
   name: Orders Delete
   type: http
-  seq: 4
+  seq: 5
 
 http:
   method: DELETE
-  url: '{{baseUrl}}/api/orders/PUT_ORDER_ID_HERE'
+  url: '{{baseUrl}}/api/orders/{{orderId}}'
   headers:
     - name: Cookie
-      value: sessionCookie
+      value: '{{sessionCookie}}'
   auth: inherit
 
 settings:

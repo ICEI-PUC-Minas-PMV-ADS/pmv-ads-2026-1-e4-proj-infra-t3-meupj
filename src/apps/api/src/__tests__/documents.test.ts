@@ -1,6 +1,6 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { FastifyInstance } from 'fastify';
 import { ObjectId, type Collection } from 'mongodb';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { buildApp } from '../app.js';
 import type { AuthService } from '../lib/auth.js';
@@ -22,63 +22,63 @@ const createAuthServiceMock = (session: unknown): AuthService => ({
   handleRequest: () =>
     Promise.resolve(
       new Response(JSON.stringify({ status: 'ok' }), {
-        status: 200,
         headers: { 'content-type': 'application/json' },
+        status: 200,
       }),
     ),
   getSessionFromHeaders: vi.fn().mockResolvedValue(session),
 });
 
 const createMongoMock = (healthy: boolean): MongoService => ({
-  initialize: vi.fn().mockResolvedValue(undefined),
-  isHealthy: vi.fn(() => healthy),
-  getStatus: vi.fn(() => ({
-    state: healthy ? ('connected' as const) : ('degraded' as const),
-    lastError: healthy ? null : 'connection refused',
-  })),
+  close: vi.fn().mockResolvedValue(undefined),
   getClient: vi.fn(() => {
     throw new Error('not implemented in tests');
   }),
   getDb: vi.fn(() => {
     throw new Error('not implemented in tests');
   }),
-  close: vi.fn().mockResolvedValue(undefined),
+  getStatus: vi.fn(() => ({
+    lastError: healthy ? null : 'connection refused',
+    state: healthy ? ('connected' as const) : ('degraded' as const),
+  })),
+  initialize: vi.fn().mockResolvedValue(undefined),
+  isHealthy: vi.fn(() => healthy),
 });
 
 const createProfileStoreMock = (
   profileId = new ObjectId(),
   authUserId = 'auth-user-1',
 ): ProfileStore => ({
-  ensureIndexes: vi.fn().mockResolvedValue(undefined),
-  getByAuthUserId: vi.fn().mockResolvedValue(null),
   ensureByAuthUserId: vi.fn().mockResolvedValue({
     _id: profileId,
     authUserId,
     business: {
-      name: 'Meu PJ',
-      document: '12345678000199',
-      phone: '31999999999',
-      email: 'contato@meupj.com',
-      logo: null,
-      color: null,
-      footer: 'Obrigado pela preferencia.',
       address: {
-        zipCode: '30110000',
-        street: 'Rua A',
-        number: '100',
-        complement: null,
-        district: 'Centro',
         city: 'Belo Horizonte',
-        state: 'MG',
+        complement: null,
         country: 'Brasil',
+        district: 'Centro',
+        number: '100',
+        state: 'MG',
+        street: 'Rua A',
+        zipCode: '30110000',
       },
+      color: null,
+      document: '12345678000199',
+      email: 'contato@meupj.com',
+      footer: 'Obrigado pela preferencia.',
+      logo: null,
+      name: 'Meu PJ',
+      phone: '31999999999',
     },
     createdAt: new Date('2026-01-01T00:00:00.000Z'),
     updatedAt: new Date('2026-01-01T00:00:00.000Z'),
   }),
-  updateBusinessByAuthUserId: vi.fn(async (_resolvedAuthUserId, business) => ({
+  ensureIndexes: vi.fn().mockResolvedValue(undefined),
+  getByAuthUserId: vi.fn().mockResolvedValue(null),
+  updateBusinessByAuthUserId: vi.fn(async (resolvedAuthUserId, business) => ({
     _id: profileId,
-    authUserId: _resolvedAuthUserId,
+    authUserId: resolvedAuthUserId,
     business: {
       ...business,
       address: { ...business.address },
@@ -168,10 +168,41 @@ const createTransactionsStoreMock = (
 const createCountersStoreStub = () =>
   ({
     ensureIndexes: vi.fn().mockResolvedValue(undefined),
+    generateOrderNumber: vi.fn(() => Promise.resolve('ORD2601001')),
     getCollection: vi.fn(() => createNoOpCollection()),
     getNextSequence: vi.fn(() => Promise.resolve(1)),
-    generateOrderNumber: vi.fn(() => Promise.resolve('ORD2601001')),
   }) as unknown as CountersStore;
+
+const createBaseApp = async ({
+  authSession = { user: { id: 'auth-user-1' } },
+  client = null,
+  order = null,
+  profileId = new ObjectId(),
+  transaction = null,
+}: {
+  authSession?: unknown;
+  client?: (Client & { _id: ObjectId }) | null;
+  order?: (Order & { _id: ObjectId }) | null;
+  profileId?: ObjectId;
+  transaction?: (Transaction & { _id: ObjectId }) | null;
+}): Promise<FastifyInstance> => {
+  return buildApp({
+    auth: createAuthServiceMock(authSession),
+    catalogStore: createCatalogStoreStub(),
+    clientsStore: createClientsStoreMock(client),
+    countersStore: createCountersStoreStub(),
+    envData: DEFAULT_ENV,
+    mongo: createMongoMock(true),
+    ordersStore: createOrdersStoreMock(order),
+    profileStore: createProfileStoreMock(profileId, 'auth-user-1'),
+    transactionsStore: createTransactionsStoreMock(transaction),
+  });
+};
+
+const expectPdfResponse = (response: { body: string; headers: Record<string, string> }) => {
+  expect(response.headers['content-type']).toContain('application/pdf');
+  expect(Buffer.byteLength(response.body)).toBeGreaterThan(0);
+};
 
 let app: FastifyInstance | undefined;
 
@@ -184,17 +215,7 @@ afterEach(async () => {
 
 describe('documents routes', () => {
   it('returns 401 when unauthenticated', async () => {
-    app = await buildApp({
-      envData: DEFAULT_ENV,
-      mongo: createMongoMock(true),
-      auth: createAuthServiceMock(null),
-      profileStore: createProfileStoreMock(),
-      ordersStore: createOrdersStoreMock(null),
-      clientsStore: createClientsStoreMock(null),
-      catalogStore: createCatalogStoreStub(),
-      transactionsStore: createTransactionsStoreMock(null),
-      countersStore: createCountersStoreStub(),
-    });
+    app = await createBaseApp({ authSession: null });
 
     const response = await app.inject({
       method: 'GET',
@@ -210,22 +231,12 @@ describe('documents routes', () => {
   });
 
   it('returns 404 when order does not exist in profile scope', async () => {
-    app = await buildApp({
-      envData: DEFAULT_ENV,
-      mongo: createMongoMock(true),
-      auth: createAuthServiceMock({ user: { id: 'auth-user-1' } }),
-      profileStore: createProfileStoreMock(),
-      ordersStore: createOrdersStoreMock(null),
-      clientsStore: createClientsStoreMock(null),
-      catalogStore: createCatalogStoreStub(),
-      transactionsStore: createTransactionsStoreMock(null),
-      countersStore: createCountersStoreStub(),
-    });
+    app = await createBaseApp({});
 
     const response = await app.inject({
+      headers: { authorization: 'Bearer fake-token' },
       method: 'GET',
       url: `/api/documents/budget/${new ObjectId().toHexString()}`,
-      headers: { authorization: 'Bearer fake-token' },
     });
 
     expect(response.statusCode).toBe(404);
@@ -243,101 +254,177 @@ describe('documents routes', () => {
 
     const order = {
       _id: orderId,
-      profileId: profileId.toHexString(),
       clientId: clientId.toHexString(),
-      orderNumber: 'ORD2601009',
-      status: 'draft' as const,
-      paymentMethods: ['pix' as const],
+      createdAt: new Date('2026-04-10T10:00:00.000Z'),
+      discount: 10,
+      fees: 20,
       items: [
         {
           catalogItemId: new ObjectId().toHexString(),
-          type: 'service' as const,
           name: 'Instalacao',
-          unitPrice: 120,
-          unitMeasure: 'hora',
+          position: 0,
           quantity: 2,
           subtotal: 240,
-          position: 0,
+          type: 'service' as const,
+          unitMeasure: 'hora',
+          unitPrice: 120,
         },
       ],
-      discount: 10,
-      fees: 20,
-      total: 250,
-      createdAt: new Date('2026-04-10T10:00:00.000Z'),
-      updatedAt: new Date('2026-04-10T10:30:00.000Z'),
+      orderNumber: 'ORD2601009',
+      paymentMethods: ['pix' as const],
+      profileId: profileId.toHexString(),
       reference: 'REF-10',
+      status: 'draft' as const,
+      total: 250,
+      updatedAt: new Date('2026-04-10T10:30:00.000Z'),
     };
 
     const client = {
       _id: clientId,
-      profileId: profileId.toHexString(),
-      name: 'Cliente 1',
-      type: 'individual' as const,
-      document: '12345678900',
-      email: 'cliente1@email.com',
-      phone: '31999999999',
       address: {
-        zipCode: '30110000',
-        street: 'Rua B',
-        number: '20',
-        district: 'Centro',
         city: 'BH',
-        state: 'MG',
         country: 'Brasil',
+        district: 'Centro',
+        number: '20',
+        state: 'MG',
+        street: 'Rua B',
+        zipCode: '30110000',
       },
       createdAt: new Date('2026-01-01T00:00:00.000Z'),
+      document: '12345678900',
+      email: 'cliente1@email.com',
+      name: 'Cliente 1',
+      phone: '31999999999',
+      profileId: profileId.toHexString(),
+      type: 'individual' as const,
       updatedAt: new Date('2026-01-01T00:00:00.000Z'),
     };
 
-    app = await buildApp({
-      envData: DEFAULT_ENV,
-      mongo: createMongoMock(true),
-      auth: createAuthServiceMock({ user: { id: 'auth-user-1' } }),
-      profileStore: createProfileStoreMock(profileId, 'auth-user-1'),
-      ordersStore: createOrdersStoreMock(order),
-      clientsStore: createClientsStoreMock(client),
-      catalogStore: createCatalogStoreStub(),
-      transactionsStore: createTransactionsStoreMock(null),
-      countersStore: createCountersStoreStub(),
-    });
+    app = await createBaseApp({ client, order, profileId });
 
     const response = await app.inject({
+      headers: { authorization: 'Bearer fake-token' },
       method: 'GET',
       url: `/api/documents/budget/${orderId.toHexString()}`,
-      headers: { authorization: 'Bearer fake-token' },
     });
 
     expect(response.statusCode).toBe(200);
 
     const body = response.json<{
+      client: { name: string } | null;
       documentType: string;
       order: { orderNumber: string };
-      client: { name: string } | null;
-      summary: { itemsSubtotal: number; discount: number; fees: number; total: number };
+      summary: { discount: number; fees: number; itemsSubtotal: number; total: number };
     }>();
+
     expect(body.documentType).toBe('budget');
     expect(body.order.orderNumber).toBe('ORD2601009');
     expect(body.client?.name).toBe('Cliente 1');
     expect(body.summary).toMatchObject({
-      itemsSubtotal: 240,
       discount: 10,
       fees: 20,
+      itemsSubtotal: 240,
       total: 250,
     });
   });
 
-  it('returns 401 for service-order endpoint when unauthenticated', async () => {
-    app = await buildApp({
-      envData: DEFAULT_ENV,
-      mongo: createMongoMock(true),
-      auth: createAuthServiceMock(null),
-      profileStore: createProfileStoreMock(),
-      ordersStore: createOrdersStoreMock(null),
-      clientsStore: createClientsStoreMock(null),
-      catalogStore: createCatalogStoreStub(),
-      transactionsStore: createTransactionsStoreMock(null),
-      countersStore: createCountersStoreStub(),
+  it('returns 409 for budget when order is cancelled', async () => {
+    const profileId = new ObjectId();
+    const orderId = new ObjectId();
+
+    const order = {
+      _id: orderId,
+      clientId: null,
+      createdAt: new Date('2026-04-10T10:00:00.000Z'),
+      items: [],
+      orderNumber: 'ORD2601011',
+      paymentMethods: ['pix' as const],
+      profileId: profileId.toHexString(),
+      status: 'cancelled' as const,
+      total: 0,
+      updatedAt: new Date('2026-04-10T10:30:00.000Z'),
+    };
+
+    app = await createBaseApp({ order, profileId });
+
+    const response = await app.inject({
+      headers: { authorization: 'Bearer fake-token' },
+      method: 'GET',
+      url: `/api/documents/budget/${orderId.toHexString()}`,
     });
+
+    expect(response.statusCode).toBe(409);
+    expect(response.json()).toEqual({
+      error: 'Conflict',
+      message: 'Pedidos cancelados nao podem gerar orcamento.',
+      statusCode: 409,
+    });
+  });
+
+  it('returns pdf buffer for budget document', async () => {
+    const profileId = new ObjectId();
+    const clientId = new ObjectId();
+    const orderId = new ObjectId();
+
+    const order = {
+      _id: orderId,
+      clientId: clientId.toHexString(),
+      createdAt: new Date('2026-04-10T10:00:00.000Z'),
+      items: [
+        {
+          catalogItemId: new ObjectId().toHexString(),
+          name: 'Instalacao',
+          position: 0,
+          quantity: 1,
+          subtotal: 150,
+          type: 'service' as const,
+          unitMeasure: 'hora',
+          unitPrice: 150,
+        },
+      ],
+      orderNumber: 'ORD2601012',
+      paymentMethods: ['pix' as const],
+      profileId: profileId.toHexString(),
+      status: 'draft' as const,
+      total: 150,
+      updatedAt: new Date('2026-04-10T10:30:00.000Z'),
+    };
+
+    const client = {
+      _id: clientId,
+      address: {
+        city: 'BH',
+        country: 'Brasil',
+        district: 'Centro',
+        number: '20',
+        state: 'MG',
+        street: 'Rua B',
+        zipCode: '30110000',
+      },
+      createdAt: new Date('2026-01-01T00:00:00.000Z'),
+      document: '12345678900',
+      email: 'cliente.pdf@email.com',
+      name: 'Cliente PDF',
+      phone: '31999999999',
+      profileId: profileId.toHexString(),
+      type: 'individual' as const,
+      updatedAt: new Date('2026-01-01T00:00:00.000Z'),
+    };
+
+    app = await createBaseApp({ client, order, profileId });
+
+    const response = await app.inject({
+      headers: { authorization: 'Bearer fake-token' },
+      method: 'GET',
+      url: `/api/documents/budget/${orderId.toHexString()}/pdf`,
+    });
+
+    expect(response.statusCode).toBe(200);
+    expectPdfResponse(response);
+  });
+
+  it('returns 401 for service-order endpoint when unauthenticated', async () => {
+    app = await createBaseApp({ authSession: null });
 
     const response = await app.inject({
       method: 'GET',
@@ -353,22 +440,12 @@ describe('documents routes', () => {
   });
 
   it('returns 404 for service-order endpoint when order does not exist in profile scope', async () => {
-    app = await buildApp({
-      envData: DEFAULT_ENV,
-      mongo: createMongoMock(true),
-      auth: createAuthServiceMock({ user: { id: 'auth-user-1' } }),
-      profileStore: createProfileStoreMock(),
-      ordersStore: createOrdersStoreMock(null),
-      clientsStore: createClientsStoreMock(null),
-      catalogStore: createCatalogStoreStub(),
-      transactionsStore: createTransactionsStoreMock(null),
-      countersStore: createCountersStoreStub(),
-    });
+    app = await createBaseApp({});
 
     const response = await app.inject({
+      headers: { authorization: 'Bearer fake-token' },
       method: 'GET',
       url: `/api/documents/service-order/${new ObjectId().toHexString()}`,
-      headers: { authorization: 'Bearer fake-token' },
     });
 
     expect(response.statusCode).toBe(404);
@@ -386,102 +463,157 @@ describe('documents routes', () => {
 
     const order = {
       _id: orderId,
-      profileId: profileId.toHexString(),
       clientId: clientId.toHexString(),
-      orderNumber: 'ORD2601010',
-      status: 'inProgress' as const,
-      paymentMethods: ['pix' as const],
+      createdAt: new Date('2026-04-10T11:00:00.000Z'),
+      discount: 0,
+      fees: 15,
       items: [
         {
           catalogItemId: new ObjectId().toHexString(),
-          type: 'service' as const,
           name: 'Manutencao preventiva',
-          unitPrice: 200,
-          unitMeasure: 'hora',
+          position: 0,
           quantity: 1,
           subtotal: 200,
-          position: 0,
+          type: 'service' as const,
+          unitMeasure: 'hora',
+          unitPrice: 200,
         },
       ],
-      discount: 0,
-      fees: 15,
+      orderNumber: 'ORD2601010',
+      paymentMethods: ['pix' as const],
+      profileId: profileId.toHexString(),
+      status: 'inProgress' as const,
       total: 215,
-      createdAt: new Date('2026-04-10T11:00:00.000Z'),
       updatedAt: new Date('2026-04-10T11:30:00.000Z'),
       warrantyTerms: '30 dias',
     };
 
     const client = {
       _id: clientId,
-      profileId: profileId.toHexString(),
-      name: 'Cliente 2',
-      type: 'company' as const,
-      document: '12345678000111',
-      email: 'contato@cliente2.com',
-      phone: '3133334444',
       address: {
-        zipCode: '30120000',
-        street: 'Rua C',
-        number: '45',
-        district: 'Funcionarios',
         city: 'Belo Horizonte',
-        state: 'MG',
         country: 'Brasil',
+        district: 'Funcionarios',
+        number: '45',
+        state: 'MG',
+        street: 'Rua C',
+        zipCode: '30120000',
       },
       createdAt: new Date('2026-01-01T00:00:00.000Z'),
+      document: '12345678000111',
+      email: 'contato@cliente2.com',
+      name: 'Cliente 2',
+      phone: '3133334444',
+      profileId: profileId.toHexString(),
+      type: 'company' as const,
       updatedAt: new Date('2026-01-01T00:00:00.000Z'),
     };
 
-    app = await buildApp({
-      envData: DEFAULT_ENV,
-      mongo: createMongoMock(true),
-      auth: createAuthServiceMock({ user: { id: 'auth-user-1' } }),
-      profileStore: createProfileStoreMock(profileId, 'auth-user-1'),
-      ordersStore: createOrdersStoreMock(order),
-      clientsStore: createClientsStoreMock(client),
-      catalogStore: createCatalogStoreStub(),
-      transactionsStore: createTransactionsStoreMock(null),
-      countersStore: createCountersStoreStub(),
-    });
+    app = await createBaseApp({ client, order, profileId });
 
     const response = await app.inject({
+      headers: { authorization: 'Bearer fake-token' },
       method: 'GET',
       url: `/api/documents/service-order/${orderId.toHexString()}`,
-      headers: { authorization: 'Bearer fake-token' },
     });
 
     expect(response.statusCode).toBe(200);
 
     const body = response.json<{
+      client: { name: string } | null;
       documentType: string;
       order: { orderNumber: string; status: string };
-      client: { name: string } | null;
-      summary: { itemsSubtotal: number; discount: number; fees: number; total: number };
+      summary: { discount: number; fees: number; itemsSubtotal: number; total: number };
     }>();
+
     expect(body.documentType).toBe('serviceOrder');
     expect(body.order.orderNumber).toBe('ORD2601010');
     expect(body.order.status).toBe('inProgress');
     expect(body.client?.name).toBe('Cliente 2');
     expect(body.summary).toMatchObject({
-      itemsSubtotal: 200,
       discount: 0,
       fees: 15,
+      itemsSubtotal: 200,
       total: 215,
     });
   });
 
-  it('returns 401 for receipt endpoint when unauthenticated', async () => {
-    app = await buildApp({
-      envData: DEFAULT_ENV,
-      mongo: createMongoMock(true),
-      auth: createAuthServiceMock(null),
-      profileStore: createProfileStoreMock(),
-      ordersStore: createOrdersStoreMock(null),
-      clientsStore: createClientsStoreMock(null),
-      catalogStore: createCatalogStoreStub(),
-      transactionsStore: createTransactionsStoreMock(null),
-      countersStore: createCountersStoreStub(),
+  it('returns 409 for service-order when order status is invalid', async () => {
+    const profileId = new ObjectId();
+    const orderId = new ObjectId();
+
+    const order = {
+      _id: orderId,
+      clientId: null,
+      createdAt: new Date('2026-04-10T11:00:00.000Z'),
+      items: [],
+      orderNumber: 'ORD2601013',
+      paymentMethods: ['pix' as const],
+      profileId: profileId.toHexString(),
+      status: 'draft' as const,
+      total: 0,
+      updatedAt: new Date('2026-04-10T11:30:00.000Z'),
+    };
+
+    app = await createBaseApp({ order, profileId });
+
+    const response = await app.inject({
+      headers: { authorization: 'Bearer fake-token' },
+      method: 'GET',
+      url: `/api/documents/service-order/${orderId.toHexString()}`,
     });
+
+    expect(response.statusCode).toBe(409);
+    expect(response.json()).toEqual({
+      error: 'Conflict',
+      message:
+        'A ordem de servico so esta disponivel para pedidos em andamento, concluidos ou em garantia.',
+      statusCode: 409,
+    });
+  });
+
+  it('returns pdf buffer for service-order document', async () => {
+    const profileId = new ObjectId();
+    const orderId = new ObjectId();
+
+    const order = {
+      _id: orderId,
+      clientId: null,
+      createdAt: new Date('2026-04-10T11:00:00.000Z'),
+      items: [
+        {
+          catalogItemId: new ObjectId().toHexString(),
+          name: 'Reparo',
+          position: 0,
+          quantity: 1,
+          subtotal: 320,
+          type: 'service' as const,
+          unitMeasure: 'servico',
+          unitPrice: 320,
+        },
+      ],
+      orderNumber: 'ORD2601014',
+      paymentMethods: ['pix' as const],
+      profileId: profileId.toHexString(),
+      status: 'completed' as const,
+      total: 320,
+      updatedAt: new Date('2026-04-10T11:30:00.000Z'),
+    };
+
+    app = await createBaseApp({ order, profileId });
+
+    const response = await app.inject({
+      headers: { authorization: 'Bearer fake-token' },
+      method: 'GET',
+      url: `/api/documents/service-order/${orderId.toHexString()}/pdf`,
+    });
+
+    expect(response.statusCode).toBe(200);
+    expectPdfResponse(response);
+  });
+
+  it('returns 401 for receipt endpoint when unauthenticated', async () => {
+    app = await createBaseApp({ authSession: null });
 
     const response = await app.inject({
       method: 'GET',
@@ -496,23 +628,13 @@ describe('documents routes', () => {
     });
   });
 
-  it('returns 404 for receipt endpoint when confirmed transaction does not exist', async () => {
-    app = await buildApp({
-      envData: DEFAULT_ENV,
-      mongo: createMongoMock(true),
-      auth: createAuthServiceMock({ user: { id: 'auth-user-1' } }),
-      profileStore: createProfileStoreMock(),
-      ordersStore: createOrdersStoreMock(null),
-      clientsStore: createClientsStoreMock(null),
-      catalogStore: createCatalogStoreStub(),
-      transactionsStore: createTransactionsStoreMock(null),
-      countersStore: createCountersStoreStub(),
-    });
+  it('returns 404 for receipt endpoint when transaction does not exist', async () => {
+    app = await createBaseApp({});
 
     const response = await app.inject({
+      headers: { authorization: 'Bearer fake-token' },
       method: 'GET',
       url: `/api/documents/receipt/${new ObjectId().toHexString()}`,
-      headers: { authorization: 'Bearer fake-token' },
     });
 
     expect(response.statusCode).toBe(404);
@@ -531,103 +653,154 @@ describe('documents routes', () => {
 
     const order = {
       _id: orderId,
-      profileId: profileId.toHexString(),
       clientId: clientId.toHexString(),
-      orderNumber: 'ORD2601011',
-      status: 'completed' as const,
-      paymentMethods: ['pix' as const],
+      createdAt: new Date('2026-04-10T12:00:00.000Z'),
+      discount: 0,
+      fees: 0,
       items: [
         {
           catalogItemId: new ObjectId().toHexString(),
-          type: 'service' as const,
           name: 'Servico finalizado',
-          unitPrice: 300,
-          unitMeasure: 'un',
+          position: 0,
           quantity: 1,
           subtotal: 300,
-          position: 0,
+          type: 'service' as const,
+          unitMeasure: 'un',
+          unitPrice: 300,
         },
       ],
-      discount: 0,
-      fees: 0,
-      total: 300,
-      createdAt: new Date('2026-04-10T12:00:00.000Z'),
-      updatedAt: new Date('2026-04-10T12:30:00.000Z'),
+      orderNumber: 'ORD2601015',
+      paymentMethods: ['pix' as const],
+      profileId: profileId.toHexString(),
       reference: 'REF-REC-01',
+      status: 'completed' as const,
+      total: 300,
+      updatedAt: new Date('2026-04-10T12:30:00.000Z'),
     };
 
     const client = {
       _id: clientId,
-      profileId: profileId.toHexString(),
-      name: 'Cliente Recibo',
-      type: 'individual' as const,
-      document: '12345678900',
-      email: 'recibo@cliente.com',
-      phone: '31999888777',
       address: {
-        zipCode: '30130000',
-        street: 'Rua D',
-        number: '200',
-        district: 'Savassi',
         city: 'Belo Horizonte',
-        state: 'MG',
         country: 'Brasil',
+        district: 'Savassi',
+        number: '200',
+        state: 'MG',
+        street: 'Rua D',
+        zipCode: '30130000',
       },
       createdAt: new Date('2026-01-01T00:00:00.000Z'),
+      document: '12345678900',
+      email: 'recibo@cliente.com',
+      name: 'Cliente Recibo',
+      phone: '31999888777',
+      profileId: profileId.toHexString(),
+      type: 'individual' as const,
       updatedAt: new Date('2026-01-01T00:00:00.000Z'),
     };
 
     const transaction = {
       _id: transactionId,
-      profileId: profileId.toHexString(),
-      orderId: orderId.toHexString(),
-      clientId: clientId.toHexString(),
-      type: 'income' as const,
-      status: 'confirmed' as const,
-      paymentMethod: 'pix' as const,
       amount: 300,
-      transactionDate: new Date('2026-04-10T13:00:00.000Z'),
-      dueDate: new Date('2026-04-10T13:00:00.000Z'),
       category: 'Servico',
-      reference: 'TX-REC-01',
-      notes: 'Pagamento integral',
+      clientId: clientId.toHexString(),
       createdAt: new Date('2026-04-10T13:05:00.000Z'),
+      dueDate: new Date('2026-04-10T13:00:00.000Z'),
+      notes: 'Pagamento integral',
+      orderId: orderId.toHexString(),
+      paymentMethod: 'pix' as const,
+      profileId: profileId.toHexString(),
+      reference: 'TX-REC-01',
+      status: 'confirmed' as const,
+      transactionDate: new Date('2026-04-10T13:00:00.000Z'),
+      type: 'income' as const,
       updatedAt: new Date('2026-04-10T13:05:00.000Z'),
     };
 
-    app = await buildApp({
-      envData: DEFAULT_ENV,
-      mongo: createMongoMock(true),
-      auth: createAuthServiceMock({ user: { id: 'auth-user-1' } }),
-      profileStore: createProfileStoreMock(profileId, 'auth-user-1'),
-      ordersStore: createOrdersStoreMock(order),
-      clientsStore: createClientsStoreMock(client),
-      catalogStore: createCatalogStoreStub(),
-      transactionsStore: createTransactionsStoreMock(transaction),
-      countersStore: createCountersStoreStub(),
-    });
+    app = await createBaseApp({ client, order, profileId, transaction });
 
     const response = await app.inject({
+      headers: { authorization: 'Bearer fake-token' },
       method: 'GET',
       url: `/api/documents/receipt/${transactionId.toHexString()}`,
-      headers: { authorization: 'Bearer fake-token' },
     });
 
     expect(response.statusCode).toBe(200);
 
     const body = response.json<{
-      documentType: string;
       client: { name: string } | null;
+      documentType: string;
       order: { orderNumber: string } | null;
-      transaction: { status: string; amount: number; type: string };
       summary: { totalReceived: number };
+      transaction: { amount: number; status: string; type: string };
     }>();
+
     expect(body.documentType).toBe('receipt');
     expect(body.client?.name).toBe('Cliente Recibo');
-    expect(body.order?.orderNumber).toBe('ORD2601011');
+    expect(body.order?.orderNumber).toBe('ORD2601015');
     expect(body.transaction.status).toBe('confirmed');
     expect(body.transaction.type).toBe('income');
     expect(body.transaction.amount).toBe(300);
     expect(body.summary.totalReceived).toBe(300);
+  });
+
+  it('returns 409 for receipt when transaction is not confirmed', async () => {
+    const profileId = new ObjectId();
+    const transactionId = new ObjectId();
+
+    const transaction = {
+      _id: transactionId,
+      amount: 180,
+      createdAt: new Date('2026-05-01T09:00:00.000Z'),
+      paymentMethod: 'pix' as const,
+      profileId: profileId.toHexString(),
+      status: 'pending' as const,
+      transactionDate: new Date('2026-05-01T10:00:00.000Z'),
+      type: 'income' as const,
+      updatedAt: new Date('2026-05-01T09:30:00.000Z'),
+    };
+
+    app = await createBaseApp({ profileId, transaction });
+
+    const response = await app.inject({
+      headers: { authorization: 'Bearer fake-token' },
+      method: 'GET',
+      url: `/api/documents/receipt/${transactionId.toHexString()}`,
+    });
+
+    expect(response.statusCode).toBe(409);
+    expect(response.json()).toEqual({
+      error: 'Conflict',
+      message: 'O recibo so esta disponivel para lancamentos confirmados.',
+      statusCode: 409,
+    });
+  });
+
+  it('returns pdf buffer for receipt document', async () => {
+    const profileId = new ObjectId();
+    const transactionId = new ObjectId();
+
+    const transaction = {
+      _id: transactionId,
+      amount: 480,
+      createdAt: new Date('2026-05-01T09:00:00.000Z'),
+      paymentMethod: 'pix' as const,
+      profileId: profileId.toHexString(),
+      status: 'confirmed' as const,
+      transactionDate: new Date('2026-05-01T10:00:00.000Z'),
+      type: 'income' as const,
+      updatedAt: new Date('2026-05-01T09:30:00.000Z'),
+    };
+
+    app = await createBaseApp({ profileId, transaction });
+
+    const response = await app.inject({
+      headers: { authorization: 'Bearer fake-token' },
+      method: 'GET',
+      url: `/api/documents/receipt/${transactionId.toHexString()}/pdf`,
+    });
+
+    expect(response.statusCode).toBe(200);
+    expectPdfResponse(response);
   });
 });

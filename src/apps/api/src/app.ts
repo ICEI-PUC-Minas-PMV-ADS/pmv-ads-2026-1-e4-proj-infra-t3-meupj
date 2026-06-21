@@ -51,6 +51,11 @@ export const buildApp = async (options: BuildAppOptions = {}): Promise<FastifyIn
     logger: {
       level: resolveInitialLogLevel(),
     },
+    ajv: {
+      customOptions: {
+        coerceTypes: true, // Permite que a API converta strings para números automaticamente na querystring
+      },
+    },
   }).withTypeProvider<TypeBoxTypeProvider>();
 
   app.setValidatorCompiler(TypeBoxValidatorCompiler);
@@ -176,6 +181,7 @@ export const buildApp = async (options: BuildAppOptions = {}): Promise<FastifyIn
     authService: selectedAuthService,
     profileStore: selectedProfileStore,
     catalogStore: selectedCatalogStore,
+    clientsStore: selectedClientsStore,
     ordersStore: selectedOrdersStore,
     countersStore: selectedCountersStore,
     transactionsStore: selectedTransactionsStore,

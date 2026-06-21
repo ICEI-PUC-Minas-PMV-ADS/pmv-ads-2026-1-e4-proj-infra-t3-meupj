@@ -37,13 +37,9 @@ export const registerHealthRoutes = (
         return { status: 'ok' };
       }
 
-      const mongoStatus = dependencies.getMongoStatus();
-
       return reply.status(503).send({
         error: 'ServiceUnavailable',
-        message: mongoStatus.lastError
-          ? `MongoDB is unavailable: ${mongoStatus.lastError}`
-          : 'MongoDB is unavailable',
+        message: 'MongoDB is unavailable',
         statusCode: 503,
       });
     },

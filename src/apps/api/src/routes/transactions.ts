@@ -4,8 +4,17 @@ import { ObjectId, type WithId } from 'mongodb';
 
 import type { AuthService } from '../lib/auth.js';
 import type { ClientStore } from '../lib/clients.js';
+import {
+  LIMIT_DEFAULT,
+  MAX_LIMIT,
+  MAX_PAGE,
+  PAGE_DEFAULT,
+  PositiveIntegerStringSchema,
+  toBoundedPositiveInteger,
+} from '../lib/pagination.js';
 import type { ProfileStore } from '../lib/profile.js';
 import type { TransactionsStore, Transaction } from '../lib/transactions.js';
+import { resolveAuthenticatedProfileId } from './auth-session.js';
 
 const PaymentMethodSchema = Type.Union([
   Type.Literal('pix'),
@@ -27,6 +36,9 @@ const TransactionCreateSchema = Type.Object(
     category: Type.Optional(Type.String()),
     reference: Type.Optional(Type.String()),
     notes: Type.Optional(Type.String()),
+    status: Type.Optional(
+      Type.Union([Type.Literal('pending'), Type.Literal('confirmed'), Type.Literal('cancelled')]),
+    ),
   },
   {
     additionalProperties: false,
@@ -123,11 +135,9 @@ const TransactionUpdateSchema = Type.Object(
     category: Type.Optional(Type.String()),
     reference: Type.Optional(Type.String()),
     notes: Type.Optional(Type.String()),
-    status: Type.Optional(Type.Union([
-      Type.Literal('pending'),
-      Type.Literal('confirmed'),
-      Type.Literal('cancelled'),
-    ])),
+    status: Type.Optional(
+      Type.Union([Type.Literal('pending'), Type.Literal('confirmed'), Type.Literal('cancelled')]),
+    ),
   },
   {
     additionalProperties: false,
@@ -178,15 +188,17 @@ const TransactionSortOrderSchema = Type.Union([Type.Literal('asc'), Type.Literal
 
 const TransactionListQuerySchema = Type.Object(
   {
-    page: Type.Optional(Type.Integer({ minimum: 1 })),
-    limit: Type.Optional(Type.Integer({ minimum: 1 })),
+    page: Type.Optional(
+      Type.Union([Type.Integer({ minimum: 1, maximum: MAX_PAGE }), PositiveIntegerStringSchema]),
+    ),
+    limit: Type.Optional(
+      Type.Union([Type.Integer({ minimum: 1, maximum: MAX_LIMIT }), PositiveIntegerStringSchema]),
+    ),
     q: Type.Optional(Type.String()),
     type: Type.Optional(Type.Union([Type.Literal('income'), Type.Literal('expense')])),
-    status: Type.Optional(Type.Union([
-      Type.Literal('pending'),
-      Type.Literal('confirmed'),
-      Type.Literal('cancelled'),
-    ])),
+    status: Type.Optional(
+      Type.Union([Type.Literal('pending'), Type.Literal('confirmed'), Type.Literal('cancelled')]),
+    ),
     clientId: Type.Optional(Type.String({ pattern: '^[a-fA-F0-9]{24}$' })),
     orderId: Type.Optional(Type.String({ pattern: '^[a-fA-F0-9]{24}$' })),
     paymentMethod: Type.Optional(PaymentMethodSchema),
@@ -274,7 +286,7 @@ const transactionToResponse = (transaction: WithId<Transaction>) => {
     dueDate: transaction.dueDate ? transaction.dueDate.toISOString() : undefined,
     createdAt: transaction.createdAt.toISOString(),
     updatedAt: transaction.updatedAt.toISOString(),
-    displayStatus: isOverdue ? 'overdue' as const : transaction.status,
+    displayStatus: isOverdue ? ('overdue' as const) : transaction.status,
   };
 };
 
@@ -301,7 +313,7 @@ const buildTransactionDocument = (
   ...(body.orderId !== undefined && { orderId: body.orderId }),
   ...(body.clientId !== undefined && { clientId: body.clientId }),
   type,
-  status: 'pending' as const,
+  status: body.status ?? ('pending' as const),
   ...(body.paymentMethod !== undefined && { paymentMethod: body.paymentMethod }),
   amount: body.amount,
   transactionDate: new Date(body.transactionDate),
@@ -319,8 +331,6 @@ type TransactionUpdateBody = Static<typeof TransactionUpdateSchema>;
 
 type TransactionParams = Static<typeof TransactionParamsSchema>;
 
-type TransactionListQuery = Static<typeof TransactionListQuerySchema>;
-
 export type TransactionsRouteDependencies = {
   authService: AuthService;
   profileStore: ProfileStore;
@@ -332,6 +342,10 @@ export const registerTransactionsRoutes = (
   app: FastifyInstance,
   dependencies: TransactionsRouteDependencies,
 ): void => {
+  const getAuthenticatedProfileId = (
+    headers: Parameters<AuthService['getSessionFromHeaders']>[0],
+  ) => resolveAuthenticatedProfileId(app, dependencies, headers);
+
   app.post(
     '/api/transactions/income',
     {
@@ -345,18 +359,20 @@ export const registerTransactionsRoutes = (
       },
     },
     async (request, reply) => {
-      const session = await dependencies.authService.getSessionFromHeaders(request.headers);
+      const profileId = await getAuthenticatedProfileId(request.headers);
 
-      if (!session) {
+      if (!profileId) {
         return reply.status(401).send(UnauthorizedPayload);
       }
 
-      const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
-      const profileId = profile._id.toHexString();
       const body = request.body as TransactionCreateBody;
 
       if (body.clientId) {
-        const validClient = await validateClientOwnership(body.clientId, profileId, dependencies.clientsStore);
+        const validClient = await validateClientOwnership(
+          body.clientId,
+          profileId,
+          dependencies.clientsStore,
+        );
 
         if (!validClient) {
           return reply.status(400).send({
@@ -395,18 +411,20 @@ export const registerTransactionsRoutes = (
       },
     },
     async (request, reply) => {
-      const session = await dependencies.authService.getSessionFromHeaders(request.headers);
+      const profileId = await getAuthenticatedProfileId(request.headers);
 
-      if (!session) {
+      if (!profileId) {
         return reply.status(401).send(UnauthorizedPayload);
       }
 
-      const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
-      const profileId = profile._id.toHexString();
       const body = request.body as TransactionCreateBody;
 
       if (body.clientId) {
-        const validClient = await validateClientOwnership(body.clientId, profileId, dependencies.clientsStore);
+        const validClient = await validateClientOwnership(
+          body.clientId,
+          profileId,
+          dependencies.clientsStore,
+        );
 
         if (!validClient) {
           return reply.status(400).send({
@@ -433,6 +451,42 @@ export const registerTransactionsRoutes = (
   );
 
   app.get(
+    '/api/transactions/:transactionId',
+    {
+      schema: {
+        params: TransactionParamsSchema,
+        response: {
+          200: TransactionResponseSchema,
+          401: UnauthorizedSchema,
+          404: NotFoundSchema,
+        },
+      },
+    },
+    async (request, reply) => {
+      const profileId = await getAuthenticatedProfileId(request.headers);
+
+      if (!profileId) {
+        return reply.status(401).send(UnauthorizedPayload);
+      }
+
+      const params = request.params as TransactionParams;
+      const transactionObjectId = new ObjectId(params.transactionId);
+      const collection = dependencies.transactionsStore.getCollection();
+
+      const transaction = await collection.findOne({
+        _id: transactionObjectId,
+        profileId,
+      });
+
+      if (!transaction) {
+        return reply.status(404).send(NotFoundPayload);
+      }
+
+      return reply.status(200).send(transactionToResponse(transaction));
+    },
+  );
+
+  app.get(
     '/api/transactions',
     {
       schema: {
@@ -444,18 +498,16 @@ export const registerTransactionsRoutes = (
       },
     },
     async (request, reply) => {
-      const session = await dependencies.authService.getSessionFromHeaders(request.headers);
+      const profileId = await getAuthenticatedProfileId(request.headers);
 
-      if (!session) {
+      if (!profileId) {
         return reply.status(401).send(UnauthorizedPayload);
       }
 
-      const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
-      const profileId = profile._id.toHexString();
-      const query = request.query as TransactionListQuery;
+      const query = request.query as Static<typeof TransactionListQuerySchema>;
 
-      const page = query.page ?? 1;
-      const limit = query.limit ?? 20;
+      const page = toBoundedPositiveInteger(query.page, PAGE_DEFAULT, MAX_PAGE);
+      const limit = toBoundedPositiveInteger(query.limit, LIMIT_DEFAULT, MAX_LIMIT);
       const sortBy = query.sortBy ?? 'createdAt';
       const sortOrder = query.sortOrder ?? 'desc';
       const skip = (page - 1) * limit;
@@ -553,20 +605,22 @@ export const registerTransactionsRoutes = (
       },
     },
     async (request, reply) => {
-      const session = await dependencies.authService.getSessionFromHeaders(request.headers);
+      const profileId = await getAuthenticatedProfileId(request.headers);
 
-      if (!session) {
+      if (!profileId) {
         return reply.status(401).send(UnauthorizedPayload);
       }
 
-      const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
-      const profileId = profile._id.toHexString();
       const params = request.params as TransactionParams;
       const body = request.body as TransactionUpdateBody;
       const transactionObjectId = new ObjectId(params.transactionId);
 
       if (body.clientId) {
-        const validClient = await validateClientOwnership(body.clientId, profileId, dependencies.clientsStore);
+        const validClient = await validateClientOwnership(
+          body.clientId,
+          profileId,
+          dependencies.clientsStore,
+        );
 
         if (!validClient) {
           return reply.status(400).send({
@@ -593,7 +647,9 @@ export const registerTransactionsRoutes = (
         ...(body.clientId !== undefined && { clientId: body.clientId }),
         ...(body.orderId !== undefined && { orderId: body.orderId }),
         ...(body.amount !== undefined && { amount: body.amount }),
-        ...(body.transactionDate !== undefined && { transactionDate: new Date(body.transactionDate) }),
+        ...(body.transactionDate !== undefined && {
+          transactionDate: new Date(body.transactionDate),
+        }),
         ...(body.dueDate !== undefined && { dueDate: new Date(body.dueDate) }),
         ...(body.paymentMethod !== undefined && { paymentMethod: body.paymentMethod }),
         ...(body.category !== undefined && { category: body.category }),
@@ -639,14 +695,12 @@ export const registerTransactionsRoutes = (
       },
     },
     async (request, reply) => {
-      const session = await dependencies.authService.getSessionFromHeaders(request.headers);
+      const profileId = await getAuthenticatedProfileId(request.headers);
 
-      if (!session) {
+      if (!profileId) {
         return reply.status(401).send(UnauthorizedPayload);
       }
 
-      const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
-      const profileId = profile._id.toHexString();
       const params = request.params as TransactionParams;
       const transactionObjectId = new ObjectId(params.transactionId);
       const collection = dependencies.transactionsStore.getCollection();
@@ -690,14 +744,12 @@ export const registerTransactionsRoutes = (
       },
     },
     async (request, reply) => {
-      const session = await dependencies.authService.getSessionFromHeaders(request.headers);
+      const profileId = await getAuthenticatedProfileId(request.headers);
 
-      if (!session) {
+      if (!profileId) {
         return reply.status(401).send(UnauthorizedPayload);
       }
 
-      const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
-      const profileId = profile._id.toHexString();
       const params = request.params as TransactionParams;
       const transactionObjectId = new ObjectId(params.transactionId);
       const collection = dependencies.transactionsStore.getCollection();

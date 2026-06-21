@@ -1,0 +1,20 @@
+info:
+  name: Documents Budget PDF
+  type: http
+  seq: 2
+
+http:
+  method: GET
+  url: '{{baseUrl}}/api/documents/budget/{{orderId}}/pdf'
+  headers:
+    - name: Cookie
+      value: '{{sessionCookie}}'
+    - name: Accept
+      value: application/pdf
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

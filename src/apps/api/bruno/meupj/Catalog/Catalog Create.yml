@@ -1,0 +1,50 @@
+info:
+  name: Catalog Create
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: '{{baseUrl}}/api/catalog'
+  headers:
+    - name: Cookie
+      value: '{{sessionCookie}}'
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "type": "product",
+        "name": "Sample Product",
+        "unitPrice": 10.99,
+        "unitMeasure": "unit",
+        "description": "A sample product description",
+        "costPrice": 5.50
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        const responseBody = res.getBody();
+
+        if (responseBody === undefined || responseBody === null || responseBody === "") {
+          throw new Error("Missing response body in Catalog Create");
+        }
+
+        const body =
+          typeof responseBody === "string" ? JSON.parse(responseBody) : responseBody;
+
+        if (!body || typeof body !== "object" || typeof body._id !== "string") {
+          throw new Error("Catalog item id not found in Catalog Create response");
+        }
+
+        bru.setEnvVar("catalogItemId", body._id);
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

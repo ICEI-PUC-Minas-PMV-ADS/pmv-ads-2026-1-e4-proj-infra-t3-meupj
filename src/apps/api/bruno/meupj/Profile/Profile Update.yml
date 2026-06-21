@@ -1,0 +1,42 @@
+info:
+  name: Profile Update
+  type: http
+  seq: 2
+
+http:
+  method: PUT
+  url: '{{baseUrl}}/api/profile'
+  headers:
+    - name: Cookie
+      value: '{{sessionCookie}}'
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "name": "MeuPJ Serviços",
+        "document": "12.345.678/0001-99",
+        "phone": "31 99999-1234",
+        "email": "contato@meupj.com",
+        "logo": null,
+        "color": "#4F46E5",
+        "footer": "Atendimento em horário comercial.",
+        "address": {
+          "zipCode": "30130-110",
+          "street": "Av. Afonso Pena",
+          "number": "1500",
+          "complement": "Sala 302",
+          "district": "Centro",
+          "city": "Belo Horizonte",
+          "state": "MG",
+          "country": "Brasil"
+        }
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

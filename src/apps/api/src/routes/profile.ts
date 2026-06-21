@@ -45,6 +45,16 @@ const ProfileBusinessSchema = Type.Object(
 
 const ProfileResponseSchema = Type.Object(
   {
+    user: Type.Object(
+      {
+        id: Type.String({ minLength: 1 }),
+        name: NullableStringSchema,
+        email: NullableStringSchema,
+      },
+      {
+        additionalProperties: false,
+      },
+    ),
     business: ProfileBusinessSchema,
     createdAt: Type.String({ format: 'date-time' }),
     updatedAt: Type.String({ format: 'date-time' }),
@@ -96,7 +106,14 @@ export const registerProfileRoutes = (
 
       const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
 
-      return reply.send(toPublicProfile(profile));
+      return reply.send({
+        user: {
+          id: session.user.id,
+          name: session.user.name,
+          email: session.user.email,
+        },
+        ...toPublicProfile(profile),
+      });
     },
   );
 
@@ -129,7 +146,14 @@ export const registerProfileRoutes = (
         body,
       );
 
-      return reply.send(toPublicProfile(profile));
+      return reply.send({
+        user: {
+          id: session.user.id,
+          name: session.user.name,
+          email: session.user.email,
+        },
+        ...toPublicProfile(profile),
+      });
     },
   );
 };

@@ -1,0 +1,29 @@
+info:
+  name: Transactions Update
+  type: http
+  seq: 5
+
+http:
+  method: PUT
+  url: '{{baseUrl}}/api/transactions/{{transactionId}}'
+  headers:
+    - name: Cookie
+      value: '{{sessionCookie}}'
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "status": "pending",
+        "paymentMethod": "bankTransfer",
+        "reference": "Parcela atualizada via Bruno",
+        "notes": "Atualização de teste via Bruno"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

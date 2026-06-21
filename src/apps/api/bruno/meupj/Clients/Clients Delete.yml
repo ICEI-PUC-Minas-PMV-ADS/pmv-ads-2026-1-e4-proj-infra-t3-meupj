@@ -1,14 +1,14 @@
 info:
   name: Clients Delete
   type: http
-  seq: 4
+  seq: 5
 
 http:
   method: DELETE
   url: '{{baseUrl}}/api/clients/{{clientId}}'
   headers:
     - name: Cookie
-      value: sessionCookie
+      value: '{{sessionCookie}}'
   auth: inherit
 
 settings:

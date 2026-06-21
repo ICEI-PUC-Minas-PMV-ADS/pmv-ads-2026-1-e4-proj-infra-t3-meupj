@@ -9,8 +9,15 @@ import {
   buildReceiptDocument,
   buildServiceOrderDocument,
 } from '../lib/documents.js';
+import {
+  renderBudgetDocumentPdf,
+  renderReceiptDocumentPdf,
+  renderServiceOrderDocumentPdf,
+} from '../lib/document-pdf.js';
+import type { Order } from '../lib/orders.js';
 import type { OrdersStore } from '../lib/orders.js';
 import type { ProfileStore } from '../lib/profile.js';
+import type { Transaction } from '../lib/transactions.js';
 import type { TransactionsStore } from '../lib/transactions.js';
 
 const UnauthorizedSchema = Type.Object({
@@ -23,6 +30,12 @@ const NotFoundSchema = Type.Object({
   error: Type.Literal('Not Found'),
   message: Type.Literal('Order not found'),
   statusCode: Type.Literal(404),
+});
+
+const ConflictSchema = Type.Object({
+  error: Type.Literal('Conflict'),
+  message: Type.String(),
+  statusCode: Type.Literal(409),
 });
 
 const OrderParamsSchema = Type.Object(
@@ -224,6 +237,12 @@ const ReceiptDocumentResponseSchema = Type.Object(
   },
 );
 
+const TransactionNotFoundSchema = Type.Object({
+  error: Type.Literal('Not Found'),
+  message: Type.Literal('Transaction not found'),
+  statusCode: Type.Literal(404),
+});
+
 const UnauthorizedPayload = Object.freeze({
   error: 'Unauthorized',
   message: 'Unauthorized',
@@ -236,20 +255,45 @@ const NotFoundPayload = Object.freeze({
   statusCode: 404,
 });
 
-const TransactionNotFoundSchema = Type.Object({
-  error: Type.Literal('Not Found'),
-  message: Type.Literal('Transaction not found'),
-  statusCode: Type.Literal(404),
-});
-
 const TransactionNotFoundPayload = Object.freeze({
   error: 'Not Found',
   message: 'Transaction not found',
   statusCode: 404,
 });
 
+const CancelledBudgetPayload = Object.freeze({
+  error: 'Conflict',
+  message: 'Pedidos cancelados nao podem gerar orcamento.',
+  statusCode: 409,
+});
+
+const InvalidServiceOrderPayload = Object.freeze({
+  error: 'Conflict',
+  message:
+    'A ordem de servico so esta disponivel para pedidos em andamento, concluidos ou em garantia.',
+  statusCode: 409,
+});
+
+const InvalidReceiptPayload = Object.freeze({
+  error: 'Conflict',
+  message: 'O recibo so esta disponivel para lancamentos confirmados.',
+  statusCode: 409,
+});
+
 type DocumentOrderParams = Static<typeof OrderParamsSchema>;
 type DocumentTransactionParams = Static<typeof TransactionParamsSchema>;
+
+type ProfileScopedOrder = {
+  order: (Order & { _id: ObjectId }) | null;
+  profile: Awaited<ReturnType<ProfileStore['ensureByAuthUserId']>>;
+  profileId: string;
+};
+
+type ProfileScopedTransaction = {
+  profile: Awaited<ReturnType<ProfileStore['ensureByAuthUserId']>>;
+  profileId: string;
+  transaction: (Transaction & { _id: ObjectId }) | null;
+};
 
 export type DocumentsRouteDependencies = {
   authService: AuthService;
@@ -259,10 +303,69 @@ export type DocumentsRouteDependencies = {
   transactionsStore: TransactionsStore;
 };
 
+const canGenerateBudget = (status: Order['status']): boolean => status !== 'cancelled';
+
+const canGenerateServiceOrder = (status: Order['status']): boolean =>
+  status === 'inProgress' || status === 'completed' || status === 'warranty';
+
+const canGenerateReceipt = (status: Transaction['status']): boolean => status === 'confirmed';
+
+const getCommercialDocumentFileName = (prefix: string, orderNumber: string): string =>
+  `${prefix}-${orderNumber}.pdf`;
+
+const getReceiptFileName = (transactionId: string): string => `recibo-${transactionId}.pdf`;
+
 export const registerDocumentsRoutes = (
   app: FastifyInstance,
   dependencies: DocumentsRouteDependencies,
 ): void => {
+  const loadProfileScopedOrder = async (
+    authUserId: string,
+    orderId: string,
+  ): Promise<ProfileScopedOrder> => {
+    const profile = await dependencies.profileStore.ensureByAuthUserId(authUserId);
+    const profileId = profile._id.toHexString();
+    const order = await dependencies.ordersStore.getCollection().findOne({
+      _id: new ObjectId(orderId),
+      profileId,
+    });
+
+    return {
+      order,
+      profile,
+      profileId,
+    };
+  };
+
+  const loadProfileScopedClient = async (profileId: string, clientId?: string | null) => {
+    if (!clientId) {
+      return null;
+    }
+
+    return dependencies.clientsStore.getCollection().findOne({
+      _id: new ObjectId(clientId),
+      profileId,
+    });
+  };
+
+  const loadProfileScopedTransaction = async (
+    authUserId: string,
+    transactionId: string,
+  ): Promise<ProfileScopedTransaction> => {
+    const profile = await dependencies.profileStore.ensureByAuthUserId(authUserId);
+    const profileId = profile._id.toHexString();
+    const transaction = await dependencies.transactionsStore.getCollection().findOne({
+      _id: new ObjectId(transactionId),
+      profileId,
+    });
+
+    return {
+      profile,
+      profileId,
+      transaction,
+    };
+  };
+
   app.get(
     '/api/documents/budget/:orderId',
     {
@@ -272,6 +375,7 @@ export const registerDocumentsRoutes = (
           200: BudgetDocumentResponseSchema,
           401: UnauthorizedSchema,
           404: NotFoundSchema,
+          409: ConflictSchema,
         },
       },
     },
@@ -282,30 +386,72 @@ export const registerDocumentsRoutes = (
         return reply.status(401).send(UnauthorizedPayload);
       }
 
-      const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
-      const profileId = profile._id.toHexString();
       const params = request.params as DocumentOrderParams;
-      const orderObjectId = new ObjectId(params.orderId);
-
-      const order = await dependencies.ordersStore.getCollection().findOne({
-        _id: orderObjectId,
-        profileId,
-      });
+      const { order, profile, profileId } = await loadProfileScopedOrder(
+        session.user.id,
+        params.orderId,
+      );
 
       if (!order) {
         return reply.status(404).send(NotFoundPayload);
       }
 
-      const client = order.clientId
-        ? await dependencies.clientsStore.getCollection().findOne({
-            _id: new ObjectId(order.clientId),
-            profileId,
-          })
-        : null;
+      if (!canGenerateBudget(order.status)) {
+        return reply.status(409).send(CancelledBudgetPayload);
+      }
 
+      const client = await loadProfileScopedClient(profileId, order.clientId);
       const payload = buildBudgetDocument(order, profile, client);
 
       return reply.status(200).send(payload);
+    },
+  );
+
+  app.get(
+    '/api/documents/budget/:orderId/pdf',
+    {
+      schema: {
+        params: OrderParamsSchema,
+        response: {
+          200: Type.Any(),
+          401: UnauthorizedSchema,
+          404: NotFoundSchema,
+          409: ConflictSchema,
+        },
+      },
+    },
+    async (request, reply) => {
+      const session = await dependencies.authService.getSessionFromHeaders(request.headers);
+
+      if (!session) {
+        return reply.status(401).send(UnauthorizedPayload);
+      }
+
+      const params = request.params as DocumentOrderParams;
+      const { order, profile, profileId } = await loadProfileScopedOrder(
+        session.user.id,
+        params.orderId,
+      );
+
+      if (!order) {
+        return reply.status(404).send(NotFoundPayload);
+      }
+
+      if (!canGenerateBudget(order.status)) {
+        return reply.status(409).send(CancelledBudgetPayload);
+      }
+
+      const client = await loadProfileScopedClient(profileId, order.clientId);
+      const payload = buildBudgetDocument(order, profile, client);
+      const pdfBuffer = await renderBudgetDocumentPdf(payload);
+
+      reply.header(
+        'Content-Disposition',
+        `inline; filename="${getCommercialDocumentFileName('orcamento', order.orderNumber)}"`,
+      );
+      reply.header('Content-Type', 'application/pdf');
+
+      return reply.status(200).send(pdfBuffer);
     },
   );
 
@@ -318,6 +464,7 @@ export const registerDocumentsRoutes = (
           200: ServiceOrderDocumentResponseSchema,
           401: UnauthorizedSchema,
           404: NotFoundSchema,
+          409: ConflictSchema,
         },
       },
     },
@@ -328,30 +475,72 @@ export const registerDocumentsRoutes = (
         return reply.status(401).send(UnauthorizedPayload);
       }
 
-      const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
-      const profileId = profile._id.toHexString();
       const params = request.params as DocumentOrderParams;
-      const orderObjectId = new ObjectId(params.orderId);
-
-      const order = await dependencies.ordersStore.getCollection().findOne({
-        _id: orderObjectId,
-        profileId,
-      });
+      const { order, profile, profileId } = await loadProfileScopedOrder(
+        session.user.id,
+        params.orderId,
+      );
 
       if (!order) {
         return reply.status(404).send(NotFoundPayload);
       }
 
-      const client = order.clientId
-        ? await dependencies.clientsStore.getCollection().findOne({
-            _id: new ObjectId(order.clientId),
-            profileId,
-          })
-        : null;
+      if (!canGenerateServiceOrder(order.status)) {
+        return reply.status(409).send(InvalidServiceOrderPayload);
+      }
 
+      const client = await loadProfileScopedClient(profileId, order.clientId);
       const payload = buildServiceOrderDocument(order, profile, client);
 
       return reply.status(200).send(payload);
+    },
+  );
+
+  app.get(
+    '/api/documents/service-order/:orderId/pdf',
+    {
+      schema: {
+        params: OrderParamsSchema,
+        response: {
+          200: Type.Any(),
+          401: UnauthorizedSchema,
+          404: NotFoundSchema,
+          409: ConflictSchema,
+        },
+      },
+    },
+    async (request, reply) => {
+      const session = await dependencies.authService.getSessionFromHeaders(request.headers);
+
+      if (!session) {
+        return reply.status(401).send(UnauthorizedPayload);
+      }
+
+      const params = request.params as DocumentOrderParams;
+      const { order, profile, profileId } = await loadProfileScopedOrder(
+        session.user.id,
+        params.orderId,
+      );
+
+      if (!order) {
+        return reply.status(404).send(NotFoundPayload);
+      }
+
+      if (!canGenerateServiceOrder(order.status)) {
+        return reply.status(409).send(InvalidServiceOrderPayload);
+      }
+
+      const client = await loadProfileScopedClient(profileId, order.clientId);
+      const payload = buildServiceOrderDocument(order, profile, client);
+      const pdfBuffer = await renderServiceOrderDocumentPdf(payload);
+
+      reply.header(
+        'Content-Disposition',
+        `inline; filename="${getCommercialDocumentFileName('ordem-servico', order.orderNumber)}"`,
+      );
+      reply.header('Content-Type', 'application/pdf');
+
+      return reply.status(200).send(pdfBuffer);
     },
   );
 
@@ -364,6 +553,7 @@ export const registerDocumentsRoutes = (
           200: ReceiptDocumentResponseSchema,
           401: UnauthorizedSchema,
           404: TransactionNotFoundSchema,
+          409: ConflictSchema,
         },
       },
     },
@@ -374,28 +564,21 @@ export const registerDocumentsRoutes = (
         return reply.status(401).send(UnauthorizedPayload);
       }
 
-      const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
-      const profileId = profile._id.toHexString();
       const params = request.params as DocumentTransactionParams;
-      const transactionObjectId = new ObjectId(params.transactionId);
-
-      const transaction = await dependencies.transactionsStore.getCollection().findOne({
-        _id: transactionObjectId,
-        profileId,
-        status: 'confirmed',
-      });
+      const { transaction, profile, profileId } = await loadProfileScopedTransaction(
+        session.user.id,
+        params.transactionId,
+      );
 
       if (!transaction) {
         return reply.status(404).send(TransactionNotFoundPayload);
       }
 
-      const client = transaction.clientId
-        ? await dependencies.clientsStore.getCollection().findOne({
-            _id: new ObjectId(transaction.clientId),
-            profileId,
-          })
-        : null;
+      if (!canGenerateReceipt(transaction.status)) {
+        return reply.status(409).send(InvalidReceiptPayload);
+      }
 
+      const client = await loadProfileScopedClient(profileId, transaction.clientId);
       const order = transaction.orderId
         ? await dependencies.ordersStore.getCollection().findOne({
             _id: new ObjectId(transaction.orderId),
@@ -406,6 +589,60 @@ export const registerDocumentsRoutes = (
       const payload = buildReceiptDocument(transaction, profile, client, order);
 
       return reply.status(200).send(payload);
+    },
+  );
+
+  app.get(
+    '/api/documents/receipt/:transactionId/pdf',
+    {
+      schema: {
+        params: TransactionParamsSchema,
+        response: {
+          200: Type.Any(),
+          401: UnauthorizedSchema,
+          404: TransactionNotFoundSchema,
+          409: ConflictSchema,
+        },
+      },
+    },
+    async (request, reply) => {
+      const session = await dependencies.authService.getSessionFromHeaders(request.headers);
+
+      if (!session) {
+        return reply.status(401).send(UnauthorizedPayload);
+      }
+
+      const params = request.params as DocumentTransactionParams;
+      const { transaction, profile, profileId } = await loadProfileScopedTransaction(
+        session.user.id,
+        params.transactionId,
+      );
+
+      if (!transaction) {
+        return reply.status(404).send(TransactionNotFoundPayload);
+      }
+
+      if (!canGenerateReceipt(transaction.status)) {
+        return reply.status(409).send(InvalidReceiptPayload);
+      }
+
+      const client = await loadProfileScopedClient(profileId, transaction.clientId);
+      const order = transaction.orderId
+        ? await dependencies.ordersStore.getCollection().findOne({
+            _id: new ObjectId(transaction.orderId),
+            profileId,
+          })
+        : null;
+      const payload = buildReceiptDocument(transaction, profile, client, order);
+      const pdfBuffer = await renderReceiptDocumentPdf(payload);
+
+      reply.header(
+        'Content-Disposition',
+        `inline; filename="${getReceiptFileName(transaction._id.toHexString())}"`,
+      );
+      reply.header('Content-Type', 'application/pdf');
+
+      return reply.status(200).send(pdfBuffer);
     },
   );
 };

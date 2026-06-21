@@ -1,14 +1,14 @@
 info:
   name: Orders Update
   type: http
-  seq: 3
+  seq: 4
 
 http:
   method: PUT
-  url: '{{baseUrl}}/api/orders/PUT_ORDER_ID_HERE'
+  url: '{{baseUrl}}/api/orders/{{orderId}}'
   headers:
     - name: Cookie
-      value: sessionCookie
+      value: '{{sessionCookie}}'
     - name: Content-Type
       value: application/json
   body:
@@ -16,7 +16,8 @@ http:
     data: |-
       {
         "status": "pendingApproval",
-        "discount": 5.00
+        "discount": 5,
+        "reference": "Pedido atualizado via Bruno"
       }
   auth: inherit
 

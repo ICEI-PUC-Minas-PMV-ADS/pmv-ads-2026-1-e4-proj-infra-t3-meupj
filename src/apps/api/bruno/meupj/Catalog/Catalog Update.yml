@@ -1,14 +1,14 @@
 info:
   name: Catalog Update
   type: http
-  seq: 9
+  seq: 4
 
 http:
   method: PUT
   url: '{{baseUrl}}/api/catalog/{{catalogItemId}}'
   headers:
     - name: Cookie
-      value: sessionCookie
+      value: '{{sessionCookie}}'
     - name: Content-Type
       value: application/json
   body:

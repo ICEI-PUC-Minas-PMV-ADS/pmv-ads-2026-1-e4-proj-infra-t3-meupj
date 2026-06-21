@@ -1,91 +1,100 @@
 # Testes de Integração no Backend
 
-## O que são Testes de Integração?
+## Visão Geral
 
-Testes de integração são testes automatizados que verificam se diferentes módulos ou componentes de um sistema funcionam corretamente quando integrados. Ao contrário dos testes unitários, que testam pequenas unidades isoladas de código, os testes de integração focam na interação entre várias partes do sistema, como classes, bancos de dados, APIs externas, entre outros.
+Neste projeto, os testes automatizados de integração do backend validam o comportamento das rotas e dos módulos principais da API em conjunto, considerando autenticação, validação, regras de negócio e serialização das respostas.
 
-## Por que são Importantes?
+A stack utilizada no repositório é:
 
-Testes de integração ajudam a:
+- Node.js
+- `pnpm`
+- Fastify
+- Vitest
 
-- Garantir que os diferentes componentes do sistema funcionem bem juntos.
-- Detectar problemas que possam surgir da interação entre módulos, como erros de comunicação ou incompatibilidades.
-- Validar cenários de uso realistas, onde múltiplas partes do sistema precisam interagir.
+Os testes ficam em `src/apps/api/src/__tests__/`.
 
-## Configuração do Ambiente
+## Execução
 
-Para começar a escrever testes de integração em um projeto backend utilizando C#, siga os passos abaixo:
+Instalação das dependências do monorepo:
 
-1. **Instale o .NET SDK**: Certifique-se de ter o [.NET SDK](https://dotnet.microsoft.com/download) instalado.
+```bash
+cd src
+pnpm install
+```
 
-2. **Crie um projeto de testes**: No terminal, navegue até o diretório do seu projeto e execute o seguinte comando para criar um projeto de testes usando xUnit:
+Execução dos testes do backend:
 
-    ```bash
-    dotnet new xunit -o tests
-    ```
+```bash
+cd src
+pnpm --filter @repo/api test
+```
 
-3. **Adicione uma referência ao seu projeto principal**: No diretório do projeto de testes, adicione uma referência ao seu projeto principal:
+Execução da suíte completa do monorepo:
 
-    ```bash
-    dotnet add reference ../src/MyProject.csproj
-    ```
+```bash
+cd src
+pnpm test
+```
 
-4. **Configure um banco de dados para testes**: Se seu projeto interage com um banco de dados, considere usar um banco de dados em memória ou configurar um ambiente de banco de dados separado para os testes.
+## Cobertura Atual Observável no Repositório
 
-5. **Organize sua estrutura de diretórios**: Uma estrutura comum de projeto é a seguinte:
+Os arquivos de teste hoje presentes no backend incluem:
 
-    ```
-    MyProject/
-    ├── src/
-    │   └── MyProject.cs
-    └── tests/
-        └── MyProject.IntegrationTests.cs
-    ```
+- `app.test.ts`
+- `catalog.test.ts`
+- `clients.test.ts`
+- `documents.test.ts`
+- `orders.test.ts`
+- `orders-rules.test.ts`
+- `transactions.test.ts`
 
-## Exemplo de Teste de Integração
+## Cenários de Integração Registrados
 
-Vamos supor que temos um método na classe `UserService` que adiciona um usuário a um banco de dados. Queremos testar se esse método funciona corretamente ao interagir com o banco de dados.
+### Autenticação e Sessão
 
-### Código de Exemplo
+- integração das rotas `/api/auth/*` com o serviço de autenticação;
+- propagação da sessão autenticada para proteção das rotas privadas;
+- retorno `401` quando a requisição não possui sessão válida.
 
-Aqui está a implementação da classe `UserService`:
+### Perfil do Negócio
 
-```csharp
-// src/MyProject.cs
+- leitura do perfil consolidado do usuário autenticado em `GET /api/profile`;
+- criação automática do perfil quando necessário;
+- atualização de dados do negócio em `PUT /api/profile`.
 
-using System.Data.SqlClient;
+### Clientes
 
-namespace MyProject
-{
-    public class UserService
-    {
-        private readonly string _connectionString;
+- criação, leitura, atualização e exclusão no escopo do perfil autenticado;
+- busca, filtros e paginação na listagem;
+- bloqueio de exclusão quando houver vínculos impeditivos.
 
-        public UserService(string connectionString)
-        {
-            _connectionString = connectionString;
-        }
+### Catálogo
 
-        public void AddUser(string name, string email)
-        {
-            using (var connection = new SqlConnection(_connectionString))
-            {
-                connection.Open();
-                var command = new SqlCommand("INSERT INTO Users (Name, Email) VALUES (@Name, @Email)", connection);
-                command.Parameters.AddWithValue("@Name", name);
-                command.Parameters.AddWithValue("@Email", email);
-                command.ExecuteNonQuery();
-            }
-        }
+- criação e manutenção de itens de catálogo por perfil;
+- busca, filtros, ordenação e paginação;
+- validação de payload e de identificadores.
 
-        public int GetUserCount()
-        {
-            using (var connection = new SqlConnection(_connectionString))
-            {
-                connection.Open();
-                var command = new SqlCommand("SELECT COUNT(*) FROM Users", connection);
-                return (int)command.ExecuteScalar();
-            }
-        }
-    }
-}
+### Pedidos
+
+- criação de pedidos com itens de catálogo;
+- leitura de pedido unitário e listagem;
+- atualização de status conforme as regras do domínio;
+- bloqueio de exclusão quando houver impedimentos de negócio.
+
+### Lançamentos Financeiros
+
+- criação de receitas e custos;
+- leitura e listagem com filtros por tipo, status e datas;
+- atualização de lançamentos;
+- bloqueio de exclusão para lançamentos confirmados.
+
+### Documentos Comerciais
+
+- montagem de orçamento, ordem de serviço e recibo a partir dos dados do domínio;
+- geração das respostas JSON e PDF;
+- retorno `404` para entidades inexistentes;
+- retorno `409` quando a emissão não é permitida pelo status atual.
+
+## Observação
+
+Este documento resume a cobertura de integração observável no repositório atual. Detalhamento acadêmico adicional, evidências e rastreabilidade por etapa podem continuar sendo mantidos nos demais artefatos da pasta `docs/`.

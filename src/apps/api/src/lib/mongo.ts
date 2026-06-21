@@ -98,9 +98,11 @@ const clearHealthcheckTimer = (): void => {
   runtime.healthcheckTimer = null;
 };
 
-const closeClient = async (): Promise<void> => {
+const closeClient = async (options?: { resetRuntime?: boolean }): Promise<void> => {
   if (!runtime.client) {
-    runtime.db = null;
+    if (options?.resetRuntime) {
+      runtime.db = null;
+    }
     return;
   }
 
@@ -110,8 +112,10 @@ const closeClient = async (): Promise<void> => {
     runtime.logger?.warn({ err: normalizeError(error) }, 'Error while closing MongoDB client');
   }
 
-  runtime.client = null;
-  runtime.db = null;
+  if (options?.resetRuntime) {
+    runtime.client = null;
+    runtime.db = null;
+  }
 };
 
 const scheduleReconnect = (): void => {
@@ -146,7 +150,7 @@ const connect = async (): Promise<void> => {
   try {
     runtime.client ??= new MongoClient(runtime.uri, {
       retryReads: true,
-      retryWrites: true,
+      retryWrites: false,
       serverSelectionTimeoutMS: 5_000,
     });
 
@@ -165,7 +169,6 @@ const connect = async (): Promise<void> => {
     runtime.lastError = normalizedError;
     runtime.state = 'degraded';
     runtime.logger.error({ err: normalizedError }, 'MongoDB connection failed');
-    await closeClient();
     scheduleReconnect();
   }
 };
@@ -191,7 +194,6 @@ const startHealthcheck = (): void => {
           { err: normalizedError },
           'MongoDB ping failed; entering degraded state',
         );
-        await closeClient();
         scheduleReconnect();
       }
     })();
@@ -235,7 +237,7 @@ const getStatus = (): MongoStatus => ({
 const close = async (): Promise<void> => {
   clearReconnectTimer();
   clearHealthcheckTimer();
-  await closeClient();
+  await closeClient({ resetRuntime: true });
   runtime.state = 'idle';
 };
 

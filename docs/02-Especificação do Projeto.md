@@ -1,10 +1,8 @@
 # Especificações do Projeto
 
-<span style="color:red">Pré-requisitos: <a href="1-Documentação de Contexto.md"> Documentação de Contexto</a></span>
+<span style="color:red">Pré-requisitos: <a href="01-Documentação de Contexto.md"> Documentação de Contexto</a></span>
 
-Definição do problema e ideia de solução a partir da perspectiva do usuário. É composta pela definição do diagrama de personas, histórias de usuários, requisitos funcionais e não funcionais além das restrições do projeto.
-
-Apresente uma visão geral do que será abordado nesta parte do documento, enumerando as técnicas e/ou ferramentas utilizadas para realizar a especificações do projeto
+Este documento consolida a especificação funcional do sistema entregue, a partir da perspectiva do usuário. O conteúdo reúne personas, histórias de usuário, requisitos funcionais, requisitos não funcionais, restrições, casos de uso e organização temporal do projeto, sempre alinhados ao estado atual da implementação.
 
 ## Personas
 
@@ -12,153 +10,138 @@ Apresente uma visão geral do que será abordado nesta parte do documento, enume
 ![Persona 2](https://github.com/user-attachments/assets/0acb5cc0-9f7d-422c-9351-a76bfd621b65)
 ![Persona 3](https://github.com/user-attachments/assets/2aad9fbd-10af-4228-9e1d-76457c33acb6)
 
-
 ## Histórias de Usuários
 
-Com base na análise das personas forma identificadas as seguintes histórias de usuários:
+Com base nas personas analisadas, foram consolidadas as seguintes histórias de usuário para o sistema efetivamente entregue:
 
-| EU COMO... `PERSONA`               | QUERO/PRECISO ... `FUNCIONALIDADE`                                     | PARA ... `MOTIVO/VALOR`                                                  |
-| ---------------------------------- | ---------------------------------------------------------------------- | ------------------------------------------------------------------------ |
-| **João Pereira Santos**   | Registrar os serviços combinados de forma rápida                       | Não perder o controle do que foi acordado com o cliente.                 |
-| **João Pereira Santos**   | Anotar os valores pendentes de recebimento                             | Saber exatamente quem está me devendo e poder cobrar.                    |
-| **João Pereira Santos**   | Gerar e enviar propostas de serviço de forma digital                   | Agilizar o fechamento de negócios sem complicação.                       |
-| **Carla Mendes Oliveira**    | Criar propostas padronizadas com a minha marca (identidade visual)     | Transmitir uma imagem mais profissional aos meus clientes.               |
-| **Carla Mendes Oliveira**    | Registrar os pagamentos recebidos vinculados às propostas              | Centralizar as informações comerciais e financeiras no mesmo lugar.      |
-| **Carla Mendes Oliveira**    | Registrar as minhas despesas recorrentes e custos operacionais         | Ter controle de quanto meu negócio custa para operar mensalmente.        |
-| **Carla Mendes Oliveira**    | Visualizar um painel (dashboard) com resumos e gráficos de faturamento | Entender a real situação financeira do meu negócio para previsibilidade. |
-| **Marcos Ribeiro Costa** | De um acesso compartilhado simplificado ao sistema   | Que minha esposa/assistente possa me ajudar com registros e cobranças.   |
-| **Marcos Ribeiro Costa** | Visualizar rapidamente o fluxo de caixa do dia/semana                  | Tomar melhores decisões sobre despesas urgentes e compras de material.   |
-| **Marcos Ribeiro Costa** | Emitir ordens de serviço claras com status de andamento                | Que minha auxiliar possa acompanhar a execução dos trabalhos.            |
+| EU COMO... `PERSONA`      | QUERO/PRECISO ... `FUNCIONALIDADE`                             | PARA ... `MOTIVO/VALOR`                                                  |
+| ------------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| **João Pereira Santos**   | Registrar clientes e pedidos com rapidez                       | Não perder o controle do que foi acordado com cada atendimento.          |
+| **João Pereira Santos**   | Emitir orçamento e ordem de serviço em PDF                     | Formalizar propostas e serviços com mais profissionalismo.               |
+| **João Pereira Santos**   | Registrar receitas e custos do negócio                         | Acompanhar valores pagos, pendentes e em atraso.                         |
+| **Carla Mendes Oliveira** | Manter um catálogo padronizado de produtos e serviços          | Ganhar agilidade ao montar pedidos e propostas.                          |
+| **Carla Mendes Oliveira** | Visualizar um painel financeiro resumido                       | Entender a situação atual do negócio sem depender de planilhas externas. |
+| **Carla Mendes Oliveira** | Emitir recibos de pagamentos confirmados                       | Formalizar recebimentos para clientes e manter histórico.                |
+| **Marcos Ribeiro Costa**  | Operar o sistema tanto no navegador quanto no celular          | Registrar e consultar informações em diferentes contextos de trabalho.   |
+| **Marcos Ribeiro Costa**  | Entrar em contato rápido com clientes por telefone ou WhatsApp | Agilizar atendimento e cobrança diretamente a partir do cadastro.        |
+| **Marcos Ribeiro Costa**  | Editar pedidos e lançamentos conforme a evolução do serviço    | Manter o sistema coerente com a rotina real do negócio.                  |
 
 ## Requisitos
 
-As tabelas que se seguem apresentam os requisitos funcionais e não funcionais que detalham o escopo do projeto. Para determinar a prioridade de requisitos, aplicar uma técnica de priorização de requisitos e detalhar como a técnica foi aplicada.
-
+As tabelas a seguir apresentam os requisitos funcionais e não funcionais do sistema implementado.
 
 ### Requisitos Funcionais
 
-| ID     | Descrição do Requisito                  | Prioridade | Responsável |
-| ------ | --------------------------------------- | ---------- | ----------- |
-| RF-001 | O sistema deve permitir que o usuário crie uma conta informando nome, CPF/CNPJ, telefone, email, endereço e senha | ALTA       | Amanda       |
-| RF-002 | O sistema deve permitir que o usuário edite os dados de sua conta  | ALTA      | Amanda        |
-| RF-003 | O sistema deve permitir que o usuário exclua a sua conta, removendo os dados vinculados após confirmação | ALTA       | Amanda       |
-| RF-004 | O sistema deve permitir que o usuário cadastre clientes com nome, CPF/CNPJ, telefone, email e endereço   | ALTA      | Bruna        |
-| RF-005 | O sistema deve permitir que o usuário edite os dados de um cliente | ALTA       | Bruna       |
-| RF-006 | O sistema deve permitir que o usuário exclua um cliente, desde que não haja documentos ativos vinculados   | ALTA      | Bruna        |
-| RF-007 | O sistema deve permitir que o usuário busque e filtre clientes cadastrados por nome, CPF/CNPJ, telefone, email e endereço | MÉDIA       | Bruna       |
-| RF-008 | O sistema deve permitir que o usuário crie pedidos com um ou mais serviços/produtos vinculado a um cliente, definindo quantidade, valor unitário e desconto  | ALTA      | Eric        |
-| RF-009 | O sistema deve permitir que o usuário edite os dados de um pedido | ALTA       | Eric       |
-| RF-010 | O sistema deve permitir que o usuário exclua um pedido | ALTA      | Eric        |
-| RF-011 | O sistema deve permitir que o usuário busque e filtre pedidos por cliente e nome de serviço/produto | MÉDIA       | Frederico       |
-| RF-012 | o sistema deve permitir que o usuário cadastre serviços/produtos, informando nome, descrição, valor unitário e unidade de medida  | ALTA     | Frederico        |
-| RF-013 | O sistema deve permitir que o usuário edite os dados de um serviço/produto | ALTA       | Frederico      |
-| RF-014 | o sistema deve permitir que o usuário exclua um serviço/produto, desde que não esteja vinculado a um pedido ativo   | ALTA      | Guilherme        |
-| RF-015 | O sistema deve permitir que o usuário busque e filtre serviços/produtos por nome, descrição e valor  | MÉDIA       | Guilherme       |
-| RF-016 | O sistema deve exibir um painel com a receita recebida, receita a receber e receita em atraso   | MÉDIA      | Guilherme        |
-| RF-017 | O sistema deve apresentar um gráfico de resultado com os valores calculados a partir da diferença entre receitas e custos | BAIXA       | Maria Julia       |
-| RF-018 | O sistema deve exibir um painel com os custos pagos, os custos previstos e os custos em atraso  | MÉDIA      | Maria Julia        |
-| RF-019 | O sistema deve permitir gerar um recibo a partir de um pagamento registrado de um pedido, contendo os dados do usuário, dados do cliente, descrição dos serviços prestados, valor pago, data e forma de pagamento | MÉDIA | Amanda        |
-| RF-020 | O sistema deve permitir gerar um orçamento a partir de um pedido criado, contendo os dados do usuário, dados do cliente, descrição dos serviços, valor estimado, data prevista para execução e método de pagamento | MÉDIA  | Eric       |
-| RF-021 | O sistema deve permitir gerar uma ordem de serviço a partir de um pedido confirmado, contendo os dados do usuário, dados do cliente, descrição dos serviços, status do serviço, data de execução e responsável pela execução | MÉDIA  | Eric       |
-| RF-022 | O sistema deve permitir que o usuário inicie uma chamada telefônica para um cliente diretamente através do aplicativo mobile  | ALTA      | Frederico       |
-| RF-023 | O sistema deve permitir que o usuário envie mensagens de texto (SMS ou WhatsApp) para um cliente diretamente através do aplicativo mobile| ALTA      | Frederico       |
-
-
+| ID     | Descrição do Requisito                                                                                                                 | Prioridade | Responsável |
+| ------ | -------------------------------------------------------------------------------------------------------------------------------------- | ---------- | ----------- |
+| RF-001 | O sistema deve permitir que o usuário crie uma conta com nome, email e senha, gerando sessão autenticada após o cadastro               | ALTA       | Amanda      |
+| RF-002 | O sistema deve permitir que o usuário realize login e mantenha sessão autenticada para uso das áreas protegidas                        | ALTA       | Amanda      |
+| RF-003 | O sistema deve permitir que o usuário visualize e edite os dados do perfil do negócio em configurações                                 | ALTA       | Amanda      |
+| RF-004 | O sistema deve permitir que o usuário cadastre clientes com nome, tipo, documento, telefone, email e endereço                          | ALTA       | Bruna       |
+| RF-005 | O sistema deve permitir que o usuário edite os dados de um cliente                                                                     | ALTA       | Bruna       |
+| RF-006 | O sistema deve permitir que o usuário exclua um cliente, respeitando as validações de vínculo do sistema                               | ALTA       | Bruna       |
+| RF-007 | O sistema deve permitir que o usuário busque e filtre clientes cadastrados                                                             | MÉDIA      | Bruna       |
+| RF-008 | O sistema deve permitir que o usuário crie pedidos com um ou mais itens de catálogo, cliente opcional e condições comerciais           | ALTA       | Eric        |
+| RF-009 | O sistema deve permitir que o usuário edite pedidos, incluindo status válidos e composição dos itens                                   | ALTA       | Eric        |
+| RF-010 | O sistema deve permitir que o usuário exclua pedidos quando não houver impedimento pelas regras do negócio                             | ALTA       | Eric        |
+| RF-011 | O sistema deve permitir que o usuário busque e filtre pedidos por texto, cliente e status                                              | MÉDIA      | Frederico   |
+| RF-012 | O sistema deve permitir que o usuário cadastre serviços e produtos no catálogo                                                         | ALTA       | Frederico   |
+| RF-013 | O sistema deve permitir que o usuário edite os dados de um item do catálogo                                                            | ALTA       | Frederico   |
+| RF-014 | O sistema deve permitir que o usuário exclua um item de catálogo, respeitando os vínculos existentes                                   | ALTA       | Guilherme   |
+| RF-015 | O sistema deve permitir que o usuário busque e filtre itens do catálogo                                                                | MÉDIA      | Guilherme   |
+| RF-016 | O sistema deve permitir que o usuário registre lançamentos financeiros de receita e custo                                              | ALTA       | Guilherme   |
+| RF-017 | O sistema deve permitir que o usuário edite lançamentos financeiros e aplique as restrições de exclusão previstas                      | ALTA       | Maria Julia |
+| RF-018 | O sistema deve exibir um painel financeiro com resumos de receita confirmada, valores pendentes, atrasos, resultado e listagem recente | MÉDIA      | Maria Julia |
+| RF-019 | O sistema deve permitir gerar um recibo em PDF a partir de um lançamento confirmado                                                    | MÉDIA      | Amanda      |
+| RF-020 | O sistema deve permitir gerar um orçamento em PDF a partir de um pedido elegível                                                       | MÉDIA      | Eric        |
+| RF-021 | O sistema deve permitir gerar uma ordem de serviço em PDF a partir de um pedido elegível                                               | MÉDIA      | Eric        |
+| RF-022 | O sistema deve permitir que o usuário inicie uma chamada telefônica para um cliente com telefone válido                                | ALTA       | Frederico   |
+| RF-023 | O sistema deve permitir que o usuário abra uma conversa no WhatsApp para um cliente com telefone válido                                | ALTA       | Frederico   |
 
 ### Requisitos não Funcionais
 
-| ID      | Descrição do Requisito                                            | Prioridade |
-| ------- | ----------------------------------------------------------------- | ---------- |
-| RNF-001 | As senhas dos usuários devem ser criptografadas utilizando algoritmo de hash seguro (bcrypt) antes de serem armazenadas no banco de dados, garantindo que nenhuma senha seja salva em texto puro | ALTA      |
-| RNF-002 | Toda comunicação entre o aplicativo e o servidor deve ser realizada por meio de HTTPS, com autenticação das requisições via token JWT, garantindo que apenas usuários autenticados acessem os dados da aplicação            | ALTA      |
-| RNF-003 | A interface deve ser simples e intuitiva, permitindo que o usuário realize as principais tarefas da aplicação sem necessidade de treinamento prévio ou conhecimento técnico avançado | ALTA      |
-| RNF-004 | O aplicativo mobile deve funcionar corretamente nos sistemas operacionais Android e iOS, mantendo comportamento e aparência consistentes entre as duas plataformas          | MÉDIA     |
-| RNF-005 | A versão web da aplicação deve funcionar corretamente nos principais navegadores modernos, incluindo Google Chrome, Mozilla Firefox, Safari e Microsoft Edge, em suas versões mais recentes | MÉDIA      |
-| RNF-006 | As telas e operações principais da aplicação devem apresentar tempo de resposta inferior a 3 segundos em condições normais de uso e conectividade | ALTA      |
-
+| ID      | Descrição do Requisito                                                                                                                                  | Prioridade |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| RNF-001 | As credenciais e sessões dos usuários devem ser tratadas com mecanismos de autenticação seguros, sem armazenamento de senha em texto puro               | ALTA       |
+| RNF-002 | A comunicação entre clientes e servidor deve ser compatível com execução autenticada por sessão e cookies, com uso de HTTPS nos ambientes de publicação | ALTA       |
+| RNF-003 | A interface deve ser simples, direta e compatível com uso operacional sem treinamento avançado                                                          | ALTA       |
+| RNF-004 | A aplicação mobile deve operar em Android e iOS, além de suportar execução web para desenvolvimento e validação básica                                  | MÉDIA      |
+| RNF-005 | A aplicação web deve funcionar nos principais navegadores modernos                                                                                      | MÉDIA      |
+| RNF-006 | As operações principais devem responder de forma adequada para uso cotidiano, com feedback de loading, erro e sucesso nas ações relevantes              | ALTA       |
 
 ## Restrições
 
 O projeto está restrito pelos itens apresentados na tabela a seguir.
 
-| ID  | Restrição                                             |
-| --- | ----------------------------------------------------- |
-| 01  | O projeto deverá ser entregue até o final do semestre |
-| 02  | O backend deverá ser desenvolvido exclusivamente em Node.js, não sendo permitida a adoção de outras linguagens ou runtimes server-side no escopo do projeto.|
-| 03  | O frontend web deverá ser desenvolvido em React, e o aplicativo móvel em React Native, mantendo consistência tecnológica entre as plataformas.|
-| 04  | A aplicação não poderá emitir documentos fiscais oficiais (como NF-e ou NFS-e), ficando restrita à geração de documentos comerciais informais, como propostas, ordens de serviço e recibos.|
-| 05  | O sistema não integrará com sistemas bancários ou gateways de pagamento, limitando-se ao registro manual de recebimentos e despesas pelo próprio usuário.|
-| 06  | A solução deverá ser desenvolvida com tecnologias acessíveis à equipe do projeto, sem dependência de licenças pagas de frameworks, plataformas ou ferramentas proprietárias.|
-| 07  | O escopo da aplicação se restringe ao controle comercial e financeiro básico, não contemplando funcionalidades de CRM avançado, gestão de estoque ou módulos contábeis completos.|
-| 08  | A aplicação não realizará envio automático de documentos por e-mail ou WhatsApp de forma nativa — o compartilhamento dependerá de recursos do próprio dispositivo do usuário ou de integrações futuras fora do escopo atual.|
+| ID  | Restrição                                                                                                                                              |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 01  | O projeto deve ser entregue dentro do calendário acadêmico da disciplina                                                                               |
+| 02  | O backend deve permanecer em Node.js com Fastify e MongoDB, seguindo a arquitetura distribuída adotada no monorepo                                     |
+| 03  | O frontend web deve ser desenvolvido em Next.js/React, e o aplicativo móvel em Expo/React Native                                                       |
+| 04  | A aplicação não emite documentos fiscais oficiais, ficando restrita a documentos comerciais informais                                                  |
+| 05  | O sistema não realiza integração com gateways de pagamento ou instituições bancárias                                                                   |
+| 06  | O projeto prioriza ferramentas e dependências compatíveis com o contexto acadêmico e com licenças acessíveis à equipe                                  |
+| 07  | O escopo da aplicação permanece focado em controle comercial e financeiro básico, sem CRM avançado, estoque completo ou contabilidade fiscal           |
+| 08  | O sistema não realiza envio automático nativo de documentos por email ou WhatsApp; a entrega ocorre por abertura, download ou compartilhamento externo |
 
 ## Diagrama de Casos de Uso
 
-O diagrama de casos de uso representa de forma visual, as principais funcionalidades oferecidas pelo sistema e como elas se relacionam com os atores que interagem com a aplicação. A modelagem foi construída com base nas personas, histórias de usuário e requisitos funcionais definidos anteriormente.
+O diagrama de casos de uso representa visualmente as principais funcionalidades oferecidas pelo sistema e como elas se relacionam com o ator que interage com a aplicação.
 
-No contexto deste projeto, o ator principal é o **Usuário**, que representa o profissional autônomo, microempreendedor individual (MEI) ou pequeno prestador de serviço que utiliza o sistema para organizar sua rotina comercial e financeira.
-
-Também foi considerado o ator **Apoio administrativo**, que representa uma pessoa auxiliar, como assistente, sócio ou familiar, que pode colaborar em atividades operacionais, como cadastro de informações, acompanhamento de pedidos, organização de registros e apoio na gestão financeira básica.
-
-O diagrama contempla as funcionalidades essenciais do sistema, incluindo o gerenciamento da conta do usuário, cadastro de clientes e serviços, controle de pedidos, emissão de documentos comerciais, registro de pagamentos e visualização de informações financeiras do negócio.
+No contexto do produto entregue, o ator principal é o **Usuário**, que representa o profissional autônomo, MEI ou pequeno prestador de serviço que utiliza o sistema para organizar sua rotina comercial e financeira.
 
 ### Atores Identificados
 
-| Ator | Descrição |
-|-----|-----|
-| Usuário | Profissional autônomo, MEI ou pequeno prestador de serviço que utiliza o sistema para organizar clientes, serviços, pedidos, recebimentos e informações financeiras do negócio. |
-| Apoio administrativo | Pessoa que auxilia o usuário principal nas rotinas administrativas, como cadastro de informações, acompanhamento de pedidos e organização financeira básica. |
+| Ator    | Descrição                                                                                                                                       |
+| ------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| Usuário | Responsável pelo negócio que utiliza o sistema para autenticação, cadastro, pedidos, lançamentos, emissão de documentos e contato com clientes. |
 
----
 
 ### Casos de Uso Identificados
 
-| Caso de Uso | Descrição |
-|-----|-----|
-| Manter conta de usuário | Permite criar, editar e excluir a conta do usuário no sistema. |
-| Manter clientes | Permite cadastrar, editar e excluir clientes. |
-| Buscar e filtrar clientes | Permite localizar clientes cadastrados utilizando critérios como nome ou CPF/CNPJ. |
-| Manter serviços | Permite cadastrar, editar e excluir serviços oferecidos pelo usuário. |
-| Buscar e filtrar serviços | Permite localizar serviços cadastrados no sistema. |
-| Manter pedidos | Permite criar, editar e excluir pedidos vinculados a clientes e serviços. |
-| Buscar e filtrar pedidos | Permite localizar pedidos por cliente ou serviço. |
-| Registrar pagamento | Permite registrar pagamentos recebidos referentes aos pedidos realizados. |
-| Gerar recibo | Permite emitir um recibo a partir de um pagamento registrado. |
-| Gerar contrato de serviço | Permite gerar um contrato de prestação de serviço vinculado a um cliente e a um pedido. |
-| Visualizar painel financeiro | Permite visualizar um resumo financeiro contendo valores recebidos, a receber e em atraso. |
-| Visualizar gráficos financeiros | Permite visualizar gráficos comparativos de receitas e custos do negócio. |
-| Iniciar chamada para cliente | Permite realizar chamada telefônica diretamente para um cliente pelo aplicativo mobile. |
+| Caso de Uso                    | Descrição                                                               |
+| ------------------------------ | ----------------------------------------------------------------------- |
+| Criar conta                    | Permite iniciar o uso do sistema com credenciais próprias.              |
+| Realizar login                 | Permite acessar a área protegida do sistema.                            |
+| Manter perfil do negócio       | Permite visualizar e editar dados do usuário e da empresa.              |
+| Manter clientes                | Permite cadastrar, editar e excluir clientes.                           |
+| Buscar e filtrar clientes      | Permite localizar clientes por critérios textuais e por tipo.           |
+| Manter catálogo                | Permite cadastrar, editar e excluir serviços e produtos.                |
+| Buscar e filtrar catálogo      | Permite localizar itens do catálogo por busca e filtros.                |
+| Manter pedidos                 | Permite criar, editar e excluir pedidos.                                |
+| Buscar e filtrar pedidos       | Permite localizar pedidos por texto, cliente e status.                  |
+| Manter lançamentos financeiros | Permite criar e editar receitas e custos.                               |
+| Visualizar painel financeiro   | Permite consultar resumos financeiros e lançamentos recentes.           |
+| Gerar recibo                   | Permite emitir recibo em PDF a partir de lançamento confirmado.         |
+| Gerar orçamento                | Permite emitir orçamento em PDF a partir de pedido elegível.            |
+| Gerar ordem de serviço         | Permite emitir ordem de serviço em PDF a partir de pedido elegível.     |
+| Ligar para cliente             | Permite iniciar chamada telefônica com base no cadastro do cliente.     |
+| Abrir WhatsApp do cliente      | Permite abrir uma conversa no WhatsApp com base no cadastro do cliente. |
 
----
 
 ### Relacionamentos entre Casos de Uso
 
-Alguns casos de uso possuem dependência lógica entre si. O caso de uso **Gerar recibo**, por exemplo, depende da existência de um pagamento previamente registrado no sistema. Dessa forma, o recibo é gerado a partir das informações do pagamento vinculado a um pedido.
+Alguns casos de uso possuem dependência lógica entre si. A emissão de **recibo** depende da existência de um lançamento confirmado. A emissão de **orçamento** e **ordem de serviço** depende da existência de um pedido em condição compatível com as regras do sistema.
 
-Os casos de uso de **busca e filtragem** estão associados às funcionalidades de consulta dos módulos de clientes, serviços e pedidos, permitindo que o usuário encontre informações de forma rápida e organizada dentro do sistema.
+Os casos de uso de **busca e filtragem** estão associados às funcionalidades de consulta de clientes, catálogo e pedidos, permitindo que o usuário encontre informações de forma rápida e organizada.
 
----
 
 ### Diagrama de Casos de Uso
 
-A figura a seguir apresenta o diagrama de casos de uso da aplicação, evidenciando os atores e as principais funcionalidades do sistema.
+A figura atualmente vinculada a esta seção deve ser atualizada para refletir os casos de uso reais do sistema entregue, especialmente emissão de documentos em PDF, contato rápido com clientes e painel financeiro consolidado.
 
 ![Diagrama de Casos de Uso](img/diagrama-casos-de-uso.png)
 
-> O diagrama ilustra as interações entre os atores **Usuário** e **Apoio administrativo** com as funcionalidades principais do sistema de organização comercial e financeira.
+> **Pendência registrada:** revisar a imagem do diagrama para alinhamento completo com os casos de uso descritos acima.
 
 # Gerenciamento de Tempo
 
-O gerenciamento de tempo tem como objetivo planejar, organizar e controlar as atividades necessárias para o desenvolvimento do projeto dentro do prazo estabelecido.
-
-Para facilitar esse controle, o projeto foi dividido em cinco etapas principais, cada uma contemplando atividades específicas relacionadas ao planejamento, modelagem, desenvolvimento e finalização do sistema.
-
-Essa divisão permite acompanhar o progresso do projeto, identificar possíveis atrasos e garantir que o desenvolvimento avance de forma organizado.
+O gerenciamento de tempo foi estruturado para organizar a evolução do projeto em etapas de levantamento, modelagem, desenvolvimento backend, desenvolvimento das interfaces e fechamento final com testes e documentação.
 
 ## Cronograma do Projeto
 
-| Etapa | Período |
-|------|------|
+| Etapa   | Período                 |
+| ------- | ----------------------- |
 | Etapa 1 | 09/02/2026 a 08/03/2026 |
 | Etapa 2 | 10/03/2026 a 12/04/2026 |
 | Etapa 3 | 13/04/2026 a 10/05/2026 |
@@ -167,77 +150,56 @@ Essa divisão permite acompanhar o progresso do projeto, identificar possíveis 
 
 ## Planejamento das Atividades
 
-| Etapa | Atividade | Início | Fim |
-|------|------|------|------|
-| Etapa 1 | Levantamento de requisitos | 09/02/2026 | 16/02/2026 |
-| Etapa 1 | Definição do escopo do sistema | 17/02/2026 | 22/02/2026 |
-| Etapa 1 | Planejamento do projeto | 23/02/2026 | 02/03/2026 |
-| Etapa 1 | Elaboração da documentação inicial | 03/03/2026 | 08/03/2026 |
-| Etapa 2 | Modelagem do sistema | 10/03/2026 | 20/03/2026 |
-| Etapa 2 | Modelagem do banco de dados | 21/03/2026 | 30/03/2026 |
-| Etapa 2 | Protótipo das interfaces | 31/03/2026 | 12/04/2026 |
-| Etapa 3 | Estruturação do backend (API) | 13/04/2026 | 25/04/2026 |
-| Etapa 3 | Implementação das regras de negócio | 26/04/2026 | 10/05/2026 |
-| Etapa 4 | Desenvolvimento do frontend web | 11/05/2026 | 22/05/2026 |
-| Etapa 4 | Desenvolvimento do aplicativo mobile | 23/05/2026 | 31/05/2026 |
-| Etapa 5 | Integração dos sistemas | 01/06/2026 | 10/06/2026 |
-| Etapa 5 | Testes do sistema | 11/06/2026 | 16/06/2026 |
-| Etapa 5 | Ajustes finais e documentação | 17/06/2026 | 21/06/2026 |
+| Etapa   | Atividade                                         | Início     | Fim        |
+| ------- | ------------------------------------------------- | ---------- | ---------- |
+| Etapa 1 | Levantamento de requisitos                        | 09/02/2026 | 16/02/2026 |
+| Etapa 1 | Definição do escopo do sistema                    | 17/02/2026 | 22/02/2026 |
+| Etapa 1 | Planejamento do projeto                           | 23/02/2026 | 02/03/2026 |
+| Etapa 1 | Elaboração da documentação inicial                | 03/03/2026 | 08/03/2026 |
+| Etapa 2 | Modelagem do sistema e da base de dados           | 10/03/2026 | 12/04/2026 |
+| Etapa 3 | Desenvolvimento e estabilização do backend        | 13/04/2026 | 10/05/2026 |
+| Etapa 4 | Desenvolvimento web e mobile                      | 11/05/2026 | 31/05/2026 |
+| Etapa 5 | Integração, testes, ajustes finais e documentação | 01/06/2026 | 21/06/2026 |
 
 ## Gráfico de Gantt Simplificado
 
-| Etapa | Fev | Mar | Abr | Mai | Jun |
-|------|------|------|------|------|------|
-| Planejamento | █████ |  |  |  |  |
-| Modelagem |  | █████ |  |  |  |
-| Backend |  |  | █████ |  |  |
-| Frontend / Mobile |  |  |  | █████ |  |
-| Integração e Testes |  |  |  |  | █████ |
+| Etapa               | Fev   | Mar   | Abr   | Mai   | Jun   |
+| ------------------- | ----- | ----- | ----- | ----- | ----- |
+| Planejamento        | █████ |       |       |       |       |
+| Modelagem           |       | █████ |       |       |       |
+| Backend             |       |       | █████ |       |       |
+| Frontend / Mobile   |       |       |       | █████ |       |
+| Integração e Testes |       |       |       |       | █████ |
 
----
 
 # Gerenciamento de Equipe
 
-O projeto será desenvolvido por uma equipe composta por seis integrantes. Todos os membros participarão das atividades de planejamento, desenvolvimento e validação do sistema.
-
-Considerando que os integrantes possuem níveis de experiência entre júnior e pleno, as atividades serão distribuídas de forma equilibrada para incentivar a colaboração e o aprendizado coletivo.
-
-A equipe será responsável pelo desenvolvimento das diferentes camadas da aplicação distribuída, incluindo:
-
-- Interface web
-- API backend
-- Aplicação mobile
-- Banco de dados
-- Integração entre os componentes
+O projeto foi desenvolvido por uma equipe de seis integrantes, com divisão por frentes principais e apoio cruzado entre backend, web, mobile, documentação e testes.
 
 ## Estrutura da Equipe
 
-| Área | Responsabilidades |
-|------|------|
-| Backend | Desenvolvimento da API e regras de negócio |
-| Frontend Web | Desenvolvimento da interface web utilizando React |
-| Mobile | Desenvolvimento do aplicativo utilizando React Native |
-| Banco de Dados | Modelagem e gerenciamento do MongoDB |
-| Integração | Comunicação entre os componentes do sistema |
-| Testes | Validação das funcionalidades e qualidade do sistema |
+| Área           | Responsabilidades                                               |
+| -------------- | --------------------------------------------------------------- |
+| Backend        | API, autenticação, regras de negócio, documentos e persistência |
+| Frontend Web   | Interface de operação no navegador                              |
+| Mobile         | Interface em Expo para uso em dispositivos móveis               |
+| Banco de Dados | Modelagem, índices e coleções de domínio em MongoDB             |
+| Integração     | Comunicação entre API, web e mobile                             |
+| Testes         | Validação funcional, regressão e documentação das evidências    |
 
----
 
 # Ferramentas de Gerenciamento do Projeto
 
-| Ferramenta | Finalidade |
-|------|------|
-| GitHub | Controle de versão do código |
-| Git | Versionamento do código |
-| Figma | Prototipação das interfaces |
-| Linear | Organização das tarefas |
-| Visual Studio Code | Desenvolvimento do código |
-| MongoDB | Gerenciamento do banco de dados |
+| Ferramenta         | Finalidade                                      |
+| ------------------ | ----------------------------------------------- |
+| Git                | Controle de versão local                        |
+| GitHub             | Hospedagem do repositório                       |
+| Linear             | Organização e acompanhamento das tarefas        |
+| Figma              | Referência de prototipação e organização visual |
+| Visual Studio Code | Desenvolvimento do código                       |
+| MongoDB            | Persistência dos dados do sistema               |
 
----
 
 # Considerações Finais
 
-A adoção de práticas de gerenciamento de projeto contribui para estruturar o desenvolvimento do sistema de forma organizada, permitindo que as atividades sejam distribuídas entre os integrantes da equipe e executadas dentro do prazo estabelecido.
-
-Além disso, a utilização de uma arquitetura distribuída possibilita maior modularidade no desenvolvimento do sistema, permitindo que diferentes componentes sejam desenvolvidos e integrados de forma eficiente.
+A especificação consolidada demonstra que o sistema entregue cobre o fluxo principal previsto para gestão comercial e financeira básica do pequeno negócio. O produto final integra autenticação, cadastro, pedidos, lançamentos, documentos em PDF e interfaces web/mobile em uma solução única e coerente com o problema proposto.

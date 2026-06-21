@@ -1,0 +1,52 @@
+info:
+  name: Transactions Create Expense
+  type: http
+  seq: 3
+
+http:
+  method: POST
+  url: '{{baseUrl}}/api/transactions/expense'
+  headers:
+    - name: Cookie
+      value: '{{sessionCookie}}'
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "amount": 120,
+        "transactionDate": "2026-06-21T12:00:00.000Z",
+        "dueDate": "2026-06-25T12:00:00.000Z",
+        "paymentMethod": "cash",
+        "category": "operacional",
+        "reference": "Compra de material",
+        "notes": "Custo criado via Bruno",
+        "status": "pending"
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        const responseBody = res.getBody();
+
+        if (responseBody === undefined || responseBody === null || responseBody === "") {
+          throw new Error("Missing response body in Transactions Create Expense");
+        }
+
+        const body =
+          typeof responseBody === "string" ? JSON.parse(responseBody) : responseBody;
+
+        if (!body || typeof body !== "object" || typeof body._id !== "string") {
+          throw new Error("Transaction id not found in Transactions Create Expense response");
+        }
+
+        bru.setEnvVar("transactionId", body._id);
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

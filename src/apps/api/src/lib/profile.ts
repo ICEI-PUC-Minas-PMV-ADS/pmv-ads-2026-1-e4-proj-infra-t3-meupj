@@ -152,7 +152,10 @@ export const createProfileStore = (getDb: () => Db): ProfileStore => ({
     await collection.updateOne(
       { authUserId },
       {
-        $setOnInsert: createDefaultProfile(authUserId, now),
+        $setOnInsert: {
+          authUserId,
+          createdAt: now,
+        },
         $set: {
           business: cloneBusiness(business),
           updatedAt: now,

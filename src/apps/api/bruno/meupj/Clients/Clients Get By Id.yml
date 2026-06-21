@@ -1,0 +1,37 @@
+info:
+  name: Clients Get By Id
+  type: http
+  seq: 3
+
+http:
+  method: GET
+  url: '{{baseUrl}}/api/clients/{{clientId}}'
+  headers:
+    - name: Cookie
+      value: '{{sessionCookie}}'
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        const responseBody = res.getBody();
+
+        if (responseBody === undefined || responseBody === null || responseBody === "") {
+          throw new Error("Missing response body in Clients Get By Id");
+        }
+
+        const body =
+          typeof responseBody === "string" ? JSON.parse(responseBody) : responseBody;
+
+        if (!body || typeof body !== "object" || typeof body._id !== "string") {
+          throw new Error("Client id not found in Clients Get By Id response");
+        }
+
+        bru.setEnvVar("clientId", body._id);
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

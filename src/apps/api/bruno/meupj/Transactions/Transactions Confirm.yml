@@ -1,0 +1,18 @@
+info:
+  name: Transactions Confirm
+  type: http
+  seq: 6
+
+http:
+  method: POST
+  url: '{{baseUrl}}/api/transactions/{{transactionId}}/confirm'
+  headers:
+    - name: Cookie
+      value: '{{sessionCookie}}'
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

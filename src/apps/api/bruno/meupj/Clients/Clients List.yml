@@ -17,17 +17,17 @@ http:
       value: ''
       disabled: true
     - name: type
-      value: 'individual'
+      value: individual
       disabled: true
     - name: sortBy
-      value: 'createdAt'
+      value: createdAt
       disabled: true
     - name: sortOrder
-      value: 'desc'
+      value: desc
       disabled: true
   headers:
     - name: Cookie
-      value: sessionCookie
+      value: '{{sessionCookie}}'
   auth: inherit
 
 settings:

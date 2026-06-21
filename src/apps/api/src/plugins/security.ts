@@ -17,11 +17,31 @@ const parseCorsOrigins = (origins?: string): string[] => {
 export const registerSecurityPlugins = async (app: FastifyInstance): Promise<void> => {
   await app.register(helmet);
 
-  const corsOrigins = parseCorsOrigins(app.env.CORS_ORIGIN);
+  const configuredCorsOrigins = parseCorsOrigins(app.env.CORS_ORIGIN);
+
+  if (configuredCorsOrigins.includes('*')) {
+    app.log.warn(
+      'Ignoring wildcard CORS_ORIGIN because credentialed requests require explicit origins',
+    );
+  }
+
+  const corsOrigins = configuredCorsOrigins.filter((origin) => origin !== '*');
+
+  if (corsOrigins.includes('http://localhost:3000')) {
+    corsOrigins.push('http://127.0.0.1:3000');
+  }
+
+  if (corsOrigins.includes('http://127.0.0.1:3000')) {
+    corsOrigins.push('http://localhost:3000');
+  }
+
+  const allowedOrigins = Array.from(new Set(corsOrigins));
 
   await app.register(cors, {
-    origin: corsOrigins.length > 0 ? corsOrigins : false,
-    credentials: corsOrigins.length > 0,
+    origin: allowedOrigins.length > 0 ? allowedOrigins : false,
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
   });
 
   app.addHook('onSend', async (_request, reply, payload) => {
