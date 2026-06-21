@@ -121,14 +121,22 @@ Para a evolução da plataforma, sugere-se a implementação de processamento as
 
 ## Maria Julia Gonçalves Maia Sales
 ### **Avaliação dos frameworks e tecnologias utilizados**
--
+A combinação de tecnologias escolhida mostrou-se adequada ao escopo e às demandas do projeto. O uso de frameworks modernos nas três frentes (web, mobile e backend) possibilitou alto reaproveitamento de padrões de desenvolvimento e componentização, o que contribuiu diretamente para a produtividade da equipe. A arquitetura orientada a APIs REST, sustentada pelo Fastify, estabeleceu limites claros entre as camadas da aplicação, facilitando tanto a manutenção quanto a evolução independente de cada módulo. A segurança na autenticação, resolvida com o Better Auth, e a padronização de validações via TypeBox garantiram consistência na manipulação dos dados. No geral, a stack correspondeu bem aos requisitos de desempenho e organização esperados para um sistema desta natureza.
+
 ### Quadro visual atualizado de gestão do trabalho no GitHub
--
+<img width="1591" height="497" alt="image" src="https://github.com/user-attachments/assets/f749881c-4973-451c-b648-40fe16ec2e6a" />
+
 
 ### Comentários sobre a participação individual de cada integrante
--
+
+- Eric Esteves Martins: foi responsável pelo módulo de pedidos, schema e índices da coleção, rotas CRUD na API, `OrdersContext` e telas no frontend. Mostrou capacidade analítica ao implementar a máquina de estados de status com transições validadas, o que exigiu atenção às regras de negócio.
+- Amanda Vitor Lopes:ficou com o módulo de clientes: modelo de dados, rotas CRUD na API com validação de CPF/CNPJ, contexto no frontend e telas no mobile. Teve papel importante na integridade dos dados do sistema, tratando com cuidado as validações de documentos fiscais.
+- Frederico Furtado Amantino Vieira: estruturou o monorepo, configurou o Fastify, integrou o Better Auth e manteve a infraestrutura compartilhada do projeto. Sua atuação na base técnica foi decisiva para que os demais integrantes conseguissem trabalhar de forma padronizada e produtiva desde o início.
+- Guilherme de Andrade Castro Vieira: implementou o módulo de documentos na API (orçamento, recibo, ordem de serviço), o módulo de transações no frontend e mobile, e cuidou do deploy no GitHub Pages. Demonstrou versatilidade ao transitar entre backend, frontend e configurações de infraestrutura.
+- Bruna Bricio Alvarenga Sampaio: implementou o endpoint de perfil comercial na API, telas mobile de resumo financeiro e a tela "Sobre o Projeto", além de contribuir com documentação de casos de uso e registros de testes. Sua atenção à documentação foi importante para o rastreamento das entregas do grupo.
 
 ### ⁠Análise crítica do projeto desenvolvido
--
+Avalio que o projeto atingiu os objetivos propostos ao longo do semestre. A aplicação entrega uma solução funcional voltada a profissionais autônomos e pequenos prestadores de serviço, reunindo em um único sistema o gerenciamento de catálogo, clientes, pedidos e transações financeiras. A interface web e o aplicativo mobile se complementam, permitindo que o usuário acesse as informações tanto no computador quanto no celular. A separação da aplicação em módulos bem definidos favoreceu a organização do trabalho em equipe e facilitará a manutenção futura.
+  
 ### Propostas de melhorias para a arquitetura e implementação da solução
--
+Para evoluções futuras, destaco a integração com gateways de pagamento e a emissão de notas fiscais via serviços externos como prioridades que tornariam a solução mais aderente ao uso profissional real. O envio automático de documentos por e-mail ou WhatsApp também ampliaria a utilidade do sistema.
