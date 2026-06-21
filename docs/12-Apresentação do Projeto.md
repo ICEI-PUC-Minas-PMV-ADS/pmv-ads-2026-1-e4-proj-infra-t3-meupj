@@ -25,3 +25,24 @@ O grupo deve distribuir de forma coerente o conteúdo a ser apresentado, dentro 
 > - [A regra 10-20-30 para apresentações de sucesso](https://revistapegn.globo.com/Noticias/noticia/2014/07/regra-10-20-30-para-apresentacoes-de-sucesso.html)
 > - [Top Tips for Effective Presentations](https://www.skillsyouneed.com/present/presentation-tips.html)
 > - [How to make a great presentation](https://www.ted.com/playlists/574/how_to_make_a_great_presentation)
+
+# Considerações Finais
+
+## Amanda Vitor Lopes
+### **Avaliação dos frameworks e tecnologias utilizados**
+Os frameworks e tecnologias escolhidos atenderam às necessidades do projeto, oferecendo boa performance, escalabilidade, segurança e produtividade no desenvolvimento, além de facilitar a manutenção e a padronização do código.
+### Quadro visual atualizado de gestão do trabalho no GitHub
+<img width="1670" height="641" alt="image" src="https://github.com/user-attachments/assets/e0249241-6ad5-4ecb-b3a2-26c656ba76e8" />
+
+### Comentários sobre a participação individual de cada integrante
+Acredito que o grupo foi bem colaborativo e unido
+### ⁠Análise crítica do projeto desenvolvido
+Acredito que o projeto atingiu os objetivos propostos no início do semestre. Entregamos uma interface web e um aplicativo mobile capazes de atender às principais necessidades do nosso público-alvo: profissionais autônomos e pequenos prestadores de serviço. A aplicação busca centralizar processos simples que fazem parte da rotina desses usuários, oferecendo um sistema de gestão de fácil usabilidade e acesso.
+
+A arquitetura adotada favoreceu a separação de responsabilidades, a reutilização de código e facilitou a manutenção e a evolução da aplicação.
+
+Como limitações, o sistema ainda não possui integração com meios de pagamento, emissão de documentos fiscais, notificações automáticas ou recursos mais avançados de gestão, como controle de estoque e relatórios analíticos. Essas funcionalidades poderiam ampliar sua utilização em cenários reais e tornar a solução ainda mais completa.
+### Propostas de melhorias para a arquitetura e implementação da solução
+Como evolução do projeto, podem ser implementadas integrações com gateways de pagamento, envio automático de documentos por e-mail ou WhatsApp e emissão de notas fiscais por meio de serviços externos. Também é possível expandir as funcionalidades de gestão, incluindo controle de estoque, dashboards mais completos e geração de relatórios mais detalhados.
+
+Do ponto de vista da arquitetura, seria interessante adotar mecanismos de cache para otimizar consultas mais frequentes, além de processamento assíncrono para geração de documentos e envio de notificações.
