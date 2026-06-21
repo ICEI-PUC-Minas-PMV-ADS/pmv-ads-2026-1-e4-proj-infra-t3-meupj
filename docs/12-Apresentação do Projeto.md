@@ -99,17 +99,25 @@ Do ponto de vista da arquitetura, seria interessante adotar mecanismos de cache 
 
 ## Guilherme de Andrade Castro Vieira
 ### **Avaliação dos frameworks e tecnologias utilizados**
--
+O ecossistema de tecnologias selecionado para o projeto provou-se altamente eficaz. A utilização de frameworks modernos para o desenvolvimento web e mobile permitiu um excelente reaproveitamento de lógica de negócios e componentização, o que acelerou o ritmo de entrega. No backend, a adoção de uma arquitetura baseada em APIs REST garantiu uma separação clara de responsabilidades, assegurando segurança na autenticação e consistência na manipulação dos dados. A stack atendeu plenamente aos requisitos de performance e escalabilidade exigidos pelo escopo do trabalho.
+
 ### Quadro visual atualizado de gestão do trabalho no GitHub
--
+<img width="1114" height="621" alt="image" src="https://github.com/user-attachments/assets/7c48fdbb-af2d-44dc-a6f8-a96606f6b8f1" />
 
 ### Comentários sobre a participação individual de cada integrante
--
+O grupo demonstrou uma sinergia excelente ao longo de todo o semestre, mantendo uma comunicação fluida e um ambiente extremamente colaborativo.
+
+- Amanda Vitor Lopes: Teve um papel na liderança organizacional e na amarração dos requisitos do projeto, garantindo que o cronograma fosse respeitado.
+- Frederico Furtado Amantino Vieira: Demonstrou grande proatividade na resolução de problemas técnicos.
+- Maria Julia Gonçalves Maia Sales: Destacou-se pelo capricho e atenção aos detalhes na experiência do usuário e interface, entregando componentes refinados e visualmente consistentes.
+- Eric Esteves Martins: Foi muito consistente no desenvolvimento das regras de negócio e rotas do sistema, trazendo soluções práticas e seguras para a estruturação da aplicação.
+- Bruna Bricio Alvarenga Sampaio: Teve uma participação ativa no controle de qualidade, testes das funcionalidades e refinamento da documentação técnica do projeto.
 
 ### ⁠Análise crítica do projeto desenvolvido
--
+O balanço final do projeto é altamente positivo, visto que o produto cumpre rigorosamente o objetivo de centralizar e simplificar a gestão diária de profissionais autônomos e prestadores de serviços de pequeno porte. A usabilidade intuitiva da interface web e a portabilidade do aplicativo mobile resolvem dores reais do público-alvo. Como limitações técnicas identificadas, a solução atual opera de forma estritamente online e ainda carece de automações externas mais robustas, como notificações automáticas por múltiplos canais e módulos avançados de relatórios financeiros detalhados.
+
 ### Propostas de melhorias para a arquitetura e implementação da solução
--
+Para a evolução da plataforma, sugere-se a implementação de processamento assíncrono baseado em filas para o envio de e-mails e alertas, evitando gargalos na API principal. Na camada de persistência, seria interessante otimizar as consultas repetitivas através de mecanismos de cache. Além disso, estruturar tabelas de históricos (como logs de agendamentos e fluxos financeiros) em um modelo sequencial de múltiplas linhas facilitaria futuras auditorias e a geração de dashboards analíticos. Por fim, a integração com gateways de pagamento e microsserviços de emissão de notas fiscais tornaria a solução comercialmente viável.
 
 ## Maria Julia Gonçalves Maia Sales
 ### **Avaliação dos frameworks e tecnologias utilizados**
