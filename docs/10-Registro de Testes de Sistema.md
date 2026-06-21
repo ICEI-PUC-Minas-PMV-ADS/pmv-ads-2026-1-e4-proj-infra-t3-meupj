@@ -59,6 +59,44 @@
 <img width="670" height="1464" alt="image" src="https://github.com/user-attachments/assets/97e35e8b-c0ab-4f3b-8e10-eaa6fbb225d0" />
 
 
+### RF 005 - O sistema deve permitir que o usuário edite os dados de um cliente
+#### Descrição dos testes
+1) Login no sistema
+2) Direcionamento para página de configurações
+
+#### Evidências - Web
+
+
+#### Evidências - Mobile
+
+### RF 006 - O sistema deve permitir que o usuário exclua um cliente, desde que não haja documentos ativos vinculados
+#### Descrição dos testes
+1) Login no sistema
+2) Direcionamento para página de clientes
+
+
+#### Evidências - Web
+
+
+#### Evidências - Mobile
+
+### RF 007 - O sistema deve permitir que o usuário busque e filtre clientes cadastrados por nome, CPF/CNPJ, telefone, email e endereço
+#### Descrição dos testes
+1) Login no sistema
+2) Direcionamento para página de clientes
+3) Busca um cliente pelo nome
+4) Exibe a listagem com os resultados encontrados
+
+#### Evidências - Web
+<img width="2940" height="1770" alt="image" src="https://github.com/user-attachments/assets/f5b61123-04c4-4cd6-a17f-2dc6ac90352e" />
+<img width="2940" height="1750" alt="image" src="https://github.com/user-attachments/assets/411c47c7-6dc6-4ea5-a825-147113ca5646" />
+
+
+#### Evidências - Mobile
+<img width="670" height="1464" alt="image" src="https://github.com/user-attachments/assets/97e35e8b-c0ab-4f3b-8e10-eaa6fbb225d0" />
+<img width="668" height="1474" alt="image" src="https://github.com/user-attachments/assets/9f5cbede-682a-49be-9bf0-3837ccfc8f38" />
+
+
 
 
 
