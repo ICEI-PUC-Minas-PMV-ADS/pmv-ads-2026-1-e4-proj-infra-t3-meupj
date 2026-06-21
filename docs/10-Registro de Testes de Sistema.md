@@ -275,11 +275,21 @@ Evidência pendente de atualização.
 
 #### Evidências - Web
 
-Evidência pendente de atualização.
+Figura 01 - Criando lançamento
+<img width="1246" height="630" alt="image" src="https://github.com/user-attachments/assets/82be1789-19df-412a-8189-4d4ad2532ed5" />
+
+Figura 02 - Lançamento criado
+
+<img width="1254" height="252" alt="image" src="https://github.com/user-attachments/assets/e955351d-d827-437f-a9b6-889f9ddded87" />
 
 #### Evidências - Mobile
 
-Evidência pendente de atualização.
+Figura 03 - Criando lançamento
+<img width="371" height="573" alt="image" src="https://github.com/user-attachments/assets/9bf63407-bc08-4e41-9d85-834be8f51c7f" />
+
+
+Figura 04 - Lançamento criado
+<img width="275" height="565" alt="image" src="https://github.com/user-attachments/assets/35df0b64-75b3-4653-99d1-920dcf54eb6d" />
 
 ### RF 017 - O sistema deve permitir que o usuário edite lançamentos financeiros e aplique as restrições de exclusão previstas
 
@@ -292,11 +302,17 @@ Evidência pendente de atualização.
 
 #### Evidências - Web
 
-Evidência pendente de atualização.
+Figura 01 - Editando um lançamento Web
+
+<img width="1204" height="555" alt="image" src="https://github.com/user-attachments/assets/aa133bd8-f8bc-42e7-a6ab-f8508768a011" />
+
 
 #### Evidências - Mobile
 
-Evidência pendente de atualização.
+Figura 02 - Editando um lançamento mobile+
+
+<img width="278" height="570" alt="image" src="https://github.com/user-attachments/assets/f55d505a-03b1-4004-a8d6-373099e23bfd" />
+
 
 ### RF 018 - O sistema deve exibir um painel financeiro com resumos de receita confirmada, valores pendentes, atrasos, resultado e listagem recente
 
@@ -309,11 +325,17 @@ Evidência pendente de atualização.
 
 #### Evidências - Web
 
-Evidência pendente de atualização.
+Figura 01 - Dashboard
+
+<img width="1257" height="599" alt="image" src="https://github.com/user-attachments/assets/67113f13-b6b0-4c1f-a4ff-72bf5069356e" />
+
 
 #### Evidências - Mobile
 
-Evidência pendente de atualização.
+Figura 02 - Dashboard mobile
+
+<img width="286" height="572" alt="image" src="https://github.com/user-attachments/assets/9e5a353a-e86c-4ffe-81cb-78574f1021ef" />
+
 
 ### RF 019 - O sistema deve permitir gerar um recibo em PDF a partir de um lançamento confirmado
 
