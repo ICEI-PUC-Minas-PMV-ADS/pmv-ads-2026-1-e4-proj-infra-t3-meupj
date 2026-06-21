@@ -96,7 +96,6 @@ No contexto do produto entregue, o ator principal é o **Usuário**, que represe
 | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
 | Usuário | Responsável pelo negócio que utiliza o sistema para autenticação, cadastro, pedidos, lançamentos, emissão de documentos e contato com clientes. |
 
----
 
 ### Casos de Uso Identificados
 
@@ -119,7 +118,6 @@ No contexto do produto entregue, o ator principal é o **Usuário**, que represe
 | Ligar para cliente             | Permite iniciar chamada telefônica com base no cadastro do cliente.     |
 | Abrir WhatsApp do cliente      | Permite abrir uma conversa no WhatsApp com base no cadastro do cliente. |
 
----
 
 ### Relacionamentos entre Casos de Uso
 
@@ -127,7 +125,6 @@ Alguns casos de uso possuem dependência lógica entre si. A emissão de **recib
 
 Os casos de uso de **busca e filtragem** estão associados às funcionalidades de consulta de clientes, catálogo e pedidos, permitindo que o usuário encontre informações de forma rápida e organizada.
 
----
 
 ### Diagrama de Casos de Uso
 
@@ -174,7 +171,6 @@ O gerenciamento de tempo foi estruturado para organizar a evolução do projeto 
 | Frontend / Mobile   |       |       |       | █████ |       |
 | Integração e Testes |       |       |       |       | █████ |
 
----
 
 # Gerenciamento de Equipe
 
@@ -191,7 +187,6 @@ O projeto foi desenvolvido por uma equipe de seis integrantes, com divisão por 
 | Integração     | Comunicação entre API, web e mobile                             |
 | Testes         | Validação funcional, regressão e documentação das evidências    |
 
----
 
 # Ferramentas de Gerenciamento do Projeto
 
@@ -204,7 +199,6 @@ O projeto foi desenvolvido por uma equipe de seis integrantes, com divisão por 
 | Visual Studio Code | Desenvolvimento do código                       |
 | MongoDB            | Persistência dos dados do sistema               |
 
----
 
 # Considerações Finais
 
