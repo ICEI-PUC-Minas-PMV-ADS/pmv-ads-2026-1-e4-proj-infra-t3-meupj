@@ -5,7 +5,12 @@ import { useParams, useRouter } from 'next/navigation';
 import { useState, useCallback, useEffect } from 'react';
 import { ChevronLeft, Trash2, Plus } from 'lucide-react';
 import { z } from 'zod';
-import { OrdersService, type OrderStatus, type PaymentMethod, type Order } from '@/services/orders.service';
+import {
+  OrdersService,
+  type OrderStatus,
+  type PaymentMethod,
+  type Order,
+} from '@/services/orders.service';
 import { Button, Input, Select, Textarea, Alert, Badge } from '@/components/ui';
 import { useClients } from '@/contexts/clients.context';
 import { useCatalog } from '@/contexts/catalog.context';
@@ -16,14 +21,20 @@ const orderSchema = z.object({
   clientId: z.string().optional().nullable(),
   status: z.enum(['draft', 'pendingApproval', 'inProgress', 'completed', 'warranty', 'cancelled']),
   reference: z.string().optional(),
-  paymentMethods: z.array(z.enum(['pix', 'cash', 'creditCard', 'debitCard', 'bankTransfer', 'bankSlip'])).optional(),
+  paymentMethods: z
+    .array(z.enum(['pix', 'cash', 'creditCard', 'debitCard', 'bankTransfer', 'bankSlip']))
+    .optional(),
   paymentTerms: z.string().optional(),
   discount: z.number().min(0).optional(),
   fees: z.number().min(0).optional(),
-  items: z.array(z.object({
-    catalogItemId: z.string().min(1, 'Selecione um item do catálogo'),
-    quantity: z.number().min(1, 'Mínimo 1'),
-  })).min(1, 'Adicione pelo menos um item ao pedido.'),
+  items: z
+    .array(
+      z.object({
+        catalogItemId: z.string().min(1, 'Selecione um item do catálogo'),
+        quantity: z.number().min(1, 'Mínimo 1'),
+      }),
+    )
+    .min(1, 'Adicione pelo menos um item ao pedido.'),
 });
 
 interface LineItem {
@@ -48,9 +59,12 @@ const createEmptyLineItem = (): LineItem => ({
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const STATUS_LABELS: Record<OrderStatus, string> = {
-  draft: 'Rascunho', pendingApproval: 'Aguard. aprovação',
-  inProgress: 'Em andamento', completed: 'Concluído',
-  warranty: 'Garantia', cancelled: 'Cancelado',
+  draft: 'Rascunho',
+  pendingApproval: 'Aguard. aprovação',
+  inProgress: 'Em andamento',
+  completed: 'Concluído',
+  warranty: 'Garantia',
+  cancelled: 'Cancelado',
 };
 
 const STATUS_BADGE: Record<OrderStatus, 'default' | 'warning' | 'info' | 'success' | 'danger'> = {
@@ -63,8 +77,12 @@ const STATUS_BADGE: Record<OrderStatus, 'default' | 'warning' | 'info' | 'succes
 };
 
 const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
-  pix: 'Pix', cash: 'Dinheiro', creditCard: 'Cartão de Crédito',
-  debitCard: 'Cartão de Débito', bankTransfer: 'Transferência Bancária', bankSlip: 'Boleto',
+  pix: 'Pix',
+  cash: 'Dinheiro',
+  creditCard: 'Cartão de Crédito',
+  debitCard: 'Cartão de Débito',
+  bankTransfer: 'Transferência Bancária',
+  bankSlip: 'Boleto',
 };
 
 const STATUS_OPTIONS = [
@@ -78,6 +96,10 @@ const STATUS_OPTIONS = [
 
 function formatCurrency(n: number) {
   return n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+function getErrorMessage(error: unknown, fallback: string): string {
+  return error instanceof Error ? error.message : fallback;
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -103,6 +125,9 @@ export default function PedidoDetalhePage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
 
   useEffect(() => {
     loadClientOptions();
@@ -124,16 +149,18 @@ export default function PedidoDetalhePage() {
         setFees(data.fees ?? 0);
 
         if (data.items && data.items.length > 0) {
-          setItems(data.items.map((i, index) => ({
-            id: Date.now() + index,
-            catalogItemId: i.catalogItemId,
-            name: i.name,
-            quantity: i.quantity,
-            unitPrice: i.unitPrice,
-          })));
+          setItems(
+            data.items.map((i, index) => ({
+              id: Date.now() + index,
+              catalogItemId: i.catalogItemId,
+              name: i.name,
+              quantity: i.quantity,
+              unitPrice: i.unitPrice,
+            })),
+          );
         }
-      } catch (err: any) {
-        setError(err.message || 'Falha ao carregar pedido.');
+      } catch (error: unknown) {
+        setError(getErrorMessage(error, 'Falha ao carregar pedido.'));
       } finally {
         setLoadingInitial(false);
       }
@@ -154,15 +181,16 @@ export default function PedidoDetalhePage() {
       return [...currentItems, createEmptyLineItem()];
     });
 
-  const removeItem = (itemId: number) =>
-    setItems((p) => p.filter((i) => i.id !== itemId));
+  const removeItem = (itemId: number) => setItems((p) => p.filter((i) => i.id !== itemId));
 
   const updateItemCatalog = (itemId: number, catalogItemId: string) => {
     const cat = catalogOptions.find((c) => c.id === catalogItemId);
     setItems((p) =>
       p.map((i) =>
-        i.id === itemId ? { ...i, catalogItemId, name: cat?.name ?? '', unitPrice: cat?.unitPrice ?? 0 } : i
-      )
+        i.id === itemId
+          ? { ...i, catalogItemId, name: cat?.name ?? '', unitPrice: cat?.unitPrice ?? 0 }
+          : i,
+      ),
     );
   };
 
@@ -170,9 +198,7 @@ export default function PedidoDetalhePage() {
     setItems((p) => p.map((i) => (i.id === itemId ? { ...i, quantity } : i)));
 
   const togglePaymentMethod = (method: PaymentMethod) =>
-    setPaymentMethods((p) =>
-      p.includes(method) ? p.filter((m) => m !== method) : [...p, method]
-    );
+    setPaymentMethods((p) => (p.includes(method) ? p.filter((m) => m !== method) : [...p, method]));
 
   const handleSave = useCallback(async () => {
     setError('');
@@ -195,29 +221,38 @@ export default function PedidoDetalhePage() {
     };
 
     const validation = orderSchema.safeParse(payload);
-    if (!validation.success) { setError(validation.error.issues[0].message); return; }
+    if (!validation.success) {
+      setError(validation.error.issues[0].message);
+      return;
+    }
 
     try {
       setLoading(true);
       await OrdersService.update(id, validation.data);
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
-    } catch (err: any) {
-      setError(err.message || 'Falha ao salvar pedido.');
+    } catch (error: unknown) {
+      setError(getErrorMessage(error, 'Falha ao salvar pedido.'));
     } finally {
       setLoading(false);
     }
   }, [id, clientId, status, reference, paymentMethods, paymentTerms, discount, fees, items]);
 
-  const handleDelete = useCallback(async () => {
-    if (!confirm('Tem certeza que deseja excluir este pedido?')) return;
+  const handleDelete = useCallback(() => {
+    setDeleteError('');
+    setShowDeleteModal(true);
+  }, []);
+
+  const handleDeleteConfirm = useCallback(async () => {
     try {
-      setLoading(true);
+      setDeleting(true);
+      setDeleteError('');
       await OrdersService.delete(id);
       router.push('/pedidos');
-    } catch (err: any) {
-      setError(err.message || 'Falha ao excluir pedido.');
-      setLoading(false);
+    } catch (error: unknown) {
+      setDeleteError(getErrorMessage(error, 'Falha ao excluir pedido.'));
+    } finally {
+      setDeleting(false);
     }
   }, [id, router]);
 
@@ -243,7 +278,6 @@ export default function PedidoDetalhePage() {
 
   return (
     <div className="flex flex-col h-full bg-white">
-
       {/* ── Header ── */}
       <div className="bg-white border-b border-gray-100 px-4 md:px-6 py-3 flex items-center justify-between sticky top-0 z-20">
         <div className="flex items-center gap-3">
@@ -258,8 +292,13 @@ export default function PedidoDetalhePage() {
             <Badge variant={STATUS_BADGE[status]}>{STATUS_LABELS[status]}</Badge>
           </div>
         </div>
-        <Button variant="ghost" size="sm" onClick={handleDelete} disabled={loading}
-          className="text-red-500 hover:bg-red-50 hover:text-red-600">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleDelete}
+          disabled={loading || deleting}
+          className="text-red-500 hover:bg-red-50 hover:text-red-600"
+        >
           <Trash2 size={15} />
           <span className="hidden sm:inline">Excluir</span>
         </Button>
@@ -267,16 +306,24 @@ export default function PedidoDetalhePage() {
 
       {/* ── Body ── */}
       <div className="flex-1 p-4 md:p-10 max-w-4xl mx-auto w-full overflow-y-auto pb-48 md:pb-32">
-
-        {error && <Alert variant="error" className="mb-6">{error}</Alert>}
-        {success && <Alert variant="success" className="mb-6">Pedido atualizado com sucesso!</Alert>}
+        {error && (
+          <Alert variant="error" className="mb-6">
+            {error}
+          </Alert>
+        )}
+        {success && (
+          <Alert variant="success" className="mb-6">
+            Pedido atualizado com sucesso!
+          </Alert>
+        )}
 
         <form className="flex flex-col gap-10" onSubmit={(e) => e.preventDefault()}>
-
           {/* ── Dados Gerais ── */}
           <section className="flex flex-col gap-5">
             <div className="border-b border-gray-100 pb-3">
-              <h2 className="text-xs font-bold tracking-widest text-gray-500 uppercase">Dados Gerais</h2>
+              <h2 className="text-xs font-bold tracking-widest text-gray-500 uppercase">
+                Dados Gerais
+              </h2>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4">
@@ -288,7 +335,9 @@ export default function PedidoDetalhePage() {
               >
                 <option value="">— Sem cliente —</option>
                 {clientOptions.map((c) => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
                 ))}
               </Select>
 
@@ -313,23 +362,32 @@ export default function PedidoDetalhePage() {
           {/* ── Itens ── */}
           <section className="flex flex-col gap-4">
             <div className="border-b border-gray-100 pb-3">
-              <h2 className="text-xs font-bold tracking-widest text-gray-500 uppercase">Itens do Pedido</h2>
+              <h2 className="text-xs font-bold tracking-widest text-gray-500 uppercase">
+                Itens do Pedido
+              </h2>
             </div>
 
             {/* Cabeçalho desktop */}
             <div className="hidden sm:flex items-center gap-4 px-1">
-              <div className="flex-1 text-[10px] font-bold tracking-widest text-gray-400 uppercase">Item do Catálogo</div>
-              <div className="w-24 text-[10px] font-bold tracking-widest text-gray-400 uppercase text-center">Qtd</div>
-              <div className="w-28 text-[10px] font-bold tracking-widest text-gray-400 uppercase text-right">Preço unit.</div>
+              <div className="flex-1 text-[10px] font-bold tracking-widest text-gray-400 uppercase">
+                Item do Catálogo
+              </div>
+              <div className="w-24 text-[10px] font-bold tracking-widest text-gray-400 uppercase text-center">
+                Qtd
+              </div>
+              <div className="w-28 text-[10px] font-bold tracking-widest text-gray-400 uppercase text-right">
+                Preço unit.
+              </div>
               <div className="w-8" />
             </div>
 
             <div className="flex flex-col gap-3">
               {items.map((item) => (
                 <div key={item.id} className="flex flex-col sm:flex-row items-end gap-3 sm:gap-4">
-
                   <div className="flex flex-col gap-1 flex-1 w-full">
-                    <label className="sm:hidden text-[10px] font-bold text-gray-400 uppercase">Item do Catálogo</label>
+                    <label className="sm:hidden text-[10px] font-bold text-gray-400 uppercase">
+                      Item do Catálogo
+                    </label>
                     <Select
                       value={item.catalogItemId}
                       onChange={(e) => updateItemCatalog(item.id, e.target.value)}
@@ -337,13 +395,17 @@ export default function PedidoDetalhePage() {
                     >
                       <option value="">Selecione um item...</option>
                       {catalogOptions.map((c) => (
-                        <option key={c.id} value={c.id}>{c.name}</option>
+                        <option key={c.id} value={c.id}>
+                          {c.name}
+                        </option>
                       ))}
                     </Select>
                   </div>
 
                   <div className="flex flex-col gap-1 w-24">
-                    <label className="sm:hidden text-[10px] font-bold text-gray-400 uppercase">Qtd</label>
+                    <label className="sm:hidden text-[10px] font-bold text-gray-400 uppercase">
+                      Qtd
+                    </label>
                     <Input
                       type="number"
                       min={1}
@@ -355,7 +417,9 @@ export default function PedidoDetalhePage() {
                   </div>
 
                   <div className="flex flex-col gap-1 w-28">
-                    <label className="sm:hidden text-[10px] font-bold text-gray-400 uppercase">Preço unit.</label>
+                    <label className="sm:hidden text-[10px] font-bold text-gray-400 uppercase">
+                      Preço unit.
+                    </label>
                     <Input
                       value={item.catalogItemId ? formatCurrency(item.unitPrice) : ''}
                       readOnlyStyle
@@ -382,14 +446,17 @@ export default function PedidoDetalhePage() {
               disabled={loading}
               className="w-full py-3.5 border border-dashed border-indigo-200 rounded-lg text-indigo-600 font-medium text-sm flex items-center justify-center gap-2 hover:bg-indigo-50/50 transition-colors disabled:opacity-50"
             >
-              <Plus size={16} />Adicionar item do catálogo
+              <Plus size={16} />
+              Adicionar item do catálogo
             </button>
 
             {/* Totais */}
             <div className="flex flex-col items-end gap-3 mt-4 w-full">
               <div className="flex justify-between items-center w-full sm:w-72">
                 <span className="text-gray-500 text-sm font-medium">Subtotal</span>
-                <span className="text-gray-900 font-medium text-sm">{formatCurrency(subtotal)}</span>
+                <span className="text-gray-900 font-medium text-sm">
+                  {formatCurrency(subtotal)}
+                </span>
               </div>
               <div className="flex justify-between items-center w-full sm:w-72">
                 <span className="text-gray-500 text-sm font-medium">Desconto</span>
@@ -423,7 +490,9 @@ export default function PedidoDetalhePage() {
           {/* ── Pagamento ── */}
           <section className="flex flex-col gap-4">
             <div className="border-b border-gray-100 pb-3">
-              <h2 className="text-xs font-bold tracking-widest text-gray-500 uppercase">Pagamento</h2>
+              <h2 className="text-xs font-bold tracking-widest text-gray-500 uppercase">
+                Pagamento
+              </h2>
             </div>
 
             <div className="flex flex-col gap-2">
@@ -437,10 +506,11 @@ export default function PedidoDetalhePage() {
                       type="button"
                       onClick={() => togglePaymentMethod(method)}
                       disabled={loading}
-                      className={`px-4 py-2 rounded-lg text-sm font-medium border transition-all ${active
-                        ? 'bg-indigo-600 border-indigo-600 text-white'
-                        : 'bg-white border-gray-200 text-gray-600 hover:border-indigo-400 hover:text-indigo-600'
-                        }`}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium border transition-all ${
+                        active
+                          ? 'bg-indigo-600 border-indigo-600 text-white'
+                          : 'bg-white border-gray-200 text-gray-600 hover:border-indigo-400 hover:text-indigo-600'
+                      }`}
                     >
                       {PAYMENT_METHOD_LABELS[method]}
                     </button>
@@ -479,6 +549,48 @@ export default function PedidoDetalhePage() {
           Salvar alterações
         </Button>
       </div>
+
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl animate-in zoom-in-95 duration-200">
+            <div className="flex flex-col gap-4">
+              <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mx-auto">
+                <Trash2 className="w-6 h-6 text-red-600" />
+              </div>
+
+              <div className="text-center">
+                <h3 className="text-base font-bold text-gray-900">Excluir pedido?</h3>
+                <p className="text-sm text-gray-500 mt-1.5 leading-relaxed">
+                  Tem certeza que deseja excluir{' '}
+                  <span className="font-semibold text-gray-700">
+                    &quot;{order.orderNumber}&quot;
+                  </span>
+                  ? Esta ação não pode ser desfeita.
+                </p>
+              </div>
+
+              {deleteError && <Alert variant="error">{deleteError}</Alert>}
+
+              <div className="flex gap-3 mt-1">
+                <Button
+                  variant="outline"
+                  fullWidth
+                  disabled={deleting}
+                  onClick={() => {
+                    setShowDeleteModal(false);
+                    setDeleteError('');
+                  }}
+                >
+                  Cancelar
+                </Button>
+                <Button variant="danger" fullWidth loading={deleting} onClick={handleDeleteConfirm}>
+                  Excluir
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

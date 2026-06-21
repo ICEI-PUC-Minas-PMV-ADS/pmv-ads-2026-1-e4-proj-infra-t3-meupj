@@ -5,30 +5,31 @@ import { useParams, useRouter } from 'next/navigation';
 import { useState, useCallback, useEffect } from 'react';
 import { ChevronLeft, Loader2, AlertCircle, Trash2, CheckCircle } from 'lucide-react';
 import { CatalogService, type CatalogUnitMeasure } from '@/services/catalog.service';
+import { Alert, Button } from '@/components/ui';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const PRODUCT_UNITS: { value: CatalogUnitMeasure; label: string }[] = [
-  { value: 'unit',        label: 'Unidade (un)' },
-  { value: 'dozen',       label: 'Dúzia (dz)' },
-  { value: 'piece',       label: 'Peça (pç)' },
-  { value: 'kilogram',    label: 'Quilograma (kg)' },
-  { value: 'meter',       label: 'Metro (m)' },
+  { value: 'unit', label: 'Unidade (un)' },
+  { value: 'dozen', label: 'Dúzia (dz)' },
+  { value: 'piece', label: 'Peça (pç)' },
+  { value: 'kilogram', label: 'Quilograma (kg)' },
+  { value: 'meter', label: 'Metro (m)' },
   { value: 'squareMeter', label: 'Metro quadrado (m²)' },
-  { value: 'box',         label: 'Caixa (cx)' },
-  { value: 'kit',         label: 'Kit' },
+  { value: 'box', label: 'Caixa (cx)' },
+  { value: 'kit', label: 'Kit' },
 ];
 
 const SERVICE_UNITS: { value: CatalogUnitMeasure; label: string }[] = [
-  { value: 'hour',  label: 'Hora (h)' },
-  { value: 'day',   label: 'Dia' },
-  { value: 'week',  label: 'Semana' },
+  { value: 'hour', label: 'Hora (h)' },
+  { value: 'day', label: 'Dia' },
+  { value: 'week', label: 'Semana' },
   { value: 'month', label: 'Mês' },
 ];
 
 const TYPE_BADGE: Record<'product' | 'service', { badge: string; label: string }> = {
   product: { badge: 'bg-amber-100/50 text-amber-800', label: 'Produto' },
-  service: { badge: 'bg-indigo-50 text-indigo-700',   label: 'Serviço' },
+  service: { badge: 'bg-indigo-50 text-indigo-700', label: 'Serviço' },
 };
 
 const CHEVRON_SVG = (
@@ -42,7 +43,10 @@ const CHEVRON_SVG = (
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function parseCurrency(value: string): number {
-  const cleaned = value.trim().replace(/[^\d,.]/g, '').replace(',', '.');
+  const cleaned = value
+    .trim()
+    .replace(/[^\d,.]/g, '')
+    .replace(',', '.');
   return parseFloat(cleaned);
 }
 
@@ -52,7 +56,7 @@ function toCurrencyStr(value: number): string {
 
 function calcMargin(unitPrice: number, costPrice: number): string | null {
   if (unitPrice > 0 && costPrice > 0 && costPrice < unitPrice) {
-    return ((unitPrice - costPrice) / unitPrice * 100).toFixed(1);
+    return (((unitPrice - costPrice) / unitPrice) * 100).toFixed(1);
   }
   return null;
 }
@@ -61,28 +65,28 @@ function calcMargin(unitPrice: number, costPrice: number): string | null {
 
 export default function EditarItemCatalogo() {
   const { itemId } = useParams<{ itemId: string }>();
-  const router     = useRouter();
+  const router = useRouter();
 
   const [fetchLoading, setFetchLoading] = useState(true);
-  const [notFound, setNotFound]         = useState(false);
+  const [notFound, setNotFound] = useState(false);
 
-  const [type, setType]               = useState<'product' | 'service'>('product');
-  const [name, setName]               = useState('');
+  const [type, setType] = useState<'product' | 'service'>('product');
+  const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [unitPriceStr, setUnitPriceStr] = useState('');
   const [unitMeasure, setUnitMeasure] = useState<CatalogUnitMeasure>('unit');
   const [costPriceStr, setCostPriceStr] = useState('');
 
-  const [loading, setLoading]           = useState(false);
-  const [error, setError]               = useState('');
-  const [success, setSuccess]           = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [deleting, setDeleting]         = useState(false);
-  const [deleteError, setDeleteError]   = useState('');
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
 
   const unitPrice = parseCurrency(unitPriceStr);
   const costPrice = parseCurrency(costPriceStr);
-  const margin    = type === 'product' ? calcMargin(unitPrice, costPrice) : null;
+  const margin = type === 'product' ? calcMargin(unitPrice, costPrice) : null;
 
   // Carrega o item na montagem
   useEffect(() => {
@@ -114,7 +118,7 @@ export default function EditarItemCatalogo() {
     };
 
     load();
-  }, [itemId]);
+  }, [itemId, router]);
 
   const handleTypeChange = (newType: 'product' | 'service') => {
     setType(newType);
@@ -136,9 +140,8 @@ export default function EditarItemCatalogo() {
       return;
     }
 
-    const cost = type === 'product' && costPriceStr.trim()
-      ? parseCurrency(costPriceStr)
-      : undefined;
+    const cost =
+      type === 'product' && costPriceStr.trim() ? parseCurrency(costPriceStr) : undefined;
 
     const payload = {
       type,
@@ -163,7 +166,7 @@ export default function EditarItemCatalogo() {
     } finally {
       setLoading(false);
     }
-  }, [itemId, type, name, description, unitPriceStr, unitMeasure, costPriceStr]);
+  }, [costPriceStr, description, itemId, name, router, type, unitMeasure, unitPriceStr]);
 
   const handleDelete = () => {
     setDeleteError('');
@@ -226,7 +229,9 @@ export default function EditarItemCatalogo() {
             <h1 className="text-sm font-bold text-gray-900 tracking-wide truncate max-w-[180px] sm:max-w-xs">
               {name || 'Editar Item'}
             </h1>
-            <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full hidden sm:inline-flex ${badgeStyle.badge}`}>
+            <span
+              className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full hidden sm:inline-flex ${badgeStyle.badge}`}
+            >
               {badgeStyle.label}
             </span>
           </div>
@@ -245,7 +250,6 @@ export default function EditarItemCatalogo() {
 
       <div className="flex-1 p-6 md:p-10 max-w-3xl mx-auto w-full animate-in fade-in slide-in-from-bottom-4 duration-500 overflow-y-auto pb-48 md:pb-32">
         <form className="flex flex-col gap-10" onSubmit={(e) => e.preventDefault()}>
-
           {/* Feedback */}
           {error && (
             <div className="flex items-center gap-3 bg-red-50 border border-red-100 text-red-600 p-4 rounded-xl text-sm">
@@ -259,7 +263,6 @@ export default function EditarItemCatalogo() {
               <span>Item atualizado com sucesso!</span>
             </div>
           )}
-
 
           {/* Tipo */}
           <section className="flex flex-col gap-4">
@@ -355,7 +358,9 @@ export default function EditarItemCatalogo() {
                     className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600 outline-none transition-all bg-white appearance-none cursor-pointer disabled:opacity-60"
                   >
                     {(type === 'product' ? PRODUCT_UNITS : SERVICE_UNITS).map((u) => (
-                      <option key={u.value} value={u.value}>{u.label}</option>
+                      <option key={u.value} value={u.value}>
+                        {u.label}
+                      </option>
                     ))}
                   </select>
                   {CHEVRON_SVG}
@@ -413,9 +418,11 @@ export default function EditarItemCatalogo() {
                 </div>
                 <div className="border-t border-gray-100 pt-3 flex justify-between items-center mt-1">
                   <span className="text-sm font-bold text-emerald-700">Margem estimada</span>
-                  <span className={`text-sm font-bold px-3 py-1 rounded-lg ${
-                    margin ? 'text-emerald-600 bg-emerald-50' : 'text-gray-400 bg-gray-50'
-                  }`}>
+                  <span
+                    className={`text-sm font-bold px-3 py-1 rounded-lg ${
+                      margin ? 'text-emerald-600 bg-emerald-50' : 'text-gray-400 bg-gray-50'
+                    }`}
+                  >
                     {margin ? `${margin}%` : '—'}
                   </span>
                 </div>
@@ -460,36 +467,28 @@ export default function EditarItemCatalogo() {
                 <h3 className="text-base font-bold text-gray-900">Excluir item?</h3>
                 <p className="text-sm text-gray-500 mt-1.5 leading-relaxed">
                   Tem certeza que deseja excluir{' '}
-                  <span className="font-semibold text-gray-700">"{name}"</span>?
-                  {' '}Esta ação não pode ser desfeita.
+                  <span className="font-semibold text-gray-700">&quot;{name}&quot;</span>? Esta ação
+                  não pode ser desfeita.
                 </p>
               </div>
 
-              {deleteError && (
-                <div className="flex items-center gap-2 bg-red-50 border border-red-100 text-red-600 p-3 rounded-xl text-sm">
-                  <AlertCircle className="h-4 w-4 flex-shrink-0" />
-                  <span>{deleteError}</span>
-                </div>
-              )}
+              {deleteError && <Alert variant="error">{deleteError}</Alert>}
 
               <div className="flex gap-3 mt-1">
-                <button
-                  type="button"
+                <Button
+                  variant="outline"
+                  fullWidth
                   disabled={deleting}
-                  onClick={() => { setShowDeleteModal(false); setDeleteError(''); }}
-                  className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-gray-600 bg-white border border-gray-200 hover:bg-gray-50 transition-all disabled:opacity-60"
+                  onClick={() => {
+                    setShowDeleteModal(false);
+                    setDeleteError('');
+                  }}
                 >
                   Cancelar
-                </button>
-                <button
-                  type="button"
-                  disabled={deleting}
-                  onClick={handleDeleteConfirm}
-                  className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white bg-red-600 hover:bg-red-700 transition-all disabled:opacity-60 flex items-center justify-center gap-2"
-                >
-                  {deleting && <Loader2 size={14} className="animate-spin" />}
+                </Button>
+                <Button variant="danger" fullWidth loading={deleting} onClick={handleDeleteConfirm}>
                   Excluir
-                </button>
+                </Button>
               </div>
             </div>
           </div>

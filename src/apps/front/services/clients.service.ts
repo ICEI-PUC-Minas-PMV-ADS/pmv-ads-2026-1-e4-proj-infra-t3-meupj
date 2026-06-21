@@ -1,4 +1,4 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://pmv-ads-2026-1-e4-proj-infra-t3-meupj.onrender.com';
+import { apiClient, resolveApiErrorMessage } from './api-client';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -78,111 +78,78 @@ export const ClientsService = {
    * Lista clientes com suporte a filtros, paginação e busca
    */
   async list(query: ClientListQuery = {}): Promise<ClientListResponse> {
-    const params = new URLSearchParams();
-
-    if (query.page) params.set('page', String(query.page));
-    if (query.limit) params.set('limit', String(query.limit));
-    if (query.q) params.set('q', query.q);
-    if (query.type) params.set('type', query.type);
-    if (query.sortBy) params.set('sortBy', query.sortBy);
-    if (query.sortOrder) params.set('sortOrder', query.sortOrder);
-
-    const qs = params.toString();
-    const url = `${BASE_URL}/api/clients${qs ? `?${qs}` : ''}`;
-
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-    });
-
-    if (!response.ok) {
-      if (response.status === 401) throw new Error('Não autorizado. Faça login novamente.');
-      const err = await response.json().catch(() => ({}));
-      throw new Error(err.message || 'Falha ao carregar clientes.');
+    try {
+      return await apiClient.get<ClientListResponse>('/api/clients', { query });
+    } catch (error) {
+      throw new Error(
+        resolveApiErrorMessage(error, 'Falha ao carregar clientes.', {
+          401: 'Não autorizado. Faça login novamente.',
+        }),
+      );
     }
-
-    return response.json();
   },
 
   /**
    * Busca um cliente pelo ID
    */
   async getById(clientId: string): Promise<Client> {
-    const response = await fetch(`${BASE_URL}/api/clients/${clientId}`, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-    });
-
-    if (!response.ok) {
-      if (response.status === 401) throw new Error('Não autorizado. Faça login novamente.');
-      if (response.status === 404) throw new Error('Cliente não encontrado.');
-      const err = await response.json().catch(() => ({}));
-      throw new Error(err.message || 'Falha ao buscar cliente.');
+    try {
+      return await apiClient.get<Client>(`/api/clients/${clientId}`);
+    } catch (error) {
+      throw new Error(
+        resolveApiErrorMessage(error, 'Falha ao buscar cliente.', {
+          401: 'Não autorizado. Faça login novamente.',
+          404: 'Cliente não encontrado.',
+        }),
+      );
     }
-
-    return response.json();
   },
 
   /**
    * Cria um novo cliente
    */
   async create(payload: ClientCreatePayload): Promise<Client> {
-    const response = await fetch(`${BASE_URL}/api/clients`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify(payload),
-    });
-
-    if (!response.ok) {
-      if (response.status === 401) throw new Error('Não autorizado. Faça login novamente.');
-      const err = await response.json().catch(() => ({}));
-      throw new Error(err.message || 'Falha ao criar cliente.');
+    try {
+      return await apiClient.post<Client>('/api/clients', { body: payload });
+    } catch (error) {
+      throw new Error(
+        resolveApiErrorMessage(error, 'Falha ao criar cliente.', {
+          401: 'Não autorizado. Faça login novamente.',
+        }),
+      );
     }
-
-    return response.json();
   },
 
   /**
    * Atualiza um cliente existente
    */
   async update(clientId: string, payload: ClientUpdatePayload): Promise<Client> {
-    const response = await fetch(`${BASE_URL}/api/clients/${clientId}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify(payload),
-    });
-
-    if (!response.ok) {
-      if (response.status === 401) throw new Error('Não autorizado. Faça login novamente.');
-      if (response.status === 404) throw new Error('Cliente não encontrado.');
-      const err = await response.json().catch(() => ({}));
-      throw new Error(err.message || 'Falha ao atualizar cliente.');
+    try {
+      return await apiClient.put<Client>(`/api/clients/${clientId}`, { body: payload });
+    } catch (error) {
+      throw new Error(
+        resolveApiErrorMessage(error, 'Falha ao atualizar cliente.', {
+          401: 'Não autorizado. Faça login novamente.',
+          404: 'Cliente não encontrado.',
+        }),
+      );
     }
-
-    return response.json();
   },
 
   /**
    * Remove um cliente (somente se não estiver vinculado a pedidos)
    */
   async delete(clientId: string): Promise<void> {
-    const response = await fetch(`${BASE_URL}/api/clients/${clientId}`, {
-      method: 'DELETE',
-      credentials: 'include',
-    });
-
-    if (!response.ok) {
-      if (response.status === 401) throw new Error('Não autorizado. Faça login novamente.');
-      if (response.status === 404) throw new Error('Cliente não encontrado.');
-      if (response.status === 409) {
-        throw new Error('Este cliente está vinculado a pedidos e não pode ser excluído.');
-      }
-      const err = await response.json().catch(() => ({}));
-      throw new Error(err.message || 'Falha ao excluir cliente.');
+    try {
+      await apiClient.delete<void>(`/api/clients/${clientId}`, { parseAs: 'none' });
+    } catch (error) {
+      throw new Error(
+        resolveApiErrorMessage(error, 'Falha ao excluir cliente.', {
+          401: 'Não autorizado. Faça login novamente.',
+          404: 'Cliente não encontrado.',
+          409: 'Este cliente está vinculado a pedidos e não pode ser excluído.',
+        }),
+      );
     }
   },
 };

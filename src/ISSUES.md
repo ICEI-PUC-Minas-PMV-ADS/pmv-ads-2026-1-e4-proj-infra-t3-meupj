@@ -81,3 +81,8 @@
 - [x] Corrigir reconexão do MongoDB na API para preservar o adapter MongoDB do Better Auth e restabelecer cadastro/login após quedas transitórias da conexão
 - [x] Validar no navegador embutido do Codex os fluxos de cadastro, login e CRUDs principais (clientes, catálogo, pedidos e lançamentos), incluindo a correção de viewport que mascarava o save do financeiro em layout mobile
 - [x] Endurecer a API para uso acadêmico com CORS credenciado apenas por allowlist explícita, bypass de autenticação restrito a `development` e healthcheck sem vazamento de erro interno do MongoDB
+- [x] Padronizar a camada HTTP do frontend com `api-client` compartilhado, remover fallback automático para backend remoto e alinhar paginação da API de lançamentos ao mesmo helper usado pelos demais CRUDs
+- [x] Fechar o lint do frontend, tipar o contexto de autenticação e validar em runtime os fluxos principais web após a padronização final dos CRUDs
+- [x] Padronizar os modais de exclusão do frontend no estilo de clientes, removendo confirmações nativas em pedidos e lançamentos
+- [x] Implementar emissão de PDF real no backend para orçamento, ordem de serviço e recibo, com preview web autenticado e ações contextuais nas listas de pedidos e lançamentos
+- [x] Adicionar contato rápido por telefone e WhatsApp na lista de clientes, com normalização compartilhada de telefone no frontend

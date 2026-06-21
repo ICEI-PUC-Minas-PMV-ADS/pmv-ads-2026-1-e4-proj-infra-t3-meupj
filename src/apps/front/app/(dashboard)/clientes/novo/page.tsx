@@ -4,13 +4,43 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, useCallback } from 'react';
 import { ChevronLeft } from 'lucide-react';
-import { ClientsService, type PersonType, type ClientCreatePayload } from '@/services/clients.service';
+import {
+  ClientsService,
+  type PersonType,
+  type ClientCreatePayload,
+} from '@/services/clients.service';
 import { useClients } from '@/contexts/clients.context';
 import { Input, Select, Textarea, Button, Alert } from '@/components/ui';
+import { maskPhone } from '@/utils/phone';
 
 const UF_OPTIONS = [
-  'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG',
-  'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO',
+  'AC',
+  'AL',
+  'AP',
+  'AM',
+  'BA',
+  'CE',
+  'DF',
+  'ES',
+  'GO',
+  'MA',
+  'MT',
+  'MS',
+  'MG',
+  'PA',
+  'PB',
+  'PR',
+  'PE',
+  'PI',
+  'RJ',
+  'RN',
+  'RS',
+  'RO',
+  'RR',
+  'SC',
+  'SP',
+  'SE',
+  'TO',
 ];
 
 const ORIGIN_OPTIONS = [
@@ -20,16 +50,6 @@ const ORIGIN_OPTIONS = [
   { value: 'site', label: 'Site' },
   { value: 'outros', label: 'Outros' },
 ];
-
-/** Formata telefone: (XX) XXXXX-XXXX ou (XX) XXXX-XXXX */
-function maskPhone(value: string): string {
-  const digits = value.replace(/\D/g, '').slice(0, 11);
-  if (digits.length <= 2) return digits.length ? `(${digits}` : '';
-  if (digits.length <= 6) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
-  if (digits.length <= 10)
-    return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
-  return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
-}
 
 export default function NovoClientePage() {
   const router = useRouter();
@@ -114,29 +134,51 @@ export default function NovoClientePage() {
     } finally {
       setLoading(false);
     }
-  }, [tipo, name, document, email, phone, zipCode, street, number, district, city, state, origin, notes, router, refreshClients]);
+  }, [
+    tipo,
+    name,
+    document,
+    email,
+    phone,
+    zipCode,
+    street,
+    number,
+    district,
+    city,
+    state,
+    origin,
+    notes,
+    router,
+    refreshClients,
+  ]);
 
   return (
     <div className="flex flex-col h-full bg-gray-50/50">
       {/* Header */}
       <div className="bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between sticky top-0 z-20 shadow-sm">
         <div className="flex items-center gap-4">
-          <Link href="/clientes" className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-500 transition-colors">
+          <Link
+            href="/clientes"
+            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-500 transition-colors"
+          >
             <ChevronLeft size={20} />
           </Link>
-          <h1 className="text-sm font-bold text-gray-400 tracking-widest uppercase">Novo Cliente</h1>
+          <h1 className="text-sm font-bold text-gray-400 tracking-widest uppercase">
+            Novo Cliente
+          </h1>
         </div>
       </div>
 
       <div className="flex-1 p-6 md:p-10 max-w-4xl mx-auto w-full animate-in fade-in slide-in-from-bottom-4 duration-500 overflow-y-auto pb-48 md:pb-32">
         <form className="flex flex-col gap-10" onSubmit={(e) => e.preventDefault()}>
-
           {/* Erro geral */}
           {error && <Alert variant="error">{error}</Alert>}
 
           {/* Identificação */}
           <section className="flex flex-col gap-5">
-            <h2 className="text-xs font-bold tracking-widest text-gray-400 uppercase">Identificação</h2>
+            <h2 className="text-xs font-bold tracking-widest text-gray-400 uppercase">
+              Identificação
+            </h2>
 
             <div className="flex flex-col sm:flex-row gap-5">
               <div className="flex-2">
@@ -291,7 +333,9 @@ export default function NovoClientePage() {
                 >
                   <option value="">—</option>
                   {UF_OPTIONS.map((uf) => (
-                    <option key={uf} value={uf}>{uf}</option>
+                    <option key={uf} value={uf}>
+                      {uf}
+                    </option>
                   ))}
                 </Select>
               </div>
@@ -300,7 +344,9 @@ export default function NovoClientePage() {
 
           {/* Anotações */}
           <section className="flex flex-col gap-5">
-            <h2 className="text-xs font-bold tracking-widest text-gray-400 uppercase">Anotações Internas</h2>
+            <h2 className="text-xs font-bold tracking-widest text-gray-400 uppercase">
+              Anotações Internas
+            </h2>
 
             <Textarea
               rows={4}
@@ -310,7 +356,6 @@ export default function NovoClientePage() {
               hint="Não visível ao cliente"
             />
           </section>
-
         </form>
       </div>
 
@@ -319,11 +364,7 @@ export default function NovoClientePage() {
         <Button variant="outline" onClick={() => router.push('/clientes')}>
           Cancelar
         </Button>
-        <Button
-          variant="primary"
-          loading={loading}
-          onClick={handleSave}
-        >
+        <Button variant="primary" loading={loading} onClick={handleSave}>
           Salvar cliente
         </Button>
       </div>

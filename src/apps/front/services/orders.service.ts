@@ -1,4 +1,4 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://pmv-ads-2026-1-e4-proj-infra-t3-meupj.onrender.com';
+import { apiClient, resolveApiErrorMessage } from './api-client';
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export type OrderStatus =
@@ -33,6 +33,7 @@ export interface Order {
   _id: string;
   profileId: string;
   clientId: string | null;
+  clientName?: string;
   orderNumber: string;
   reference?: string;
   status: OrderStatus;
@@ -104,108 +105,79 @@ export const OrdersService = {
    * Lista pedidos com suporte a filtros, paginação e busca
    */
   async list(query: OrderListQuery = {}): Promise<OrderListResponse> {
-    const params = new URLSearchParams();
-
-    if (query.page) params.set('page', String(query.page));
-    if (query.limit) params.set('limit', String(query.limit));
-    if (query.q) params.set('q', query.q);
-    if (query.clientId) params.set('clientId', query.clientId);
-    if (query.status) params.set('status', query.status);
-    if (query.createdFrom) params.set('createdFrom', query.createdFrom);
-    if (query.createdTo) params.set('createdTo', query.createdTo);
-    if (query.sortBy) params.set('sortBy', query.sortBy);
-    if (query.sortOrder) params.set('sortOrder', query.sortOrder);
-
-    const qs = params.toString();
-    const url = `${BASE_URL}/api/orders${qs ? `?${qs}` : ''}`;
-
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-    });
-
-    if (!response.ok) {
-      if (response.status === 401) throw new Error('Não autorizado. Faça login novamente.');
-      const err = await response.json().catch(() => ({}));
-      throw new Error(err.message || 'Falha ao carregar pedidos.');
+    try {
+      return await apiClient.get<OrderListResponse>('/api/orders', { query });
+    } catch (error) {
+      throw new Error(
+        resolveApiErrorMessage(error, 'Falha ao carregar pedidos.', {
+          401: 'Não autorizado. Faça login novamente.',
+        }),
+      );
     }
-
-    return response.json();
   },
 
   /**
    * Obtém um pedido pelo ID
    */
   async getById(orderId: string): Promise<Order> {
-    const response = await fetch(`${BASE_URL}/api/orders/${orderId}`, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-    });
-
-    if (!response.ok) {
-      if (response.status === 404) throw new Error('Pedido não encontrado.');
-      const err = await response.json().catch(() => ({}));
-      throw new Error(err.message || 'Falha ao carregar pedido.');
+    try {
+      return await apiClient.get<Order>(`/api/orders/${orderId}`);
+    } catch (error) {
+      throw new Error(
+        resolveApiErrorMessage(error, 'Falha ao carregar pedido.', {
+          401: 'Não autorizado. Faça login novamente.',
+          404: 'Pedido não encontrado.',
+        }),
+      );
     }
-
-    return response.json();
   },
 
   /**
    * Cria um novo pedido
    */
   async create(payload: OrderCreatePayload): Promise<Order> {
-    const response = await fetch(`${BASE_URL}/api/orders`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify(payload),
-    });
-
-    if (!response.ok) {
-      const err = await response.json().catch(() => ({}));
-      throw new Error(err.message || 'Falha ao criar pedido.');
+    try {
+      return await apiClient.post<Order>('/api/orders', { body: payload });
+    } catch (error) {
+      throw new Error(
+        resolveApiErrorMessage(error, 'Falha ao criar pedido.', {
+          401: 'Não autorizado. Faça login novamente.',
+        }),
+      );
     }
-
-    return response.json();
   },
 
   /**
    * Atualiza um pedido existente
    */
   async update(orderId: string, payload: OrderUpdatePayload): Promise<Order> {
-    const response = await fetch(`${BASE_URL}/api/orders/${orderId}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify(payload),
-    });
-
-    if (!response.ok) {
-      const err = await response.json().catch(() => ({}));
-      throw new Error(err.message || 'Falha ao atualizar pedido.');
+    try {
+      return await apiClient.put<Order>(`/api/orders/${orderId}`, { body: payload });
+    } catch (error) {
+      throw new Error(
+        resolveApiErrorMessage(error, 'Falha ao atualizar pedido.', {
+          401: 'Não autorizado. Faça login novamente.',
+          404: 'Pedido não encontrado.',
+          409: 'Falha ao atualizar pedido.',
+        }),
+      );
     }
-
-    return response.json();
   },
 
   /**
    * Remove um pedido (somente se não tiver transações confirmadas)
    */
   async delete(orderId: string): Promise<void> {
-    const response = await fetch(`${BASE_URL}/api/orders/${orderId}`, {
-      method: 'DELETE',
-      credentials: 'include',
-    });
-
-    if (!response.ok) {
-      if (response.status === 409) {
-        throw new Error('Este pedido possui transações confirmadas e não pode ser excluído.');
-      }
-      const err = await response.json().catch(() => ({}));
-      throw new Error(err.message || 'Falha ao excluir pedido.');
+    try {
+      await apiClient.delete<void>(`/api/orders/${orderId}`, { parseAs: 'none' });
+    } catch (error) {
+      throw new Error(
+        resolveApiErrorMessage(error, 'Falha ao excluir pedido.', {
+          401: 'Não autorizado. Faça login novamente.',
+          404: 'Pedido não encontrado.',
+          409: 'Este pedido possui transações confirmadas e não pode ser excluído.',
+        }),
+      );
     }
   },
 };

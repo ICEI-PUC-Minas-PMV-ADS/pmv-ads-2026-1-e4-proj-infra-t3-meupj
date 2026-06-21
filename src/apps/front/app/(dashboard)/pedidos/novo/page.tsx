@@ -1,15 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { ChevronLeft, Plus, Trash2, Loader2, AlertCircle } from 'lucide-react';
+import { ChevronLeft, Plus, Trash2 } from 'lucide-react';
 import { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { z } from 'zod';
-import {
-  OrdersService,
-  type OrderStatus,
-  type PaymentMethod,
-} from '@/services/orders.service';
+import { OrdersService, type OrderStatus, type PaymentMethod } from '@/services/orders.service';
 import { Button, Input, Select, Textarea, Alert } from '@/components/ui';
 import { useClients } from '@/contexts/clients.context';
 import { useCatalog } from '@/contexts/catalog.context';
@@ -20,19 +16,21 @@ const orderSchema = z.object({
   clientId: z.string().optional().nullable(),
   status: z.enum(['draft', 'pendingApproval', 'inProgress', 'completed', 'warranty', 'cancelled']),
   reference: z.string().optional(),
-  paymentMethods: z.array(z.enum(['pix', 'cash', 'creditCard', 'debitCard', 'bankTransfer', 'bankSlip'])).optional(),
+  paymentMethods: z
+    .array(z.enum(['pix', 'cash', 'creditCard', 'debitCard', 'bankTransfer', 'bankSlip']))
+    .optional(),
   paymentTerms: z.string().optional(),
   discount: z.number().min(0).optional(),
   fees: z.number().min(0).optional(),
-  items: z.array(
-    z.object({
-      catalogItemId: z.string().min(1, 'Selecione um item do catálogo'),
-      quantity: z.number('Qtd. inválida').min(1, 'Mínimo 1'),
-    })
-  ).min(1, 'Adicione pelo menos um item ao pedido.'),
+  items: z
+    .array(
+      z.object({
+        catalogItemId: z.string().min(1, 'Selecione um item do catálogo'),
+        quantity: z.number().min(1, 'Mínimo 1'),
+      }),
+    )
+    .min(1, 'Adicione pelo menos um item ao pedido.'),
 });
-
-type OrderFormData = z.infer<typeof orderSchema>;
 
 interface LineItem {
   id: number;
@@ -63,7 +61,9 @@ function formatCurrency(n: number) {
   return n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
 
-
+function getErrorMessage(error: unknown, fallback: string): string {
+  return error instanceof Error ? error.message : fallback;
+}
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
@@ -106,8 +106,7 @@ export default function NovoPedidoPage() {
       return [...prev, createEmptyLineItem()];
     });
 
-  const removeItem = (id: number) =>
-    setItems((prev) => prev.filter((i) => i.id !== id));
+  const removeItem = (id: number) => setItems((prev) => prev.filter((i) => i.id !== id));
 
   const updateItemCatalog = (id: number, catalogItemId: string) => {
     const catalog = catalogOptions.find((c) => c.id === catalogItemId);
@@ -131,42 +130,45 @@ export default function NovoPedidoPage() {
   };
 
   // ─── Submit ─────────────────────────────────────────────────────────────────
-  const handleSubmit = useCallback(async (targetStatus: OrderStatus) => {
-    setError('');
+  const handleSubmit = useCallback(
+    async (targetStatus: OrderStatus) => {
+      setError('');
 
-    const sanitizedItems = items.filter((item) => item.catalogItemId.trim().length > 0);
+      const sanitizedItems = items.filter((item) => item.catalogItemId.trim().length > 0);
 
-    const payload = {
-      clientId: clientId || null,
-      status: targetStatus,
-      reference: reference || undefined,
-      paymentMethods: paymentMethods.length > 0 ? paymentMethods : undefined,
-      paymentTerms: paymentTerms || undefined,
-      discount: discount > 0 ? discount : undefined,
-      fees: fees > 0 ? fees : undefined,
-      items: sanitizedItems.map((item) => ({
-        catalogItemId: item.catalogItemId,
-        quantity: item.quantity,
-      })),
-    };
+      const payload = {
+        clientId: clientId || null,
+        status: targetStatus,
+        reference: reference || undefined,
+        paymentMethods: paymentMethods.length > 0 ? paymentMethods : undefined,
+        paymentTerms: paymentTerms || undefined,
+        discount: discount > 0 ? discount : undefined,
+        fees: fees > 0 ? fees : undefined,
+        items: sanitizedItems.map((item) => ({
+          catalogItemId: item.catalogItemId,
+          quantity: item.quantity,
+        })),
+      };
 
-    const validation = orderSchema.safeParse(payload);
-    if (!validation.success) {
-      setError(validation.error.issues[0].message);
-      return;
-    }
+      const validation = orderSchema.safeParse(payload);
+      if (!validation.success) {
+        setError(validation.error.issues[0].message);
+        return;
+      }
 
-    try {
-      setLoading(true);
+      try {
+        setLoading(true);
 
-      await OrdersService.create(validation.data);
-      router.push('/pedidos');
-    } catch (err: any) {
-      setError(err.message || 'Falha ao criar pedido. Tente novamente.');
-    } finally {
-      setLoading(false);
-    }
-  }, [clientId, reference, paymentMethods, paymentTerms, discount, fees, items, router]);
+        await OrdersService.create(validation.data);
+        router.push('/pedidos');
+      } catch (error: unknown) {
+        setError(getErrorMessage(error, 'Falha ao criar pedido. Tente novamente.'));
+      } finally {
+        setLoading(false);
+      }
+    },
+    [clientId, reference, paymentMethods, paymentTerms, discount, fees, items, router],
+  );
 
   return (
     <div className="flex flex-col h-full bg-white">
@@ -182,15 +184,19 @@ export default function NovoPedidoPage() {
       </div>
 
       <div className="flex-1 p-4 md:p-10 max-w-4xl mx-auto w-full overflow-y-auto pb-48 md:pb-32">
-
-        {error && <Alert variant="error" className="mb-6">{error}</Alert>}
+        {error && (
+          <Alert variant="error" className="mb-6">
+            {error}
+          </Alert>
+        )}
 
         <form className="flex flex-col gap-10" onSubmit={(e) => e.preventDefault()}>
-
           {/* ── Dados Gerais ── */}
           <section className="flex flex-col gap-5">
             <div className="border-b border-gray-100 pb-3">
-              <h2 className="text-xs font-bold tracking-widest text-gray-500 uppercase">Dados Gerais</h2>
+              <h2 className="text-xs font-bold tracking-widest text-gray-500 uppercase">
+                Dados Gerais
+              </h2>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4">
@@ -202,7 +208,9 @@ export default function NovoPedidoPage() {
               >
                 <option value="">— Sem cliente —</option>
                 {clientOptions.map((c) => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
                 ))}
               </Select>
 
@@ -231,23 +239,32 @@ export default function NovoPedidoPage() {
           {/* ── Itens do Pedido ── */}
           <section className="flex flex-col gap-4">
             <div className="border-b border-gray-100 pb-3">
-              <h2 className="text-xs font-bold tracking-widest text-gray-500 uppercase">Itens do Pedido</h2>
+              <h2 className="text-xs font-bold tracking-widest text-gray-500 uppercase">
+                Itens do Pedido
+              </h2>
             </div>
 
             {/* Cabeçalho desktop */}
             <div className="hidden sm:flex items-center gap-4 px-1">
-              <div className="flex-1 text-[10px] font-bold tracking-widest text-gray-400 uppercase">Item do Catálogo</div>
-              <div className="w-24 text-[10px] font-bold tracking-widest text-gray-400 uppercase text-center">Qtd</div>
-              <div className="w-28 text-[10px] font-bold tracking-widest text-gray-400 uppercase text-right">Preço unit.</div>
+              <div className="flex-1 text-[10px] font-bold tracking-widest text-gray-400 uppercase">
+                Item do Catálogo
+              </div>
+              <div className="w-24 text-[10px] font-bold tracking-widest text-gray-400 uppercase text-center">
+                Qtd
+              </div>
+              <div className="w-28 text-[10px] font-bold tracking-widest text-gray-400 uppercase text-right">
+                Preço unit.
+              </div>
               <div className="w-8" />
             </div>
 
             <div className="flex flex-col gap-3">
               {items.map((item) => (
                 <div key={item.id} className="flex flex-col sm:flex-row items-end gap-3 sm:gap-4">
-
                   <div className="flex flex-col gap-1 flex-1 w-full">
-                    <label className="sm:hidden text-[10px] font-bold text-gray-400 uppercase">Item do Catálogo</label>
+                    <label className="sm:hidden text-[10px] font-bold text-gray-400 uppercase">
+                      Item do Catálogo
+                    </label>
                     <Select
                       value={item.catalogItemId}
                       onChange={(e) => updateItemCatalog(item.id, e.target.value)}
@@ -255,13 +272,17 @@ export default function NovoPedidoPage() {
                     >
                       <option value="">Selecione um item...</option>
                       {catalogOptions.map((c) => (
-                        <option key={c.id} value={c.id}>{c.name}</option>
+                        <option key={c.id} value={c.id}>
+                          {c.name}
+                        </option>
                       ))}
                     </Select>
                   </div>
 
                   <div className="flex flex-col gap-1 w-24">
-                    <label className="sm:hidden text-[10px] font-bold text-gray-400 uppercase">Qtd</label>
+                    <label className="sm:hidden text-[10px] font-bold text-gray-400 uppercase">
+                      Qtd
+                    </label>
                     <Input
                       type="number"
                       min={1}
@@ -273,7 +294,9 @@ export default function NovoPedidoPage() {
                   </div>
 
                   <div className="flex flex-col gap-1 w-28">
-                    <label className="sm:hidden text-[10px] font-bold text-gray-400 uppercase">Preço unit.</label>
+                    <label className="sm:hidden text-[10px] font-bold text-gray-400 uppercase">
+                      Preço unit.
+                    </label>
                     <Input
                       value={item.catalogItemId ? formatCurrency(item.unitPrice) : ''}
                       readOnlyStyle
@@ -300,14 +323,17 @@ export default function NovoPedidoPage() {
               disabled={loading}
               className="w-full py-3.5 border border-dashed border-indigo-200 rounded-lg text-indigo-600 font-medium text-sm flex items-center justify-center gap-2 hover:bg-indigo-50/50 transition-colors disabled:opacity-50"
             >
-              <Plus size={16} />Adicionar item do catálogo
+              <Plus size={16} />
+              Adicionar item do catálogo
             </button>
 
             {/* Totais */}
             <div className="flex flex-col items-end gap-3 mt-4 w-full">
               <div className="flex justify-between items-center w-full sm:w-72">
                 <span className="text-gray-500 text-sm font-medium">Subtotal</span>
-                <span className="text-gray-900 font-medium text-sm">{formatCurrency(subtotal)}</span>
+                <span className="text-gray-900 font-medium text-sm">
+                  {formatCurrency(subtotal)}
+                </span>
               </div>
               <div className="flex justify-between items-center w-full sm:w-72">
                 <span className="text-gray-500 text-sm font-medium">Desconto</span>
@@ -343,7 +369,9 @@ export default function NovoPedidoPage() {
           {/* ── Pagamento ── */}
           <section className="flex flex-col gap-4">
             <div className="border-b border-gray-100 pb-3">
-              <h2 className="text-xs font-bold tracking-widest text-gray-500 uppercase">Pagamento</h2>
+              <h2 className="text-xs font-bold tracking-widest text-gray-500 uppercase">
+                Pagamento
+              </h2>
             </div>
 
             <div className="flex flex-col gap-2">
@@ -357,10 +385,11 @@ export default function NovoPedidoPage() {
                       type="button"
                       onClick={() => togglePaymentMethod(method)}
                       disabled={loading}
-                      className={`px-4 py-2 rounded-lg text-sm font-medium border transition-all ${active
-                        ? 'bg-indigo-600 border-indigo-600 text-white'
-                        : 'bg-white border-gray-200 text-gray-600 hover:border-indigo-400 hover:text-indigo-600'
-                        }`}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium border transition-all ${
+                        active
+                          ? 'bg-indigo-600 border-indigo-600 text-white'
+                          : 'bg-white border-gray-200 text-gray-600 hover:border-indigo-400 hover:text-indigo-600'
+                      }`}
                     >
                       {PAYMENT_METHOD_LABELS[method]}
                     </button>

@@ -4,6 +4,14 @@ import { ObjectId, type Filter, type WithId, type Document } from 'mongodb';
 
 import type { AuthService } from '../lib/auth.js';
 import type { Client, ClientStore, PersonType, ClientAddress } from '../lib/clients.js';
+import {
+  LIMIT_DEFAULT,
+  MAX_LIMIT,
+  MAX_PAGE,
+  PAGE_DEFAULT,
+  PositiveIntegerStringSchema,
+  toBoundedPositiveInteger,
+} from '../lib/pagination.js';
 import type { ProfileStore } from '../lib/profile.js';
 
 type ClientRouteDependencies = {
@@ -115,19 +123,14 @@ const ClientSortBySchema = Type.Union([
 
 const ClientSortOrderSchema = Type.Union([Type.Literal('asc'), Type.Literal('desc')]);
 
-const PAGE_DEFAULT = 1;
-const LIMIT_DEFAULT = 20;
-const MAX_PAGE = 1000;
-const MAX_LIMIT = 100;
-const POSITIVE_INTEGER_PATTERN = '^[1-9][0-9]*$';
-const POSITIVE_INTEGER_REGEX = new RegExp(POSITIVE_INTEGER_PATTERN);
-
-const PositiveIntegerStringSchema = Type.String({ pattern: POSITIVE_INTEGER_PATTERN });
-
 const ClientListQuerySchema = Type.Object(
   {
-    page: Type.Optional(Type.Union([Type.Integer({ minimum: 1, maximum: MAX_PAGE }), PositiveIntegerStringSchema])),
-    limit: Type.Optional(Type.Union([Type.Integer({ minimum: 1, maximum: MAX_LIMIT }), PositiveIntegerStringSchema])),
+    page: Type.Optional(
+      Type.Union([Type.Integer({ minimum: 1, maximum: MAX_PAGE }), PositiveIntegerStringSchema]),
+    ),
+    limit: Type.Optional(
+      Type.Union([Type.Integer({ minimum: 1, maximum: MAX_LIMIT }), PositiveIntegerStringSchema]),
+    ),
     q: Type.Optional(Type.String()),
     type: Type.Optional(PersonTypeSchema),
     sortBy: Type.Optional(ClientSortBySchema),
@@ -217,37 +220,6 @@ type ClientCreateBody = Static<typeof ClientCreateSchema>;
 type ClientUpdateBody = Static<typeof ClientUpdateSchema>;
 type ClientParams = Static<typeof ClientParamsSchema>;
 type ClientListQuery = Static<typeof ClientListQuerySchema>;
-
-const toBoundedPositiveInteger = (
-  value: number | string | undefined,
-  fallback: number,
-  maximum: number,
-): number => {
-  const safeFallback = Math.min(Math.max(fallback, 1), maximum);
-
-  if (typeof value === 'number') {
-    if (!Number.isSafeInteger(value) || value < 1) {
-      return safeFallback;
-    }
-
-    return Math.min(value, maximum);
-  }
-
-  if (typeof value === 'string') {
-    if (!POSITIVE_INTEGER_REGEX.test(value)) {
-      return safeFallback;
-    }
-
-    const parsed = Number.parseInt(value, 10);
-    if (!Number.isSafeInteger(parsed) || parsed < 1) {
-      return safeFallback;
-    }
-
-    return Math.min(parsed, maximum);
-  }
-
-  return safeFallback;
-};
 
 const toClientResponse = (item: WithId<Client>): ClientResponse => ({
   _id: item._id.toHexString(),

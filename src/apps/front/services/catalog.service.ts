@@ -1,4 +1,4 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://pmv-ads-2026-1-e4-proj-infra-t3-meupj.onrender.com';
+import { apiClient, resolveApiErrorMessage } from './api-client';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -69,99 +69,66 @@ export interface CatalogUpdatePayload {
 
 export const CatalogService = {
   async getById(itemId: string): Promise<CatalogItem> {
-    const response = await fetch(`${BASE_URL}/api/catalog/${itemId}`, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-    });
-
-    if (!response.ok) {
-      if (response.status === 401) throw new Error('Não autorizado. Faça login novamente.');
-      if (response.status === 404) throw new Error('Item não encontrado.');
-      const err = await response.json().catch(() => ({}));
-      throw new Error((err as { message?: string }).message || 'Falha ao carregar item.');
+    try {
+      return await apiClient.get<CatalogItem>(`/api/catalog/${itemId}`);
+    } catch (error) {
+      throw new Error(
+        resolveApiErrorMessage(error, 'Falha ao carregar item.', {
+          401: 'Não autorizado. Faça login novamente.',
+          404: 'Item não encontrado.',
+        }),
+      );
     }
-
-    return response.json() as Promise<CatalogItem>;
   },
 
   async list(query: CatalogListQuery = {}): Promise<CatalogListResponse> {
-    const params = new URLSearchParams();
-
-    if (query.page) params.set('page', String(query.page));
-    if (query.limit) params.set('limit', String(query.limit));
-    if (query.q) params.set('q', query.q);
-    if (query.type) params.set('type', query.type);
-    if (query.sortBy) params.set('sortBy', query.sortBy);
-    if (query.sortOrder) params.set('sortOrder', query.sortOrder);
-
-    const qs = params.toString();
-    const url = `${BASE_URL}/api/catalog${qs ? `?${qs}` : ''}`;
-
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-    });
-
-    if (!response.ok) {
-      if (response.status === 401) throw new Error('Não autorizado. Faça login novamente.');
-      const err = await response.json().catch(() => ({}));
-      throw new Error((err as { message?: string }).message || 'Falha ao carregar catálogo.');
+    try {
+      return await apiClient.get<CatalogListResponse>('/api/catalog', { query });
+    } catch (error) {
+      throw new Error(
+        resolveApiErrorMessage(error, 'Falha ao carregar catálogo.', {
+          401: 'Não autorizado. Faça login novamente.',
+        }),
+      );
     }
-
-    return response.json() as Promise<CatalogListResponse>;
   },
 
   async create(payload: CatalogCreatePayload): Promise<CatalogItem> {
-    const response = await fetch(`${BASE_URL}/api/catalog`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify(payload),
-    });
-
-    if (!response.ok) {
-      if (response.status === 401) throw new Error('Não autorizado. Faça login novamente.');
-      const err = await response.json().catch(() => ({}));
-      throw new Error((err as { message?: string }).message || 'Falha ao criar item.');
+    try {
+      return await apiClient.post<CatalogItem>('/api/catalog', { body: payload });
+    } catch (error) {
+      throw new Error(
+        resolveApiErrorMessage(error, 'Falha ao criar item.', {
+          401: 'Não autorizado. Faça login novamente.',
+        }),
+      );
     }
-
-    return response.json() as Promise<CatalogItem>;
   },
 
   async update(itemId: string, payload: CatalogUpdatePayload): Promise<CatalogItem> {
-    const response = await fetch(`${BASE_URL}/api/catalog/${itemId}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify(payload),
-    });
-
-    if (!response.ok) {
-      if (response.status === 401) throw new Error('Não autorizado. Faça login novamente.');
-      if (response.status === 404) throw new Error('Item não encontrado.');
-      const err = await response.json().catch(() => ({}));
-      throw new Error((err as { message?: string }).message || 'Falha ao atualizar item.');
+    try {
+      return await apiClient.put<CatalogItem>(`/api/catalog/${itemId}`, { body: payload });
+    } catch (error) {
+      throw new Error(
+        resolveApiErrorMessage(error, 'Falha ao atualizar item.', {
+          401: 'Não autorizado. Faça login novamente.',
+          404: 'Item não encontrado.',
+        }),
+      );
     }
-
-    return response.json() as Promise<CatalogItem>;
   },
 
   async delete(itemId: string): Promise<void> {
-    const response = await fetch(`${BASE_URL}/api/catalog/${itemId}`, {
-      method: 'DELETE',
-      credentials: 'include',
-    });
-
-    if (!response.ok) {
-      if (response.status === 409) {
-        throw new Error('Este item está vinculado a pedidos existentes e não pode ser excluído.');
-      }
-      if (response.status === 401) throw new Error('Não autorizado. Faça login novamente.');
-      if (response.status === 404) throw new Error('Item não encontrado.');
-      const err = await response.json().catch(() => ({}));
-      throw new Error((err as { message?: string }).message || 'Falha ao excluir item.');
+    try {
+      await apiClient.delete<void>(`/api/catalog/${itemId}`, { parseAs: 'none' });
+    } catch (error) {
+      throw new Error(
+        resolveApiErrorMessage(error, 'Falha ao excluir item.', {
+          401: 'Não autorizado. Faça login novamente.',
+          404: 'Item não encontrado.',
+          409: 'Este item está vinculado a pedidos existentes e não pode ser excluído.',
+        }),
+      );
     }
   },
 };

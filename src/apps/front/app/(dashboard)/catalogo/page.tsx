@@ -2,40 +2,57 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Search, Plus, Loader2, AlertCircle, Package, ChevronLeft, ChevronRight, MoreVertical, Pencil, Trash2 } from 'lucide-react';
+import {
+  Search,
+  Plus,
+  Loader2,
+  AlertCircle,
+  Package,
+  ChevronLeft,
+  ChevronRight,
+  MoreVertical,
+  Pencil,
+  Trash2,
+} from 'lucide-react';
 import { useEffect, useState, useCallback } from 'react';
-import { CatalogService, type CatalogItem, type CatalogItemType, type CatalogUnitMeasure } from '@/services/catalog.service';
+import {
+  CatalogService,
+  type CatalogItem,
+  type CatalogItemType,
+  type CatalogUnitMeasure,
+} from '@/services/catalog.service';
+import { Alert, Button } from '@/components/ui';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const PAGE_LIMIT = 20;
 
 const UNIT_MEASURE_LABELS: Record<CatalogUnitMeasure, string> = {
-  unit:        'un',
-  dozen:       'dz',
-  hour:        'h',
-  day:         'dia',
-  week:        'sem',
-  month:       'mês',
-  meter:       'm',
+  unit: 'un',
+  dozen: 'dz',
+  hour: 'h',
+  day: 'dia',
+  week: 'sem',
+  month: 'mês',
+  meter: 'm',
   squareMeter: 'm²',
-  kilogram:    'kg',
-  box:         'cx',
-  kit:         'kit',
-  piece:       'pç',
+  kilogram: 'kg',
+  box: 'cx',
+  kit: 'kit',
+  piece: 'pç',
 };
 
 type TabKey = 'all' | CatalogItemType;
 
 const TABS: { key: TabKey; label: string }[] = [
-  { key: 'all',     label: 'Todos' },
+  { key: 'all', label: 'Todos' },
   { key: 'product', label: 'Produtos' },
   { key: 'service', label: 'Serviços' },
 ];
 
 const TYPE_STYLE: Record<CatalogItemType, { badge: string; label: string; text: string }> = {
-  product: { badge: 'bg-amber-100/50 text-amber-800', label: 'Produto',  text: 'text-amber-800' },
-  service: { badge: 'bg-indigo-50 text-indigo-700',   label: 'Serviço',  text: 'text-indigo-700' },
+  product: { badge: 'bg-amber-100/50 text-amber-800', label: 'Produto', text: 'text-amber-800' },
+  service: { badge: 'bg-indigo-50 text-indigo-700', label: 'Serviço', text: 'text-indigo-700' },
 };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -49,59 +66,62 @@ function formatCurrency(value: number) {
 export default function CatalogoPage() {
   const router = useRouter();
 
-  const [items, setItems]               = useState<CatalogItem[]>([]);
-  const [total, setTotal]               = useState(0);
-  const [page, setPage]                 = useState(1);
-  const [loading, setLoading]           = useState(true);
-  const [error, setError]               = useState('');
-  const [search, setSearch]             = useState('');
-  const [activeTab, setActiveTab]       = useState<TabKey>('all');
-  const [counts, setCounts]             = useState<Record<string, number>>({});
+  const [items, setItems] = useState<CatalogItem[]>([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [search, setSearch] = useState('');
+  const [activeTab, setActiveTab] = useState<TabKey>('all');
+  const [counts, setCounts] = useState<Record<string, number>>({});
   const [mobileSearch, setMobileSearch] = useState(false);
 
-  const [openMenuId, setOpenMenuId]     = useState<string | null>(null);
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<CatalogItem | null>(null);
-  const [deleting, setDeleting]         = useState(false);
-  const [deleteError, setDeleteError]   = useState('');
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_LIMIT));
 
-  const fetchItems = useCallback(async (tab: TabKey, q: string, pg: number) => {
-    setLoading(true);
-    setError('');
-    try {
-      const trimmedQ = q.trim() || undefined;
+  const fetchItems = useCallback(
+    async (tab: TabKey, q: string, pg: number) => {
+      setLoading(true);
+      setError('');
+      try {
+        const trimmedQ = q.trim() || undefined;
 
-      const [result, productCount, serviceCount] = await Promise.all([
-        CatalogService.list({
-          type: tab !== 'all' ? (tab as CatalogItemType) : undefined,
-          q: trimmedQ,
-          page: pg,
-          limit: PAGE_LIMIT,
-          sortBy: 'createdAt',
-          sortOrder: 'desc',
-        }),
-        CatalogService.list({ type: 'product', q: trimmedQ, limit: 1 }),
-        CatalogService.list({ type: 'service', q: trimmedQ, limit: 1 }),
-      ]);
+        const [result, productCount, serviceCount] = await Promise.all([
+          CatalogService.list({
+            type: tab !== 'all' ? (tab as CatalogItemType) : undefined,
+            q: trimmedQ,
+            page: pg,
+            limit: PAGE_LIMIT,
+            sortBy: 'createdAt',
+            sortOrder: 'desc',
+          }),
+          CatalogService.list({ type: 'product', q: trimmedQ, limit: 1 }),
+          CatalogService.list({ type: 'service', q: trimmedQ, limit: 1 }),
+        ]);
 
-      setItems(result.data);
-      setTotal(result.total);
-      setCounts({
-        all:     productCount.total + serviceCount.total,
-        product: productCount.total,
-        service: serviceCount.total,
-      });
-    } catch (err: unknown) {
-      if (err instanceof Error && err.message === 'Não autorizado. Faça login novamente.') {
-        router.replace('/login');
-        return;
+        setItems(result.data);
+        setTotal(result.total);
+        setCounts({
+          all: productCount.total + serviceCount.total,
+          product: productCount.total,
+          service: serviceCount.total,
+        });
+      } catch (err: unknown) {
+        if (err instanceof Error && err.message === 'Não autorizado. Faça login novamente.') {
+          router.replace('/login');
+          return;
+        }
+        setError(err instanceof Error ? err.message : 'Erro ao carregar catálogo.');
+      } finally {
+        setLoading(false);
       }
-      setError(err instanceof Error ? err.message : 'Erro ao carregar catálogo.');
-    } finally {
-      setLoading(false);
-    }
-  }, [router]);
+    },
+    [router],
+  );
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -164,7 +184,10 @@ export default function CatalogoPage() {
             {/* Lupa mobile — toggle */}
             <button
               type="button"
-              onClick={() => { setMobileSearch((v) => !v); if (mobileSearch) setSearch(''); }}
+              onClick={() => {
+                setMobileSearch((v) => !v);
+                if (mobileSearch) setSearch('');
+              }}
               aria-label={mobileSearch ? 'Fechar busca' : 'Abrir busca'}
               title={mobileSearch ? 'Fechar busca' : 'Abrir busca'}
               className={`md:hidden p-2 rounded-lg border transition-colors ${
@@ -220,9 +243,11 @@ export default function CatalogoPage() {
               >
                 {tab.label}
                 {(counts[countKey] ?? 0) > 0 && (
-                  <span className={`py-0.5 px-2 rounded-full text-[10px] font-bold ${
-                    isActive ? 'bg-indigo-100 text-indigo-700' : 'bg-gray-100 text-gray-600'
-                  }`}>
+                  <span
+                    className={`py-0.5 px-2 rounded-full text-[10px] font-bold ${
+                      isActive ? 'bg-indigo-100 text-indigo-700' : 'bg-gray-100 text-gray-600'
+                    }`}
+                  >
                     {counts[countKey]}
                   </span>
                 )}
@@ -233,12 +258,9 @@ export default function CatalogoPage() {
       </header>
 
       {/* Backdrop transparente para fechar o menu ao clicar fora */}
-      {openMenuId && (
-        <div className="fixed inset-0 z-40" onClick={() => setOpenMenuId(null)} />
-      )}
+      {openMenuId && <div className="fixed inset-0 z-40" onClick={() => setOpenMenuId(null)} />}
 
       <main className="flex-1 p-4 md:p-10 bg-gray-50/30 overflow-y-auto">
-
         {/* Loading */}
         {loading && (
           <div className="flex flex-col items-center justify-center py-24 gap-3 text-gray-400">
@@ -281,7 +303,7 @@ export default function CatalogoPage() {
             {/* Grid — desktop */}
             <div className="hidden sm:grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
               {items.map((item) => {
-                const style     = TYPE_STYLE[item.type];
+                const style = TYPE_STYLE[item.type];
                 const unitLabel = UNIT_MEASURE_LABELS[item.unitMeasure];
 
                 return (
@@ -291,7 +313,9 @@ export default function CatalogoPage() {
                     onClick={() => router.push(`/catalogo/${item._id}`)}
                   >
                     <div className="flex items-start justify-between">
-                      <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full inline-flex ${style.badge}`}>
+                      <span
+                        className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full inline-flex ${style.badge}`}
+                      >
                         {style.label}
                       </span>
                       <button
@@ -308,7 +332,9 @@ export default function CatalogoPage() {
 
                     <h3 className="font-bold text-gray-900 text-[15px] truncate">{item.name}</h3>
                     {item.description && (
-                      <p className="text-[12px] text-gray-400 line-clamp-2 leading-relaxed -mt-1">{item.description}</p>
+                      <p className="text-[12px] text-gray-400 line-clamp-2 leading-relaxed -mt-1">
+                        {item.description}
+                      </p>
                     )}
                     <p className="text-[13px] font-bold text-indigo-600 mt-auto">
                       {formatCurrency(item.unitPrice)}
@@ -363,7 +389,7 @@ export default function CatalogoPage() {
             {/* Lista — mobile */}
             <div className="sm:hidden flex flex-col gap-3 pb-20 animate-in fade-in slide-in-from-bottom-4 duration-500">
               {items.map((item) => {
-                const style     = TYPE_STYLE[item.type];
+                const style = TYPE_STYLE[item.type];
                 const unitLabel = UNIT_MEASURE_LABELS[item.unitMeasure];
 
                 return (
@@ -374,15 +400,21 @@ export default function CatalogoPage() {
                   >
                     <div className="flex-1 min-w-0 flex flex-col justify-center">
                       <h3 className="font-semibold text-gray-900 text-sm truncate">{item.name}</h3>
-                      <span className={`text-[10px] font-bold uppercase tracking-wider mt-0.5 ${style.text}`}>
+                      <span
+                        className={`text-[10px] font-bold uppercase tracking-wider mt-0.5 ${style.text}`}
+                      >
                         {style.label}
                       </span>
                       {item.description && (
-                        <p className="text-[11px] text-gray-400 truncate mt-0.5">{item.description}</p>
+                        <p className="text-[11px] text-gray-400 truncate mt-0.5">
+                          {item.description}
+                        </p>
                       )}
                     </div>
                     <div className="text-right mr-1">
-                      <p className="text-sm font-bold text-gray-900">{formatCurrency(item.unitPrice)}</p>
+                      <p className="text-sm font-bold text-gray-900">
+                        {formatCurrency(item.unitPrice)}
+                      </p>
                       <p className="text-[11px] text-gray-400">/{unitLabel}</p>
                     </div>
                     <button
@@ -481,36 +513,30 @@ export default function CatalogoPage() {
                 <h3 className="text-base font-bold text-gray-900">Excluir item?</h3>
                 <p className="text-sm text-gray-500 mt-1.5 leading-relaxed">
                   Tem certeza que deseja excluir{' '}
-                  <span className="font-semibold text-gray-700">&quot;{confirmDelete.name}&quot;</span>?
-                  {' '}Esta ação não pode ser desfeita.
+                  <span className="font-semibold text-gray-700">
+                    &quot;{confirmDelete.name}&quot;
+                  </span>
+                  ? Esta ação não pode ser desfeita.
                 </p>
               </div>
 
-              {deleteError && (
-                <div className="flex items-center gap-2 bg-red-50 border border-red-100 text-red-600 p-3 rounded-xl text-sm">
-                  <AlertCircle className="h-4 w-4 flex-shrink-0" />
-                  <span>{deleteError}</span>
-                </div>
-              )}
+              {deleteError && <Alert variant="error">{deleteError}</Alert>}
 
               <div className="flex gap-3 mt-1">
-                <button
-                  type="button"
+                <Button
+                  variant="outline"
+                  fullWidth
                   disabled={deleting}
-                  onClick={() => { setConfirmDelete(null); setDeleteError(''); }}
-                  className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-gray-600 bg-white border border-gray-200 hover:bg-gray-50 transition-all disabled:opacity-60"
+                  onClick={() => {
+                    setConfirmDelete(null);
+                    setDeleteError('');
+                  }}
                 >
                   Cancelar
-                </button>
-                <button
-                  type="button"
-                  disabled={deleting}
-                  onClick={handleDeleteConfirm}
-                  className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white bg-red-600 hover:bg-red-700 transition-all disabled:opacity-60 flex items-center justify-center gap-2"
-                >
-                  {deleting && <Loader2 size={14} className="animate-spin" />}
+                </Button>
+                <Button variant="danger" fullWidth loading={deleting} onClick={handleDeleteConfirm}>
                   Excluir
-                </button>
+                </Button>
               </div>
             </div>
           </div>

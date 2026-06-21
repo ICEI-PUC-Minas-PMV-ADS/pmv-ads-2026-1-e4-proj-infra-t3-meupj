@@ -1,28 +1,30 @@
 'use client';
 
 import Link from 'next/link';
-import { Mail, Lock, User, Eye, EyeOff, Building2 } from 'lucide-react';
+import { Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
 import { useState, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/auth.context';
 import { z } from 'zod';
 import { Input, Button, Alert, Divider } from '@/components/ui';
 
 // ─── Schema ───────────────────────────────────────────────────────────────────
 
-const cadastroSchema = z.object({
-  name: z.string().min(2, 'Informe seu nome completo'),
-  email: z.string().email('E-mail inválido'),
-  password: z.string()
-    .min(8, 'A senha deve ter pelo menos 8 caracteres')
-    .regex(/[A-Za-z]/, 'A senha deve conter letras')
-    .regex(/[0-9]/, 'A senha deve conter números'),
-  confirmPassword: z.string().min(1, 'Confirme sua senha'),
-  terms: z.literal(true, { message: 'Aceite os termos para continuar' }),
-}).refine((d) => d.password === d.confirmPassword, {
-  message: 'As senhas não coincidem',
-  path: ['confirmPassword'],
-});
+const cadastroSchema = z
+  .object({
+    name: z.string().min(2, 'Informe seu nome completo'),
+    email: z.string().email('E-mail inválido'),
+    password: z
+      .string()
+      .min(8, 'A senha deve ter pelo menos 8 caracteres')
+      .regex(/[A-Za-z]/, 'A senha deve conter letras')
+      .regex(/[0-9]/, 'A senha deve conter números'),
+    confirmPassword: z.string().min(1, 'Confirme sua senha'),
+    terms: z.literal(true, { message: 'Aceite os termos para continuar' }),
+  })
+  .refine((d) => d.password === d.confirmPassword, {
+    message: 'As senhas não coincidem',
+    path: ['confirmPassword'],
+  });
 
 type Fields = z.infer<typeof cadastroSchema>;
 type FieldErrors = Partial<Record<keyof Fields, string>>;
@@ -30,7 +32,6 @@ type FieldErrors = Partial<Record<keyof Fields, string>>;
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function CadastroPage() {
-  const router = useRouter();
   const { register } = useAuth();
 
   const [name, setName] = useState('');
@@ -56,34 +57,41 @@ export default function CadastroPage() {
   })();
 
   const strengthLabel = ['', 'Fraca', 'Regular', 'Boa', 'Forte'][passwordStrength];
-  const strengthColor = ['', 'bg-red-400', 'bg-amber-400', 'bg-blue-400', 'bg-emerald-500'][passwordStrength];
+  const strengthColor = ['', 'bg-red-400', 'bg-amber-400', 'bg-blue-400', 'bg-emerald-500'][
+    passwordStrength
+  ];
 
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setFieldErrors({});
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      setError('');
+      setFieldErrors({});
 
-    const result = cadastroSchema.safeParse({ name, email, password, confirmPassword, terms });
-    if (!result.success) {
-      const errs: FieldErrors = {};
-      result.error.issues.forEach((i) => { if (i.path[0]) errs[i.path[0] as keyof Fields] = i.message; });
-      setFieldErrors(errs);
-      return;
-    }
+      const result = cadastroSchema.safeParse({ name, email, password, confirmPassword, terms });
+      if (!result.success) {
+        const errs: FieldErrors = {};
+        result.error.issues.forEach((i) => {
+          if (i.path[0]) errs[i.path[0] as keyof Fields] = i.message;
+        });
+        setFieldErrors(errs);
+        return;
+      }
 
-    try {
-      setLoading(true);
-      await register({
-        name: result.data.name,
-        email: result.data.email,
-        password: result.data.password,
-      });
-    } catch (err: any) {
-      setError(err.message || 'Falha ao criar conta. Tente novamente.');
-    } finally {
-      setLoading(false);
-    }
-  }, [name, email, password, confirmPassword, terms, router]);
+      try {
+        setLoading(true);
+        await register({
+          name: result.data.name,
+          email: result.data.email,
+          password: result.data.password,
+        });
+      } catch (error: unknown) {
+        setError(error instanceof Error ? error.message : 'Falha ao criar conta. Tente novamente.');
+      } finally {
+        setLoading(false);
+      }
+    },
+    [confirmPassword, email, name, password, register, terms],
+  );
 
   return (
     <div className="flex flex-col gap-8 w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -95,7 +103,6 @@ export default function CadastroPage() {
       {error && <Alert variant="error">{error}</Alert>}
 
       <form className="flex flex-col gap-5" onSubmit={handleSubmit} noValidate>
-
         <div className="flex flex-col sm:flex-row gap-4">
           <Input
             label="Nome completo"
@@ -132,7 +139,11 @@ export default function CadastroPage() {
             onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••"
             error={fieldErrors.password}
-            hint={!fieldErrors.password ? 'Use letras, números e símbolos para uma senha forte' : undefined}
+            hint={
+              !fieldErrors.password
+                ? 'Use letras, números e símbolos para uma senha forte'
+                : undefined
+            }
             leftIcon={<Lock className="h-4 w-4" />}
             rightIcon={
               <button
@@ -156,12 +167,15 @@ export default function CadastroPage() {
                 {[1, 2, 3, 4].map((level) => (
                   <div
                     key={level}
-                    className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${passwordStrength >= level ? strengthColor : 'bg-gray-100'
-                      }`}
+                    className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${
+                      passwordStrength >= level ? strengthColor : 'bg-gray-100'
+                    }`}
                   />
                 ))}
               </div>
-              <span className="text-xs font-medium text-gray-500 w-12 text-right">{strengthLabel}</span>
+              <span className="text-xs font-medium text-gray-500 w-12 text-right">
+                {strengthLabel}
+              </span>
             </div>
           )}
         </div>
@@ -174,9 +188,13 @@ export default function CadastroPage() {
           onChange={(e) => setConfirmPassword(e.target.value)}
           placeholder="••••••••"
           error={fieldErrors.confirmPassword}
-          hint={!fieldErrors.confirmPassword && confirmPassword.length > 0 && confirmPassword === password
-            ? '✓ Senhas conferem'
-            : undefined}
+          hint={
+            !fieldErrors.confirmPassword &&
+            confirmPassword.length > 0 &&
+            confirmPassword === password
+              ? '✓ Senhas conferem'
+              : undefined
+          }
           leftIcon={<Lock className="h-4 w-4" />}
           rightIcon={
             <button
@@ -194,10 +212,11 @@ export default function CadastroPage() {
         />
 
         {/* Termos */}
-        <div className={`flex items-start gap-3 p-3 rounded-xl border transition-colors ${fieldErrors.terms
-          ? 'bg-red-50 border-red-200'
-          : 'bg-gray-50 border-gray-100'
-          }`}>
+        <div
+          className={`flex items-start gap-3 p-3 rounded-xl border transition-colors ${
+            fieldErrors.terms ? 'bg-red-50 border-red-200' : 'bg-gray-50 border-gray-100'
+          }`}
+        >
           <input
             type="checkbox"
             id="terms"
@@ -209,9 +228,19 @@ export default function CadastroPage() {
           <div className="flex flex-col gap-0.5">
             <label htmlFor="terms" className="text-sm text-gray-600 leading-snug cursor-pointer">
               Concordo com os{' '}
-              <a href="#" className="font-medium text-indigo-600 hover:text-indigo-700 hover:underline">Termos de Uso</a>
-              {' '}e{' '}
-              <a href="#" className="font-medium text-indigo-600 hover:text-indigo-700 hover:underline">Política de Privacidade</a>
+              <a
+                href="#"
+                className="font-medium text-indigo-600 hover:text-indigo-700 hover:underline"
+              >
+                Termos de Uso
+              </a>{' '}
+              e{' '}
+              <a
+                href="#"
+                className="font-medium text-indigo-600 hover:text-indigo-700 hover:underline"
+              >
+                Política de Privacidade
+              </a>
             </label>
             {fieldErrors.terms && (
               <span className="text-xs font-medium text-red-500">{fieldErrors.terms}</span>
@@ -234,7 +263,10 @@ export default function CadastroPage() {
 
         <p className="text-center text-sm text-gray-600">
           Já tem conta?{' '}
-          <Link href="/login" className="font-semibold text-indigo-600 hover:text-indigo-700 hover:underline transition-all">
+          <Link
+            href="/login"
+            className="font-semibold text-indigo-600 hover:text-indigo-700 hover:underline transition-all"
+          >
             Entrar
           </Link>
         </p>

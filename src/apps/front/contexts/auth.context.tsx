@@ -1,11 +1,17 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { AuthService, LoginCredentials, RegisterData } from '../services/auth.service';
+import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 
+import {
+  AuthService,
+  type AuthProfileResponse,
+  type LoginCredentials,
+  type RegisterData,
+} from '../services/auth.service';
+
 interface AuthContextType {
-  user: any;
+  user: AuthProfileResponse | null;
   loading: boolean;
   login: (credentials: LoginCredentials) => Promise<void>;
   register: (data: RegisterData) => Promise<void>;
@@ -16,23 +22,50 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<AuthProfileResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  const refreshProfile = async () => {
+  const refreshProfile = useCallback(async () => {
     try {
       const profile = await AuthService.getProfile();
       setUser(profile);
-    } catch (error) {
+    } catch {
       setUser(null);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    refreshProfile();
+    let isMounted = true;
+
+    const bootstrapProfile = async () => {
+      try {
+        const profile = await AuthService.getProfile();
+        if (!isMounted) {
+          return;
+        }
+
+        setUser(profile);
+      } catch {
+        if (!isMounted) {
+          return;
+        }
+
+        setUser(null);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    void bootstrapProfile();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const login = async (credentials: LoginCredentials) => {

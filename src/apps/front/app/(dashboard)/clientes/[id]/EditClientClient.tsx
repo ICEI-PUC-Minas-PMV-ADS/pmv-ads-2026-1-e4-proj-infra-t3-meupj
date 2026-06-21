@@ -6,10 +6,36 @@ import { useState, useCallback, useEffect } from 'react';
 import { ChevronLeft, Trash2 } from 'lucide-react';
 import { ClientsService, type PersonType } from '@/services/clients.service';
 import { Input, Select, Textarea, Button, Alert, Badge, Spinner } from '@/components/ui';
+import { maskPhone } from '@/utils/phone';
 
 const UF_OPTIONS = [
-  'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG',
-  'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO',
+  'AC',
+  'AL',
+  'AP',
+  'AM',
+  'BA',
+  'CE',
+  'DF',
+  'ES',
+  'GO',
+  'MA',
+  'MT',
+  'MS',
+  'MG',
+  'PA',
+  'PB',
+  'PR',
+  'PE',
+  'PI',
+  'RJ',
+  'RN',
+  'RS',
+  'RO',
+  'RR',
+  'SC',
+  'SP',
+  'SE',
+  'TO',
 ];
 
 const ORIGIN_OPTIONS = [
@@ -59,7 +85,7 @@ export default function EditarClientePage() {
   const [success, setSuccess] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  const [deleteError, setDeleteError]   = useState('');
+  const [deleteError, setDeleteError] = useState('');
 
   // Carrega o cliente na montagem
   useEffect(() => {
@@ -98,7 +124,7 @@ export default function EditarClientePage() {
     };
 
     load();
-  }, [id]);
+  }, [id, router]);
 
   const handleSave = useCallback(async () => {
     setError('');
@@ -155,7 +181,23 @@ export default function EditarClientePage() {
     } finally {
       setLoading(false);
     }
-  }, [id, tipo, name, document, email, phone, zipCode, street, number, district, city, state, origin, notes]);
+  }, [
+    city,
+    district,
+    document,
+    email,
+    id,
+    name,
+    notes,
+    number,
+    origin,
+    phone,
+    router,
+    state,
+    street,
+    tipo,
+    zipCode,
+  ]);
 
   const handleDelete = () => {
     setDeleteError('');
@@ -237,14 +279,15 @@ export default function EditarClientePage() {
 
       <div className="flex-1 p-6 md:p-10 max-w-4xl mx-auto w-full animate-in fade-in slide-in-from-bottom-4 duration-500 overflow-y-auto pb-48 md:pb-32">
         <form className="flex flex-col gap-10" onSubmit={(e) => e.preventDefault()}>
-
           {/* Feedback */}
           {error && <Alert variant="error">{error}</Alert>}
           {success && <Alert variant="success">Cliente atualizado com sucesso!</Alert>}
 
           {/* Identificação */}
           <section className="flex flex-col gap-5">
-            <h2 className="text-xs font-bold tracking-widest text-gray-400 uppercase">Identificação</h2>
+            <h2 className="text-xs font-bold tracking-widest text-gray-400 uppercase">
+              Identificação
+            </h2>
 
             <div className="flex flex-col sm:flex-row gap-5">
               <div className="flex-[2]">
@@ -323,9 +366,10 @@ export default function EditarClientePage() {
                 label="Telefone *"
                 type="tel"
                 value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                onChange={(e) => setPhone(maskPhone(e.target.value))}
                 disabled={loading}
                 inputSize="lg"
+                placeholder="(00) 00000-0000"
               />
             </div>
           </section>
@@ -398,7 +442,9 @@ export default function EditarClientePage() {
                 >
                   <option value="">—</option>
                   {UF_OPTIONS.map((uf) => (
-                    <option key={uf} value={uf}>{uf}</option>
+                    <option key={uf} value={uf}>
+                      {uf}
+                    </option>
                   ))}
                 </Select>
               </div>
@@ -407,7 +453,9 @@ export default function EditarClientePage() {
 
           {/* Anotações */}
           <section className="flex flex-col gap-5">
-            <h2 className="text-xs font-bold tracking-widest text-gray-400 uppercase">Anotações Internas</h2>
+            <h2 className="text-xs font-bold tracking-widest text-gray-400 uppercase">
+              Anotações Internas
+            </h2>
 
             <Textarea
               rows={4}
@@ -417,7 +465,6 @@ export default function EditarClientePage() {
               hint="Não visível ao cliente"
             />
           </section>
-
         </form>
       </div>
 
@@ -426,11 +473,7 @@ export default function EditarClientePage() {
         <Button variant="outline" onClick={() => router.push('/clientes')}>
           Cancelar
         </Button>
-        <Button
-          variant="primary"
-          loading={loading}
-          onClick={handleSave}
-        >
+        <Button variant="primary" loading={loading} onClick={handleSave}>
           Salvar alterações
         </Button>
       </div>
@@ -448,30 +491,26 @@ export default function EditarClientePage() {
                 <h3 className="text-base font-bold text-gray-900">Excluir cliente?</h3>
                 <p className="text-sm text-gray-500 mt-1.5 leading-relaxed">
                   Tem certeza que deseja excluir{' '}
-                  <span className="font-semibold text-gray-700">&quot;{name}&quot;</span>?
-                  {' '}Esta ação não pode ser desfeita.
+                  <span className="font-semibold text-gray-700">&quot;{name}&quot;</span>? Esta ação
+                  não pode ser desfeita.
                 </p>
               </div>
 
-              {deleteError && (
-                <Alert variant="error">{deleteError}</Alert>
-              )}
+              {deleteError && <Alert variant="error">{deleteError}</Alert>}
 
               <div className="flex gap-3 mt-1">
                 <Button
                   variant="outline"
                   fullWidth
                   disabled={deleting}
-                  onClick={() => { setShowDeleteModal(false); setDeleteError(''); }}
+                  onClick={() => {
+                    setShowDeleteModal(false);
+                    setDeleteError('');
+                  }}
                 >
                   Cancelar
                 </Button>
-                <Button
-                  variant="danger"
-                  fullWidth
-                  loading={deleting}
-                  onClick={handleDeleteConfirm}
-                >
+                <Button variant="danger" fullWidth loading={deleting} onClick={handleDeleteConfirm}>
                   Excluir
                 </Button>
               </div>

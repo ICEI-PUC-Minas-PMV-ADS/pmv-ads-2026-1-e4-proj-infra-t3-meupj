@@ -1,4 +1,4 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://pmv-ads-2026-1-e4-proj-infra-t3-meupj.onrender.com';
+import { apiClient, resolveApiErrorMessage } from './api-client';
 
 type NullableString = string | null;
 
@@ -45,102 +45,62 @@ export interface ChangePasswordPayload {
   revokeOtherSessions?: boolean;
 }
 
-const parseErrorMessage = async (response: Response, fallback: string): Promise<string> => {
-  const payload = await response.json().catch(() => null);
-
-  if (
-    payload &&
-    typeof payload === 'object' &&
-    'message' in payload &&
-    typeof payload.message === 'string' &&
-    payload.message.length > 0
-  ) {
-    return payload.message;
-  }
-
-  return fallback;
-};
-
-const assertAuthorized = (response: Response): void => {
-  if (response.status === 401) {
-    throw new Error('Não autorizado. Faça login novamente.');
-  }
-};
-
 export const SettingsService = {
   async getProfile(): Promise<SettingsProfileResponse> {
-    const response = await fetch(`${BASE_URL}/api/profile`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-      cache: 'no-store',
-    });
-
-    assertAuthorized(response);
-
-    if (!response.ok) {
-      const message = await parseErrorMessage(response, 'Falha ao carregar configurações.');
-      throw new Error(message);
+    try {
+      return await apiClient.get<SettingsProfileResponse>('/api/profile', {
+        cache: 'no-store',
+      });
+    } catch (error) {
+      throw new Error(
+        resolveApiErrorMessage(error, 'Falha ao carregar configurações.', {
+          401: 'Não autorizado. Faça login novamente.',
+        }),
+      );
     }
-
-    return response.json() as Promise<SettingsProfileResponse>;
   },
 
   async updateBusiness(business: ProfileBusiness): Promise<SettingsProfileResponse> {
-    const response = await fetch(`${BASE_URL}/api/profile`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-      body: JSON.stringify(business),
-    });
-
-    assertAuthorized(response);
-
-    if (!response.ok) {
-      const message = await parseErrorMessage(response, 'Falha ao salvar dados da empresa.');
-      throw new Error(message);
+    try {
+      return await apiClient.put<SettingsProfileResponse>('/api/profile', {
+        body: business,
+      });
+    } catch (error) {
+      throw new Error(
+        resolveApiErrorMessage(error, 'Falha ao salvar dados da empresa.', {
+          401: 'Não autorizado. Faça login novamente.',
+        }),
+      );
     }
-
-    return response.json() as Promise<SettingsProfileResponse>;
   },
 
   async updateUser(payload: UpdateUserPayload): Promise<void> {
-    const response = await fetch(`${BASE_URL}/api/auth/update-user`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-      body: JSON.stringify(payload),
-    });
-
-    assertAuthorized(response);
-
-    if (!response.ok) {
-      const message = await parseErrorMessage(response, 'Falha ao salvar dados do usuário.');
-      throw new Error(message);
+    try {
+      await apiClient.post<void>('/api/auth/update-user', {
+        body: payload,
+        parseAs: 'none',
+      });
+    } catch (error) {
+      throw new Error(
+        resolveApiErrorMessage(error, 'Falha ao salvar dados do usuário.', {
+          401: 'Não autorizado. Faça login novamente.',
+        }),
+      );
     }
   },
 
   async changePassword(payload: ChangePasswordPayload): Promise<void> {
-    const response = await fetch(`${BASE_URL}/api/auth/change-password`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-      body: JSON.stringify(payload),
-    });
-
-    assertAuthorized(response);
-
-    if (!response.ok) {
-      const message = await parseErrorMessage(response, 'Falha ao alterar senha.');
-      throw new Error(message);
+    try {
+      await apiClient.post<void>('/api/auth/change-password', {
+        body: payload,
+        parseAs: 'none',
+      });
+    } catch (error) {
+      throw new Error(
+        resolveApiErrorMessage(error, 'Falha ao alterar senha.', {
+          401: 'Não autorizado. Faça login novamente.',
+        }),
+      );
     }
   },
 };

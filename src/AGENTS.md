@@ -27,11 +27,16 @@
 - Endpoint autenticado `GET /api/catalog` para listagem com paginação, busca, filtros e ordenação.
 - Endpoint autenticado `GET /api/clients/:clientId` para detalhamento de cliente no escopo do perfil.
 - Endpoint autenticado `GET /api/orders` com paginação robusta (aceita `page` e `limit` como string numérica de querystring ou inteiro).
+- Endpoints autenticados de pedidos retornam `clientName` quando o pedido está vinculado a um cliente do perfil, evitando exibição de `clientId` bruto no front.
 - Endpoint autenticado `GET /api/orders/:orderId` para detalhamento de pedido no escopo do perfil.
+- Endpoints autenticados de documentos agora expõem tanto JSON estruturado quanto PDF real para orçamento, ordem de serviço e recibo, com regras de disponibilidade por status.
 - Camada base HTTP com CORS, error handler global e endpoint de health (`GET /api/health`).
 - CORS credenciado da API aceita apenas origens explícitas; `CORS_ORIGIN=*` é ignorado por segurança.
 - Bypass de autenticação da API só é efetivo com `NODE_ENV=development`.
 - App web (`apps/front`) alinhado ao deploy Node.js da Vercel, sem `output: 'export'`, sem `basePath` de GitHub Pages e com rotas dinâmicas de detalhe/edição servidas sob demanda.
+- Frontend web centraliza chamadas HTTP em `apps/front/services/api-client.ts`, sem fallback automático para backend remoto quando `NEXT_PUBLIC_API_URL` estiver ausente.
+- Frontend web possui previews autenticados de documentos em `/documentos/*` e ações contextuais nas listas de pedidos e lançamentos para emitir PDF sem depender da tela de detalhe.
+- Frontend web possui ações rápidas de contato na lista de clientes, abrindo telefone (`tel:`) e WhatsApp quando o cliente tiver telefone válido cadastrado.
 - App mobile (`apps/mobile`) com autenticação real via Better Auth Expo, guarda de sessão na navegação e módulo de Configurações (usuário, negócio e senha).
 - App mobile (`apps/mobile`) com suporte de execução web via Expo (`expo start --web` e `expo export --platform web`) com `react-native-web` e versões de `react`/`react-dom` alinhadas.
 - Cliente Better Auth do mobile aplica plugin Expo apenas em plataformas nativas; no web usa cliente padrão para evitar dependência de SecureStore no navegador.
@@ -75,17 +80,23 @@
   - Endpoint `GET /api/catalog` com listagem autenticada, busca, filtros, ordenação e paginação.
   - Endpoint `GET /api/clients/:clientId` com leitura de cliente autenticado por id no escopo do perfil.
   - Endpoint `GET /api/orders` com listagem autenticada e normalização segura de `page`/`limit` vindos da querystring.
+  - Endpoints de pedidos enriquecem a resposta com `clientName` quando houver cliente vinculado no perfil autenticado.
   - Endpoint `GET /api/orders/:orderId` com leitura de pedido autenticado por id no escopo do perfil.
+  - Endpoints `GET /api/documents/budget/:orderId`, `GET /api/documents/service-order/:orderId` e `GET /api/documents/receipt/:transactionId` preservam o payload JSON de documentos.
+  - Endpoints `GET /api/documents/budget/:orderId/pdf`, `GET /api/documents/service-order/:orderId/pdf` e `GET /api/documents/receipt/:transactionId/pdf` geram `application/pdf` no backend com `Content-Disposition` e bloqueio por status inválido (`409`).
   - Coleção Bruno (`apps/api/bruno/meupj`) com requests de health, sign-up, sign-in, profile e catalog.
   - Variáveis obrigatórias de auth: `BETTER_AUTH_SECRET` e `BETTER_AUTH_URL`.
   - Endpoint de health para status de aplicação e dependências.
   - Segurança/CORS e tratamento global de erros, com CORS credenciado restrito a origens explícitas.
+  - Helper compartilhado de paginação em `apps/api/src/lib/pagination.ts` para alinhar `page`/`limit` entre módulos HTTP.
   - Integração MongoDB com monitoramento de conectividade e reconexão compatível com o adapter MongoDB do Better Auth.
   - Testes automatizados com Vitest.
 - Recursos operacionais:
   - Scripts de desenvolvimento, build, lint e teste por workspace.
   - Scripts de formatação e validação de formatação (`format` e `format:check`) por workspace.
   - Frontend com rota autenticada `/configuracoes` para edição de perfil do usuário, dados da empresa e alteração de senha.
+  - Frontend expõe ações operacionais de contato na listagem de clientes via menu por item, sem necessidade de nova integração backend.
+  - Frontend possui páginas autenticadas de preview para `/documentos/orcamento/[orderId]`, `/documentos/ordem-servico/[orderId]` e `/documentos/recibo/[transactionId]`, com abertura em nova aba e download do PDF retornado pela API.
   - Frontend Next.js usa o runtime padrão de servidor em produção (`next build` + `next start` / Vercel), preservando rotas dinâmicas reais como `/clientes/[id]`, `/catalogo/[itemId]`, `/pedidos/[id]` e `/dashboard/editar/[id]`.
   - Mobile com tela autenticada de configurações para edição de usuário/empresa e alteração de senha.
   - Mobile usa `EXPO_PUBLIC_API_URL` com fallback local por plataforma para alinhar chamadas HTTP com a API (`http://localhost:3001` em web/iOS e `http://10.0.2.2:3001` no emulador Android).

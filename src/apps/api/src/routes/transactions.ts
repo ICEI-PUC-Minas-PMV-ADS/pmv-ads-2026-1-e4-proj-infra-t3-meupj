@@ -4,6 +4,14 @@ import { ObjectId, type WithId } from 'mongodb';
 
 import type { AuthService } from '../lib/auth.js';
 import type { ClientStore } from '../lib/clients.js';
+import {
+  LIMIT_DEFAULT,
+  MAX_LIMIT,
+  MAX_PAGE,
+  PAGE_DEFAULT,
+  PositiveIntegerStringSchema,
+  toBoundedPositiveInteger,
+} from '../lib/pagination.js';
 import type { ProfileStore } from '../lib/profile.js';
 import type { TransactionsStore, Transaction } from '../lib/transactions.js';
 import { resolveAuthenticatedProfileId } from './auth-session.js';
@@ -180,8 +188,12 @@ const TransactionSortOrderSchema = Type.Union([Type.Literal('asc'), Type.Literal
 
 const TransactionListQuerySchema = Type.Object(
   {
-    page: Type.Optional(Type.Any()),
-    limit: Type.Optional(Type.Any()),
+    page: Type.Optional(
+      Type.Union([Type.Integer({ minimum: 1, maximum: MAX_PAGE }), PositiveIntegerStringSchema]),
+    ),
+    limit: Type.Optional(
+      Type.Union([Type.Integer({ minimum: 1, maximum: MAX_LIMIT }), PositiveIntegerStringSchema]),
+    ),
     q: Type.Optional(Type.String()),
     type: Type.Optional(Type.Union([Type.Literal('income'), Type.Literal('expense')])),
     status: Type.Optional(
@@ -492,10 +504,10 @@ export const registerTransactionsRoutes = (
         return reply.status(401).send(UnauthorizedPayload);
       }
 
-      const query = request.query as any;
+      const query = request.query as Static<typeof TransactionListQuerySchema>;
 
-      const page = Math.max(1, parseInt(query.page ?? '1', 10));
-      const limit = Math.max(1, parseInt(query.limit ?? '20', 10));
+      const page = toBoundedPositiveInteger(query.page, PAGE_DEFAULT, MAX_PAGE);
+      const limit = toBoundedPositiveInteger(query.limit, LIMIT_DEFAULT, MAX_LIMIT);
       const sortBy = query.sortBy ?? 'createdAt';
       const sortOrder = query.sortOrder ?? 'desc';
       const skip = (page - 1) * limit;

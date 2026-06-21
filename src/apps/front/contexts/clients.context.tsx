@@ -1,7 +1,7 @@
 'use client';
 
-import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
-import { ClientsService, type Client, type ClientListQuery, type PersonType } from '@/services/clients.service';
+import { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
+import { ClientsService, type Client, type ClientListQuery } from '@/services/clients.service';
 
 interface ClientsContextValue {
   clients: Client[];
@@ -67,13 +67,8 @@ export function ClientsProvider({ children }: { children: ReactNode }) {
     loadClientOptions,
   };
 
-  return (
-    <ClientsContext.Provider value={value}>
-      {children}
-    </ClientsContext.Provider>
-  );
+  return <ClientsContext.Provider value={value}>{children}</ClientsContext.Provider>;
 }
-
 
 export function useClients() {
   const context = useContext(ClientsContext);

@@ -1,13 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { Search, Plus, FileText } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Search, Plus, FileText, MoreVertical } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { type OrderStatus } from '@/services/orders.service';
+import { type Order, type OrderStatus } from '@/services/orders.service';
 import { useOrders } from '@/contexts/orders.context';
 import { Alert, Badge, Spinner, EmptyState } from '@/components/ui';
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const STATUS_LABELS: Record<OrderStatus, string> = {
   draft: 'Rascunho',
@@ -37,6 +36,7 @@ const STATUS_BADGE: Record<OrderStatus, 'default' | 'warning' | 'info' | 'succes
 };
 
 type TabKey = 'all' | OrderStatus;
+type OrderDocumentAction = 'budget' | 'serviceOrder';
 
 const TABS: { key: TabKey; label: string }[] = [
   { key: 'all', label: 'Todos' },
@@ -48,6 +48,11 @@ const TABS: { key: TabKey; label: string }[] = [
   { key: 'cancelled', label: 'Cancelado' },
 ];
 
+const canEmitBudget = (order: Order): boolean => order.status !== 'cancelled';
+
+const canEmitServiceOrder = (order: Order): boolean =>
+  order.status === 'inProgress' || order.status === 'completed' || order.status === 'warranty';
+
 function formatCurrency(value: number) {
   return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
@@ -56,20 +61,20 @@ function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString('pt-BR');
 }
 
-// ─── Component ────────────────────────────────────────────────────────────────
-
 export default function PedidosPage() {
+  const router = useRouter();
   const { orders, loading, error, fetchOrders } = useOrders();
 
   const [search, setSearch] = useState('');
   const [activeTab, setActiveTab] = useState<TabKey>('all');
   const [mobileSearch, setMobileSearch] = useState(false);
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [openingDocumentKey, setOpeningDocumentKey] = useState<string | null>(null);
 
-  // Debounced search
   useEffect(() => {
     const timer = setTimeout(() => {
-      fetchOrders({
-        status: activeTab !== 'all' ? activeTab as OrderStatus : undefined,
+      void fetchOrders({
+        status: activeTab !== 'all' ? (activeTab as OrderStatus) : undefined,
         q: search.trim() || undefined,
         sortBy: 'createdAt',
         sortOrder: 'desc',
@@ -83,14 +88,29 @@ export default function PedidosPage() {
     setActiveTab(tab);
   };
 
+  const handleOpenOrder = (orderId: string) => {
+    router.push(`/pedidos/${orderId}`);
+  };
+
+  const handleDocumentAction = (orderId: string, action: OrderDocumentAction) => {
+    const actionKey = `${action}:${orderId}`;
+    setOpeningDocumentKey(actionKey);
+    setOpenMenuId(null);
+
+    const path =
+      action === 'budget'
+        ? `/documentos/orcamento/${orderId}`
+        : `/documentos/ordem-servico/${orderId}`;
+
+    router.push(path);
+  };
+
   return (
     <div className="flex flex-col h-full bg-white">
-      {/* Header */}
       <header className="px-4 py-3 md:px-10 md:py-6 border-b border-gray-100 flex flex-col gap-3 md:gap-6 sticky top-0 bg-white/80 backdrop-blur-md z-10">
         <div className="flex items-center justify-between gap-2">
           <h1 className="text-xl md:text-2xl font-bold text-gray-900 tracking-tight">Pedidos</h1>
 
-          {/* Search — desktop inline */}
           <div className="relative max-w-md flex-1 hidden md:block ml-4">
             <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
               <Search className="h-4 w-4 text-gray-400" />
@@ -105,14 +125,19 @@ export default function PedidosPage() {
           </div>
 
           <div className="flex gap-2">
-            {/* Lupa mobile — toggle */}
             <button
               type="button"
-              onClick={() => { setMobileSearch((v) => !v); if (mobileSearch) setSearch(''); }}
-              className={`md:hidden p-2 rounded-lg border transition-colors ${mobileSearch
+              onClick={() => {
+                setMobileSearch((value) => !value);
+                if (mobileSearch) {
+                  setSearch('');
+                }
+              }}
+              className={`md:hidden p-2 rounded-lg border transition-colors ${
+                mobileSearch
                   ? 'bg-indigo-50 border-indigo-300 text-indigo-600'
                   : 'border-gray-200 text-gray-500 hover:bg-gray-50'
-                }`}
+              }`}
             >
               <Search size={18} />
             </button>
@@ -126,7 +151,6 @@ export default function PedidosPage() {
           </div>
         </div>
 
-        {/* Search expandido — mobile */}
         {mobileSearch && (
           <div className="md:hidden relative">
             <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
@@ -143,7 +167,6 @@ export default function PedidosPage() {
           </div>
         )}
 
-        {/* Tabs */}
         <nav className="flex gap-5 sm:gap-8 -mb-3 md:-mb-6 border-t border-gray-100 pt-3 md:pt-4 overflow-x-auto no-scrollbar pb-0">
           {TABS.map((tab) => {
             const isActive = activeTab === tab.key;
@@ -151,10 +174,11 @@ export default function PedidosPage() {
               <button
                 key={tab.key}
                 onClick={() => handleTabChange(tab.key)}
-                className={`border-b-2 pb-4 text-sm font-semibold px-1 whitespace-nowrap flex items-center gap-2 transition-colors ${isActive
+                className={`border-b-2 pb-4 text-sm font-semibold px-1 whitespace-nowrap flex items-center gap-2 transition-colors ${
+                  isActive
                     ? 'border-indigo-600 text-indigo-600'
                     : 'border-transparent text-gray-500 hover:text-gray-900 hover:border-gray-300 font-medium'
-                  }`}
+                }`}
               >
                 {tab.label}
               </button>
@@ -163,10 +187,10 @@ export default function PedidosPage() {
         </nav>
       </header>
 
+      {openMenuId && <div className="fixed inset-0 z-30" onClick={() => setOpenMenuId(null)} />}
+
       <main className="flex-1 p-6 md:p-10 bg-gray-50/30 overflow-y-auto">
         <div className="flex flex-col gap-3 max-w-5xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
-
-          {/* Loading */}
           {loading && (
             <div className="flex flex-col items-center justify-center py-24 gap-3 text-gray-400">
               <Spinner size={32} />
@@ -174,64 +198,128 @@ export default function PedidosPage() {
             </div>
           )}
 
-          {/* Error */}
-          {!loading && error && (
-            <Alert variant="error">
-              {error}
-            </Alert>
-          )}
+          {!loading && error && <Alert variant="error">{error}</Alert>}
 
-          {/* Empty state */}
           {!loading && !error && orders.length === 0 && (
             <EmptyState
               icon={<FileText size={48} />}
               title="Nenhum pedido encontrado"
               description="Crie o primeiro pedido para começar."
               action={
-                <Link href="/pedidos/novo" className="text-sm text-indigo-600 font-medium hover:underline">
+                <Link
+                  href="/pedidos/novo"
+                  className="text-sm text-indigo-600 font-medium hover:underline"
+                >
                   Criar primeiro pedido
                 </Link>
               }
             />
           )}
 
-          {/* List */}
-          {!loading && !error && orders.map((order) => {
-            const style = STATUS_STYLE[order.status] ?? STATUS_STYLE.draft;
-            const label = STATUS_LABELS[order.status] ?? order.status;
+          {!loading &&
+            !error &&
+            orders.map((order) => {
+              const style = STATUS_STYLE[order.status] ?? STATUS_STYLE.draft;
+              const label = STATUS_LABELS[order.status] ?? order.status;
+              const budgetActionKey = `budget:${order._id}`;
+              const serviceOrderActionKey = `serviceOrder:${order._id}`;
 
-            return (
-              <Link
-                key={order._id}
-                href={`/pedidos/${order._id}`}
-                className="bg-white p-4 sm:p-5 rounded-2xl transition-all flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-5 group cursor-pointer relative overflow-hidden border border-gray-200 shadow-sm hover:shadow-md hover:border-gray-300"
-              >
-                <div className={`absolute top-0 left-0 w-1.5 h-full ${style.dot} opacity-0 group-hover:opacity-100 transition-opacity`} />
+              return (
+                <div
+                  key={order._id}
+                  className="bg-white p-4 sm:p-5 rounded-2xl transition-all flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-5 group cursor-pointer relative overflow-visible border border-gray-200 shadow-sm hover:shadow-md hover:border-gray-300"
+                  onClick={() => handleOpenOrder(order._id)}
+                >
+                  <div
+                    className={`absolute top-0 left-0 w-1.5 h-full ${style.dot} opacity-0 group-hover:opacity-100 transition-opacity`}
+                  />
 
-                <div className="flex-1 min-w-0 flex flex-col pl-2 sm:pl-4">
-                  <div className="flex items-center gap-2 sm:gap-3">
-                    <div className={`w-2 h-2 rounded-full ${style.dot} flex-shrink-0`} />
-                    <h3 className="font-bold text-gray-900 text-[15px]">{order.orderNumber}</h3>
-                    <Badge variant={STATUS_BADGE[order.status] ?? 'default'}>{label}</Badge>
+                  <div className="flex-1 min-w-0 flex flex-col pl-2 sm:pl-4">
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <div className={`w-2 h-2 rounded-full ${style.dot} flex-shrink-0`} />
+                      <h3 className="font-bold text-gray-900 text-[15px]">{order.orderNumber}</h3>
+                      <Badge variant={STATUS_BADGE[order.status] ?? 'default'}>{label}</Badge>
+                    </div>
+                    <p className="text-[13px] font-medium text-gray-500 mt-1 pl-4 sm:pl-5 truncate">
+                      {order.clientName ?? order.clientId ?? '— sem cliente —'}
+                    </p>
                   </div>
-                  <p className="text-[13px] font-medium text-gray-500 mt-1 pl-4 sm:pl-5 truncate">
-                    {order.clientId ? order.clientId : '— sem cliente —'}
-                  </p>
-                </div>
 
-                <div className="text-right flex sm:flex-col items-center sm:items-end justify-between sm:justify-center pl-2 sm:pl-0 mt-2 sm:mt-0">
-                  <span className="text-[15px] font-bold text-gray-900">
-                    {formatCurrency(order.total)}
-                  </span>
-                  <span className="text-[12px] font-medium text-gray-400 mt-0.5">
-                    {formatDate(order.createdAt)}
-                  </span>
-                </div>
-              </Link>
-            );
-          })}
+                  <div className="text-right flex sm:flex-col items-center sm:items-end justify-between sm:justify-center pl-2 sm:pl-0 mt-2 sm:mt-0 gap-3 sm:gap-2">
+                    <div className="flex sm:flex-col items-center sm:items-end gap-3 sm:gap-0">
+                      <span className="text-[15px] font-bold text-gray-900">
+                        {formatCurrency(order.total)}
+                      </span>
+                      <span className="text-[12px] font-medium text-gray-400 mt-0.5">
+                        {formatDate(order.createdAt)}
+                      </span>
+                    </div>
 
-          {/* Mobile FAB */}
+                    <div className="relative">
+                      <button
+                        type="button"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          setOpenMenuId((currentId) =>
+                            currentId === order._id ? null : order._id,
+                          );
+                        }}
+                        className="w-9 h-9 rounded-lg border border-gray-200 text-gray-400 hover:text-gray-700 hover:bg-gray-50 transition-colors flex items-center justify-center"
+                        aria-label={`Abrir ações do pedido ${order.orderNumber}`}
+                        title={`Abrir ações do pedido ${order.orderNumber}`}
+                      >
+                        <MoreVertical size={18} />
+                      </button>
+
+                      {openMenuId === order._id && (
+                        <div
+                          className="absolute right-0 top-11 z-40 min-w-[220px] rounded-xl border border-gray-200 bg-white py-1 shadow-lg"
+                          onClick={(event) => event.stopPropagation()}
+                        >
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setOpenMenuId(null);
+                              handleOpenOrder(order._id);
+                            }}
+                            className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                          >
+                            Abrir pedido
+                          </button>
+
+                          {canEmitBudget(order) && (
+                            <button
+                              type="button"
+                              disabled={openingDocumentKey === budgetActionKey}
+                              onClick={() => handleDocumentAction(order._id, 'budget')}
+                              className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-60"
+                            >
+                              {openingDocumentKey === budgetActionKey
+                                ? 'Abrindo orçamento...'
+                                : 'Emitir orçamento'}
+                            </button>
+                          )}
+
+                          {canEmitServiceOrder(order) && (
+                            <button
+                              type="button"
+                              disabled={openingDocumentKey === serviceOrderActionKey}
+                              onClick={() => handleDocumentAction(order._id, 'serviceOrder')}
+                              className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-60"
+                            >
+                              {openingDocumentKey === serviceOrderActionKey
+                                ? 'Abrindo ordem de serviço...'
+                                : 'Emitir ordem de serviço'}
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+
           <Link
             href="/pedidos/novo"
             aria-label="Novo pedido"

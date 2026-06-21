@@ -92,6 +92,44 @@ const createStoreStub = () => ({
   getCollection: vi.fn(() => ({ createIndex: vi.fn().mockResolvedValue('ok') })),
 });
 
+const createClientsStoreMock = (
+  records: Array<{ _id: ObjectId; profileId: string; name: string }>,
+): ClientStore =>
+  ({
+    ensureIndexes: vi.fn().mockResolvedValue(undefined),
+    getCollection: vi.fn(() => ({
+      find: vi.fn((filter: Record<string, unknown>) => {
+        const profileId = typeof filter.profileId === 'string' ? filter.profileId : undefined;
+        const objectIds =
+          filter._id &&
+          typeof filter._id === 'object' &&
+          '$in' in filter._id &&
+          Array.isArray((filter._id as { $in?: unknown[] }).$in)
+            ? ((filter._id as { $in: Array<{ toHexString: () => string }> }).$in ?? []).map((id) =>
+                id.toHexString(),
+              )
+            : [];
+
+        const filtered = records.filter((client) => {
+          if (profileId && client.profileId !== profileId) {
+            return false;
+          }
+
+          if (objectIds.length > 0 && !objectIds.includes(client._id.toHexString())) {
+            return false;
+          }
+
+          return true;
+        });
+
+        return {
+          toArray: vi.fn().mockResolvedValue(filtered),
+        };
+      }),
+      createIndex: vi.fn().mockResolvedValue('ok'),
+    })),
+  }) as unknown as ClientStore;
+
 const createCountersStoreMock = () =>
   ({
     ensureIndexes: vi.fn().mockResolvedValue(undefined),
@@ -270,11 +308,12 @@ describe('orders list route', () => {
     const profileId = new ObjectId();
     const authService = createAuthServiceMock({ user: { id: 'auth-user-1' } });
     const profileStore = createProfileStoreMock(profileId, 'auth-user-1');
+    const clientId = new ObjectId();
     const ordersRecords: WithId<Order>[] = [
       {
         _id: new ObjectId(),
         profileId: profileId.toHexString(),
-        clientId: null,
+        clientId: clientId.toHexString(),
         orderNumber: 'ORD2605001',
         reference: 'TEST-ORDER',
         status: 'draft',
@@ -305,7 +344,13 @@ describe('orders list route', () => {
       profileStore,
       ordersStore: ordersStoreMock.store,
       catalogStore: createStoreStub() as unknown as CatalogStore,
-      clientsStore: createStoreStub() as unknown as ClientStore,
+      clientsStore: createClientsStoreMock([
+        {
+          _id: clientId,
+          profileId: profileId.toHexString(),
+          name: 'Client List Test',
+        },
+      ]),
       countersStore: createCountersStoreMock(),
       transactionsStore: createStoreStub() as unknown as TransactionsStore,
     });
@@ -322,6 +367,7 @@ describe('orders list route', () => {
       limit: 50,
       data: [
         {
+          clientName: 'Client List Test',
           orderNumber: 'ORD2605001',
           reference: 'TEST-ORDER',
         },
@@ -340,11 +386,12 @@ describe('orders detail route', () => {
     const authService = createAuthServiceMock({ user: { id: 'auth-user-1' } });
     const profileStore = createProfileStoreMock(profileId, 'auth-user-1');
     const orderId = new ObjectId();
+    const clientId = new ObjectId();
     const ordersRecords: WithId<Order>[] = [
       {
         _id: orderId,
         profileId: profileId.toHexString(),
-        clientId: null,
+        clientId: clientId.toHexString(),
         orderNumber: 'ORD2605002',
         reference: 'ORDER-DETAIL',
         status: 'draft',
@@ -375,7 +422,13 @@ describe('orders detail route', () => {
       profileStore,
       ordersStore: ordersStoreMock.store,
       catalogStore: createStoreStub() as unknown as CatalogStore,
-      clientsStore: createStoreStub() as unknown as ClientStore,
+      clientsStore: createClientsStoreMock([
+        {
+          _id: clientId,
+          profileId: profileId.toHexString(),
+          name: 'Client Detail Test',
+        },
+      ]),
       countersStore: createCountersStoreMock(),
       transactionsStore: createStoreStub() as unknown as TransactionsStore,
     });
@@ -388,6 +441,7 @@ describe('orders detail route', () => {
     expect(response.statusCode).toBe(200);
     expect(response.json()).toMatchObject({
       _id: orderId.toHexString(),
+      clientName: 'Client Detail Test',
       orderNumber: 'ORD2605002',
       reference: 'ORDER-DETAIL',
     });

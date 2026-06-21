@@ -1,12 +1,22 @@
 import { Type, type Static } from '@sinclair/typebox';
 import type { FastifyInstance } from 'fastify';
-import { ObjectId } from 'mongodb';
+import { ObjectId, type WithId } from 'mongodb';
 
 import type { AuthService } from '../lib/auth.js';
 import type { CatalogStore } from '../lib/catalog.js';
+import type { ClientStore } from '../lib/clients.js';
 import type { CountersStore } from '../lib/counters.js';
 import {
+  LIMIT_DEFAULT,
+  MAX_LIMIT,
+  MAX_PAGE,
+  PAGE_DEFAULT,
+  PositiveIntegerStringSchema,
+  toBoundedPositiveInteger,
+} from '../lib/pagination.js';
+import {
   isValidOrderStatusTransition,
+  type Order,
   type OrderItemSnapshot,
   type OrderStatus,
   type OrdersStore,
@@ -20,6 +30,7 @@ export type OrdersRouteDependencies = {
   authService: AuthService;
   profileStore: ProfileStore;
   catalogStore: CatalogStore;
+  clientsStore: ClientStore;
   ordersStore: OrdersStore;
   countersStore: CountersStore;
   transactionsStore: TransactionsStore;
@@ -118,6 +129,7 @@ const OrderResponseSchema = Type.Object(
     _id: Type.String(),
     profileId: Type.String(),
     clientId: Type.Union([Type.String(), Type.Null()]),
+    clientName: Type.Optional(Type.String()),
     orderNumber: Type.String(),
     reference: Type.Optional(Type.String()),
     status: OrderStatusSchema,
@@ -195,6 +207,7 @@ const ConflictPayload = Object.freeze({
 type OrderCreateBody = Static<typeof OrderCreateSchema>;
 type OrderUpdateBody = Static<typeof OrderUpdateSchema>;
 type OrderParams = Static<typeof OrderParamsSchema>;
+type OrderResponse = Static<typeof OrderResponseSchema>;
 
 const OrderSortBySchema = Type.Union([
   Type.Literal('createdAt'),
@@ -203,15 +216,6 @@ const OrderSortBySchema = Type.Union([
 ]);
 
 const OrderSortOrderSchema = Type.Union([Type.Literal('asc'), Type.Literal('desc')]);
-
-const PAGE_DEFAULT = 1;
-const LIMIT_DEFAULT = 20;
-const MAX_PAGE = 1000;
-const MAX_LIMIT = 100;
-const POSITIVE_INTEGER_PATTERN = '^[1-9][0-9]*$';
-const POSITIVE_INTEGER_REGEX = new RegExp(POSITIVE_INTEGER_PATTERN);
-
-const PositiveIntegerStringSchema = Type.String({ pattern: POSITIVE_INTEGER_PATTERN });
 
 const OrderListQuerySchema = Type.Object(
   {
@@ -248,36 +252,39 @@ const OrderListResponseSchema = Type.Object(
 
 type OrderListQuery = Static<typeof OrderListQuerySchema>;
 
-const toBoundedPositiveInteger = (
-  value: number | string | undefined,
-  fallback: number,
-  maximum: number,
-): number => {
-  const safeFallback = Math.min(Math.max(fallback, 1), maximum);
+const buildClientNameMap = async (
+  clientsStore: ClientStore,
+  profileId: string,
+  clientIds: string[],
+): Promise<Map<string, string>> => {
+  const uniqueClientIds = Array.from(new Set(clientIds)).filter((clientId) => clientId.length > 0);
 
-  if (typeof value === 'number') {
-    if (!Number.isSafeInteger(value) || value < 1) {
-      return safeFallback;
-    }
-
-    return Math.min(value, maximum);
+  if (uniqueClientIds.length === 0) {
+    return new Map();
   }
 
-  if (typeof value === 'string') {
-    if (!POSITIVE_INTEGER_REGEX.test(value)) {
-      return safeFallback;
-    }
+  const clientObjectIds = uniqueClientIds.map((clientId) => new ObjectId(clientId));
+  const clients = await clientsStore
+    .getCollection()
+    .find({
+      _id: { $in: clientObjectIds },
+      profileId,
+    })
+    .toArray();
 
-    const parsed = Number.parseInt(value, 10);
-    if (!Number.isSafeInteger(parsed) || parsed < 1) {
-      return safeFallback;
-    }
-
-    return Math.min(parsed, maximum);
-  }
-
-  return safeFallback;
+  return new Map(clients.map((client) => [client._id.toHexString(), client.name]));
 };
+
+const serializeOrder = (
+  order: WithId<Order>,
+  clientNameMap: Map<string, string>,
+): OrderResponse => ({
+  ...order,
+  _id: order._id.toHexString(),
+  ...(order.clientId ? { clientName: clientNameMap.get(order.clientId) } : {}),
+  createdAt: order.createdAt.toISOString(),
+  updatedAt: order.updatedAt.toISOString(),
+});
 
 export const registerOrdersRoutes = (
   app: FastifyInstance,
@@ -351,14 +358,14 @@ export const registerOrdersRoutes = (
         collection.find(filter).sort(sort).skip(skip).limit(limit).toArray(),
         collection.countDocuments(filter),
       ]);
+      const clientNameMap = await buildClientNameMap(
+        dependencies.clientsStore,
+        profileId,
+        documents.flatMap((document) => (document.clientId ? [document.clientId] : [])),
+      );
 
       const response = {
-        data: documents.map((doc) => ({
-          ...doc,
-          _id: doc._id.toHexString(),
-          createdAt: doc.createdAt.toISOString(),
-          updatedAt: doc.updatedAt.toISOString(),
-        })),
+        data: documents.map((document) => serializeOrder(document, clientNameMap)),
         total,
         page,
         limit,
@@ -493,12 +500,13 @@ export const registerOrdersRoutes = (
         throw new Error('Failed to fetch just created order');
       }
 
-      return reply.status(201).send({
-        ...createdOrder,
-        _id: createdOrder._id.toHexString(),
-        createdAt: createdOrder.createdAt.toISOString(),
-        updatedAt: createdOrder.updatedAt.toISOString(),
-      });
+      const clientNameMap = await buildClientNameMap(
+        dependencies.clientsStore,
+        profileId,
+        createdOrder.clientId ? [createdOrder.clientId] : [],
+      );
+
+      return reply.status(201).send(serializeOrder(createdOrder, clientNameMap));
     },
   );
 
@@ -534,12 +542,13 @@ export const registerOrdersRoutes = (
         return reply.status(404).send(NotFoundPayload);
       }
 
-      return reply.status(200).send({
-        ...order,
-        _id: order._id.toHexString(),
-        createdAt: order.createdAt.toISOString(),
-        updatedAt: order.updatedAt.toISOString(),
-      });
+      const clientNameMap = await buildClientNameMap(
+        dependencies.clientsStore,
+        profileId,
+        order.clientId ? [order.clientId] : [],
+      );
+
+      return reply.status(200).send(serializeOrder(order, clientNameMap));
     },
   );
 
@@ -690,12 +699,13 @@ export const registerOrdersRoutes = (
         return reply.status(404).send(NotFoundPayload);
       }
 
-      return reply.status(200).send({
-        ...updatedOrder,
-        _id: updatedOrder._id.toHexString(),
-        createdAt: updatedOrder.createdAt.toISOString(),
-        updatedAt: updatedOrder.updatedAt.toISOString(),
-      });
+      const clientNameMap = await buildClientNameMap(
+        dependencies.clientsStore,
+        profileId,
+        updatedOrder.clientId ? [updatedOrder.clientId] : [],
+      );
+
+      return reply.status(200).send(serializeOrder(updatedOrder, clientNameMap));
     },
   );
 

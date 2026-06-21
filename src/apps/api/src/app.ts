@@ -181,6 +181,7 @@ export const buildApp = async (options: BuildAppOptions = {}): Promise<FastifyIn
     authService: selectedAuthService,
     profileStore: selectedProfileStore,
     catalogStore: selectedCatalogStore,
+    clientsStore: selectedClientsStore,
     ordersStore: selectedOrdersStore,
     countersStore: selectedCountersStore,
     transactionsStore: selectedTransactionsStore,

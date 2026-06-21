@@ -4,6 +4,14 @@ import { ObjectId, type Document, type Filter, type WithId } from 'mongodb';
 
 import type { AuthService } from '../lib/auth.js';
 import type { CatalogStore, CatalogItem, CatalogUnitMeasure } from '../lib/catalog.js';
+import {
+  LIMIT_DEFAULT,
+  MAX_LIMIT,
+  MAX_PAGE,
+  PAGE_DEFAULT,
+  PositiveIntegerStringSchema,
+  toBoundedPositiveInteger,
+} from '../lib/pagination.js';
 import type { ProfileStore } from '../lib/profile.js';
 
 type CatalogRouteDependencies = {
@@ -101,18 +109,11 @@ const CatalogSortBySchema = Type.Union([
 
 const CatalogSortOrderSchema = Type.Union([Type.Literal('asc'), Type.Literal('desc')]);
 
-const PAGE_DEFAULT = 1;
-const LIMIT_DEFAULT = 20;
-const MAX_PAGE = 1000;
-const MAX_LIMIT = 100;
-const POSITIVE_INTEGER_PATTERN = '^[1-9][0-9]*$';
-const POSITIVE_INTEGER_REGEX = new RegExp(POSITIVE_INTEGER_PATTERN);
-
-const PositiveIntegerStringSchema = Type.String({ pattern: POSITIVE_INTEGER_PATTERN });
-
 const CatalogListQuerySchema = Type.Object(
   {
-    page: Type.Optional(Type.Union([Type.Integer({ minimum: 1, maximum: MAX_PAGE }), PositiveIntegerStringSchema])),
+    page: Type.Optional(
+      Type.Union([Type.Integer({ minimum: 1, maximum: MAX_PAGE }), PositiveIntegerStringSchema]),
+    ),
     limit: Type.Optional(
       Type.Union([Type.Integer({ minimum: 1, maximum: MAX_LIMIT }), PositiveIntegerStringSchema]),
     ),
@@ -197,37 +198,6 @@ type CatalogUpdateBody = Static<typeof CatalogUpdateSchema>;
 type CatalogParams = Static<typeof CatalogParamsSchema>;
 type CatalogListQuery = Static<typeof CatalogListQuerySchema>;
 
-const toBoundedPositiveInteger = (
-  value: number | string | undefined,
-  fallback: number,
-  maximum: number,
-): number => {
-  const safeFallback = Math.min(Math.max(fallback, 1), maximum);
-
-  if (typeof value === 'number') {
-    if (!Number.isSafeInteger(value) || value < 1) {
-      return safeFallback;
-    }
-
-    return Math.min(value, maximum);
-  }
-
-  if (typeof value === 'string') {
-    if (!POSITIVE_INTEGER_REGEX.test(value)) {
-      return safeFallback;
-    }
-
-    const parsed = Number.parseInt(value, 10);
-    if (!Number.isSafeInteger(parsed) || parsed < 1) {
-      return safeFallback;
-    }
-
-    return Math.min(parsed, maximum);
-  }
-
-  return safeFallback;
-};
-
 const toCatalogResponse = (item: WithId<CatalogItem>): CatalogResponse => ({
   _id: item._id.toHexString(),
   profileId: item.profileId,
@@ -309,7 +279,6 @@ export const registerCatalogRoutes = (
     },
   );
 
-  
   app.get(
     '/api/catalog/:itemId',
     {

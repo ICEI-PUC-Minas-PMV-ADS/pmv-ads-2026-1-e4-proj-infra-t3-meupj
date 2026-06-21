@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { useState, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/auth.context';
 import { z } from 'zod';
 import { Input, Button, Alert, Divider } from '@/components/ui';
@@ -11,45 +10,51 @@ import { Input, Button, Alert, Divider } from '@/components/ui';
 // ─── Schema ───────────────────────────────────────────────────────────────────
 
 const loginSchema = z.object({
-  email:    z.string().email('E-mail inválido'),
+  email: z.string().email('E-mail inválido'),
   password: z.string().min(1, 'Informe sua senha'),
 });
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function LoginPage() {
-  const router = useRouter();
   const { login } = useAuth();
 
-  const [email,        setEmail]        = useState('');
-  const [password,     setPassword]     = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [loading,      setLoading]      = useState(false);
-  const [error,        setError]        = useState('');
-  const [fieldErrors,  setFieldErrors]  = useState<{ email?: string; password?: string }>({});
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({});
 
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setFieldErrors({});
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      setError('');
+      setFieldErrors({});
 
-    const result = loginSchema.safeParse({ email, password });
-    if (!result.success) {
-      const errs: Record<string, string> = {};
-      result.error.issues.forEach((i) => { if (i.path[0]) errs[i.path[0] as string] = i.message; });
-      setFieldErrors(errs);
-      return;
-    }
+      const result = loginSchema.safeParse({ email, password });
+      if (!result.success) {
+        const errs: Record<string, string> = {};
+        result.error.issues.forEach((i) => {
+          if (i.path[0]) errs[i.path[0] as string] = i.message;
+        });
+        setFieldErrors(errs);
+        return;
+      }
 
-    try {
-      setLoading(true);
-      await login(result.data);
-    } catch (err: any) {
-      setError(err.message || 'E-mail ou senha incorretos. Tente novamente.');
-    } finally {
-      setLoading(false);
-    }
-  }, [email, password, router]);
+      try {
+        setLoading(true);
+        await login(result.data);
+      } catch (error: unknown) {
+        setError(
+          error instanceof Error ? error.message : 'E-mail ou senha incorretos. Tente novamente.',
+        );
+      } finally {
+        setLoading(false);
+      }
+    },
+    [email, login, password],
+  );
 
   return (
     <div className="flex flex-col gap-8 w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -122,7 +127,10 @@ export default function LoginPage() {
 
         <p className="text-center text-sm text-gray-600">
           Não tem conta?{' '}
-          <Link href="/cadastro" className="font-semibold text-indigo-600 hover:text-indigo-700 hover:underline transition-all">
+          <Link
+            href="/cadastro"
+            className="font-semibold text-indigo-600 hover:text-indigo-700 hover:underline transition-all"
+          >
             Cadastre-se
           </Link>
         </p>

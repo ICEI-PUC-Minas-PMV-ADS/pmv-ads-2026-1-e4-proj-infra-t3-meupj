@@ -1,4 +1,5 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://pmv-ads-2026-1-e4-proj-infra-t3-meupj.onrender.com';
+import { apiClient, resolveApiErrorMessage } from './api-client';
+
 export type TransactionType = 'income' | 'expense';
 export type TransactionStatus = 'pending' | 'confirmed' | 'cancelled';
 
@@ -65,34 +66,25 @@ export interface TransactionListResponse {
   limit: number;
 }
 
+export type TransactionUpdatePayload = Partial<TransactionCreatePayload>;
+
 export const TransactionsService = {
   /**
    * Cria um novo lançamento de receita ou custo
    */
   async create(type: TransactionType, payload: TransactionCreatePayload): Promise<Transaction> {
     const endpoint = type === 'income' ? 'income' : 'expense';
-    const url = `${BASE_URL}/api/transactions/${endpoint}`;
-    
+
     try {
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify(payload),
+      return await apiClient.post<Transaction>(`/api/transactions/${endpoint}`, {
+        body: payload,
       });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.error(`Erro na API (${response.status}):`, errorData);
-        throw new Error(errorData.message || `Falha ao criar lançamento de ${type} (Status: ${response.status}).`);
-      }
-
-      return response.json();
     } catch (error) {
-      console.error(`Erro ao chamar ${url}:`, error);
-      throw error;
+      throw new Error(
+        resolveApiErrorMessage(error, `Falha ao criar lançamento de ${type}.`, {
+          401: 'Não autorizado. Faça login novamente.',
+        }),
+      );
     }
   },
 
@@ -100,36 +92,16 @@ export const TransactionsService = {
    * Lista lançamentos com filtros e paginação
    */
   async list(query: TransactionListQuery = {}): Promise<TransactionListResponse> {
-    const params = new URLSearchParams();
-    
-    Object.entries(query).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) {
-        params.set(key, String(value));
-      }
-    });
-
-    const qs = params.toString();
-    const url = `${BASE_URL}/api/transactions${qs ? `?${qs}` : ''}`;
-
     try {
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
+      return await apiClient.get<TransactionListResponse>('/api/transactions', {
+        query,
       });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.error(`Erro na listagem (${response.status}):`, errorData);
-        throw new Error(errorData.message || 'Falha ao carregar lançamentos.');
-      }
-
-      return response.json();
     } catch (error) {
-      console.error(`Erro ao chamar listagem em ${url}:`, error);
-      throw error;
+      throw new Error(
+        resolveApiErrorMessage(error, 'Falha ao carregar lançamentos.', {
+          401: 'Não autorizado. Faça login novamente.',
+        }),
+      );
     }
   },
 
@@ -137,69 +109,49 @@ export const TransactionsService = {
    * Confirma um lançamento pendente
    */
   async confirm(transactionId: string): Promise<Transaction> {
-    const response = await fetch(`${BASE_URL}/api/transactions/${transactionId}/confirm`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || 'Falha ao confirmar lançamento.');
+    try {
+      return await apiClient.patch<Transaction>(`/api/transactions/${transactionId}/confirm`);
+    } catch (error) {
+      throw new Error(
+        resolveApiErrorMessage(error, 'Falha ao confirmar lançamento.', {
+          401: 'Não autorizado. Faça login novamente.',
+          404: 'Lançamento não encontrado.',
+        }),
+      );
     }
-
-    return response.json();
   },
 
   /**
    * Busca um lançamento pelo ID
    */
   async getById(transactionId: string): Promise<Transaction> {
-    const url = `${BASE_URL}/api/transactions/${transactionId}`;
-    
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || 'Falha ao buscar lançamento.');
+    try {
+      return await apiClient.get<Transaction>(`/api/transactions/${transactionId}`);
+    } catch (error) {
+      throw new Error(
+        resolveApiErrorMessage(error, 'Falha ao buscar lançamento.', {
+          401: 'Não autorizado. Faça login novamente.',
+          404: 'Lançamento não encontrado.',
+        }),
+      );
     }
-
-    return response.json();
   },
 
   /**
    * Atualiza um lançamento existente
    */
-  async update(transactionId: string, payload: Partial<TransactionCreatePayload>): Promise<Transaction> {
-    const url = `${BASE_URL}/api/transactions/${transactionId}`;
-    
+  async update(transactionId: string, payload: TransactionUpdatePayload): Promise<Transaction> {
     try {
-      const response = await fetch(url, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify(payload),
+      return await apiClient.put<Transaction>(`/api/transactions/${transactionId}`, {
+        body: payload,
       });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `Falha ao atualizar lançamento (Status: ${response.status}).`);
-      }
-
-      return response.json();
     } catch (error) {
-      console.error(`Erro ao chamar ${url}:`, error);
-      throw error;
+      throw new Error(
+        resolveApiErrorMessage(error, 'Falha ao atualizar lançamento.', {
+          401: 'Não autorizado. Faça login novamente.',
+          404: 'Lançamento não encontrado.',
+        }),
+      );
     }
   },
 
@@ -207,14 +159,18 @@ export const TransactionsService = {
    * Exclui um lançamento (somente se não estiver confirmado)
    */
   async delete(transactionId: string): Promise<void> {
-    const response = await fetch(`${BASE_URL}/api/transactions/${transactionId}`, {
-      method: 'DELETE',
-      credentials: 'include',
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || 'Falha ao excluir lançamento.');
+    try {
+      await apiClient.delete<void>(`/api/transactions/${transactionId}`, {
+        parseAs: 'none',
+      });
+    } catch (error) {
+      throw new Error(
+        resolveApiErrorMessage(error, 'Falha ao excluir lançamento.', {
+          401: 'Não autorizado. Faça login novamente.',
+          404: 'Lançamento não encontrado.',
+          409: 'Lançamentos confirmados não podem ser excluídos.',
+        }),
+      );
     }
-  }
+  },
 };

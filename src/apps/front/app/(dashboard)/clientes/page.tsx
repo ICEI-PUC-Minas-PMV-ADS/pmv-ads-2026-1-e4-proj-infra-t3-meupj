@@ -2,10 +2,23 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Search, Plus, User, Users, ChevronLeft, ChevronRight, MoreVertical, Pencil, Trash2 } from 'lucide-react';
+import {
+  Search,
+  Plus,
+  User,
+  Users,
+  ChevronLeft,
+  ChevronRight,
+  MoreVertical,
+  Pencil,
+  Trash2,
+  Phone,
+  MessageCircle,
+} from 'lucide-react';
 import { useEffect, useState, useCallback } from 'react';
 import { ClientsService, type Client, type PersonType } from '@/services/clients.service';
 import { Input, Button, Alert, EmptyState, Spinner } from '@/components/ui';
+import { getTelHref, getWhatsAppHref } from '@/utils/phone';
 
 const PAGE_LIMIT = 20;
 
@@ -29,6 +42,10 @@ function getContactInfo(client: { phone?: string; email?: string }) {
   return parts.join(' · ') || '—';
 }
 
+function openContactLink(href: string, target: '_blank' | '_self') {
+  window.open(href, target, target === '_blank' ? 'noopener,noreferrer' : undefined);
+}
+
 export default function ClientesPage() {
   const router = useRouter();
 
@@ -49,42 +66,45 @@ export default function ClientesPage() {
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_LIMIT));
 
-  const fetchClients = useCallback(async (tab: TabKey, q: string, pg: number) => {
-    setLoading(true);
-    setError('');
-    try {
-      const trimmedQ = q.trim() || undefined;
+  const fetchClients = useCallback(
+    async (tab: TabKey, q: string, pg: number) => {
+      setLoading(true);
+      setError('');
+      try {
+        const trimmedQ = q.trim() || undefined;
 
-      const [result, pfCount, pjCount] = await Promise.all([
-        ClientsService.list({
-          type: tab !== 'all' ? (tab as PersonType) : undefined,
-          q: trimmedQ,
-          page: pg,
-          limit: PAGE_LIMIT,
-          sortBy: 'createdAt',
-          sortOrder: 'desc',
-        }),
-        ClientsService.list({ type: 'individual', q: trimmedQ, limit: 1 }),
-        ClientsService.list({ type: 'company', q: trimmedQ, limit: 1 }),
-      ]);
+        const [result, pfCount, pjCount] = await Promise.all([
+          ClientsService.list({
+            type: tab !== 'all' ? (tab as PersonType) : undefined,
+            q: trimmedQ,
+            page: pg,
+            limit: PAGE_LIMIT,
+            sortBy: 'createdAt',
+            sortOrder: 'desc',
+          }),
+          ClientsService.list({ type: 'individual', q: trimmedQ, limit: 1 }),
+          ClientsService.list({ type: 'company', q: trimmedQ, limit: 1 }),
+        ]);
 
-      setClients(result.data);
-      setTotal(result.total);
-      setCounts({
-        all: pfCount.total + pjCount.total,
-        individual: pfCount.total,
-        company: pjCount.total,
-      });
-    } catch (err: unknown) {
-      if (err instanceof Error && err.message === 'Não autorizado. Faça login novamente.') {
-        router.replace('/login');
-        return;
+        setClients(result.data);
+        setTotal(result.total);
+        setCounts({
+          all: pfCount.total + pjCount.total,
+          individual: pfCount.total,
+          company: pjCount.total,
+        });
+      } catch (err: unknown) {
+        if (err instanceof Error && err.message === 'Não autorizado. Faça login novamente.') {
+          router.replace('/login');
+          return;
+        }
+        setError(err instanceof Error ? err.message : 'Erro ao carregar clientes.');
+      } finally {
+        setLoading(false);
       }
-      setError(err instanceof Error ? err.message : 'Erro ao carregar clientes.');
-    } finally {
-      setLoading(false);
-    }
-  }, [router]);
+    },
+    [router],
+  );
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -143,13 +163,17 @@ export default function ClientesPage() {
           <div className="flex gap-2">
             <button
               type="button"
-              onClick={() => { setMobileSearch((v) => !v); if (mobileSearch) setSearch(''); }}
+              onClick={() => {
+                setMobileSearch((v) => !v);
+                if (mobileSearch) setSearch('');
+              }}
               aria-label={mobileSearch ? 'Fechar busca' : 'Abrir busca'}
               title={mobileSearch ? 'Fechar busca' : 'Abrir busca'}
-              className={`md:hidden p-2 rounded-lg border transition-colors ${mobileSearch
-                ? 'bg-indigo-50 border-indigo-300 text-indigo-600'
-                : 'border-gray-200 text-gray-500 hover:bg-gray-50'
-                }`}
+              className={`md:hidden p-2 rounded-lg border transition-colors ${
+                mobileSearch
+                  ? 'bg-indigo-50 border-indigo-300 text-indigo-600'
+                  : 'border-gray-200 text-gray-500 hover:bg-gray-50'
+              }`}
             >
               <Search size={18} />
             </button>
@@ -186,15 +210,19 @@ export default function ClientesPage() {
               <button
                 key={tab.key}
                 onClick={() => handleTabChange(tab.key)}
-                className={`border-b-2 pb-4 text-sm font-semibold px-1 whitespace-nowrap flex items-center gap-2 cursor-pointer transition-colors ${isActive
-                  ? 'border-indigo-600 text-indigo-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-900 hover:border-gray-300 font-medium'
-                  }`}
+                className={`border-b-2 pb-4 text-sm font-semibold px-1 whitespace-nowrap flex items-center gap-2 cursor-pointer transition-colors ${
+                  isActive
+                    ? 'border-indigo-600 text-indigo-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-900 hover:border-gray-300 font-medium'
+                }`}
               >
                 {tab.label}
                 {(counts[tab.key] ?? 0) > 0 && (
-                  <span className={`py-0.5 px-2 rounded-full text-[10px] font-bold ${isActive ? 'bg-indigo-100 text-indigo-700' : 'bg-gray-100 text-gray-600'
-                    }`}>
+                  <span
+                    className={`py-0.5 px-2 rounded-full text-[10px] font-bold ${
+                      isActive ? 'bg-indigo-100 text-indigo-700' : 'bg-gray-100 text-gray-600'
+                    }`}
+                  >
                     {counts[tab.key]}
                   </span>
                 )}
@@ -205,12 +233,9 @@ export default function ClientesPage() {
       </header>
 
       {/* Backdrop transparente para fechar o menu ao clicar fora */}
-      {openMenuId && (
-        <div className="fixed inset-0 z-40" onClick={() => setOpenMenuId(null)} />
-      )}
+      {openMenuId && <div className="fixed inset-0 z-40" onClick={() => setOpenMenuId(null)} />}
 
       <main className="flex-1 p-4 md:p-10 bg-gray-50/30 overflow-y-auto">
-
         {/* Loading */}
         {loading && (
           <div className="flex flex-col items-center justify-center py-24 gap-3 text-gray-400">
@@ -238,7 +263,10 @@ export default function ClientesPage() {
             icon={<Users className="h-12 w-12" />}
             title="Nenhum cliente encontrado"
             action={
-              <Link href="/clientes/novo" className="text-sm text-indigo-600 font-medium hover:underline">
+              <Link
+                href="/clientes/novo"
+                className="text-sm text-indigo-600 font-medium hover:underline"
+              >
                 Adicionar primeiro cliente
               </Link>
             }
@@ -252,6 +280,8 @@ export default function ClientesPage() {
             <div className="flex flex-col gap-3 max-w-5xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
               {clients.map((client) => {
                 const style = TYPE_STYLE[client.type];
+                const telHref = getTelHref(client.phone);
+                const whatsappHref = getWhatsAppHref(client.phone);
 
                 return (
                   <div
@@ -263,10 +293,16 @@ export default function ClientesPage() {
                       <User size={20} />
                     </div>
                     <div className="flex-1 min-w-0 flex flex-col justify-center">
-                      <h3 className="font-bold text-gray-900 text-[15px] truncate">{client.name}</h3>
-                      <p className="text-[13px] font-medium text-gray-500 mt-0.5 truncate">{getContactInfo(client)}</p>
+                      <h3 className="font-bold text-gray-900 text-[15px] truncate">
+                        {client.name}
+                      </h3>
+                      <p className="text-[13px] font-medium text-gray-500 mt-0.5 truncate">
+                        {getContactInfo(client)}
+                      </p>
                     </div>
-                    <span className={`text-[11px] font-bold px-3 py-1.5 rounded-md inline-flex ${style.badge}`}>
+                    <span
+                      className={`text-[11px] font-bold px-3 py-1.5 rounded-md inline-flex ${style.badge}`}
+                    >
                       {style.label}
                     </span>
                     <button
@@ -285,6 +321,34 @@ export default function ClientesPage() {
                     {/* Dropdown menu */}
                     {openMenuId === client._id && (
                       <div className="absolute top-2 right-12 bg-white border border-gray-200 rounded-xl shadow-lg z-50 min-w-[150px] py-1 animate-in fade-in slide-in-from-top-2 duration-150">
+                        {telHref && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setOpenMenuId(null);
+                              openContactLink(telHref, '_self');
+                            }}
+                            className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                          >
+                            <Phone size={14} className="text-gray-500" />
+                            Ligar
+                          </button>
+                        )}
+                        {whatsappHref && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setOpenMenuId(null);
+                              openContactLink(whatsappHref, '_blank');
+                            }}
+                            className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                          >
+                            <MessageCircle size={14} className="text-gray-500" />
+                            WhatsApp
+                          </button>
+                        )}
                         <button
                           type="button"
                           onClick={(e) => {
@@ -376,30 +440,28 @@ export default function ClientesPage() {
                 <h3 className="text-base font-bold text-gray-900">Excluir cliente?</h3>
                 <p className="text-sm text-gray-500 mt-1.5 leading-relaxed">
                   Tem certeza que deseja excluir{' '}
-                  <span className="font-semibold text-gray-700">&quot;{confirmDelete.name}&quot;</span>?
-                  {' '}Esta ação não pode ser desfeita.
+                  <span className="font-semibold text-gray-700">
+                    &quot;{confirmDelete.name}&quot;
+                  </span>
+                  ? Esta ação não pode ser desfeita.
                 </p>
               </div>
 
-              {deleteError && (
-                <Alert variant="error">{deleteError}</Alert>
-              )}
+              {deleteError && <Alert variant="error">{deleteError}</Alert>}
 
               <div className="flex gap-3 mt-1">
                 <Button
                   variant="outline"
                   fullWidth
                   disabled={deleting}
-                  onClick={() => { setConfirmDelete(null); setDeleteError(''); }}
+                  onClick={() => {
+                    setConfirmDelete(null);
+                    setDeleteError('');
+                  }}
                 >
                   Cancelar
                 </Button>
-                <Button
-                  variant="danger"
-                  fullWidth
-                  loading={deleting}
-                  onClick={handleDeleteConfirm}
-                >
+                <Button variant="danger" fullWidth loading={deleting} onClick={handleDeleteConfirm}>
                   Excluir
                 </Button>
               </div>

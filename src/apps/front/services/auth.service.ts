@@ -1,4 +1,7 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://pmv-ads-2026-1-e4-proj-infra-t3-meupj.onrender.com';
+import type { SettingsProfileResponse } from './settings.service';
+
+import { apiClient, isApiErrorStatus, resolveApiErrorMessage } from './api-client';
+
 export interface LoginCredentials {
   email: string;
   password: string;
@@ -10,30 +13,21 @@ export interface RegisterData {
   password: string;
 }
 
+export type AuthProfileResponse = SettingsProfileResponse;
+
 export const AuthService = {
   /**
    * Realiza o login do usuário
    */
   async login(credentials: LoginCredentials) {
     try {
-      const response = await fetch(`${BASE_URL}/api/auth/sign-in/email`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify(credentials),
+      return await apiClient.post<unknown>('/api/auth/sign-in/email', {
+        body: credentials,
       });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || 'Falha ao autenticar usuário. Verifique suas credenciais.');
-      }
-
-      return await response.json().catch(() => null);
     } catch (error) {
-      console.error('Erro no AuthService.login:', error);
-      throw error;
+      throw new Error(
+        resolveApiErrorMessage(error, 'Falha ao autenticar usuário. Verifique suas credenciais.'),
+      );
     }
   },
 
@@ -42,54 +36,27 @@ export const AuthService = {
    */
   async register(userData: RegisterData) {
     try {
-      const response = await fetch(`${BASE_URL}/api/auth/sign-up/email`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify(userData),
+      return await apiClient.post<unknown>('/api/auth/sign-up/email', {
+        body: userData,
       });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || 'Falha ao criar conta. Tente novamente.');
-      }
-
-      return await response.json().catch(() => null);
     } catch (error) {
-      console.error('Erro no AuthService.register:', error);
-      throw error;
+      throw new Error(resolveApiErrorMessage(error, 'Falha ao criar conta. Tente novamente.'));
     }
   },
 
   /**
    * Busca o perfil do usuário logado
    */
-  async getProfile() {
+  async getProfile(): Promise<AuthProfileResponse | null> {
     try {
-      console.log('AuthService.getProfile: Iniciando busca de perfil...');
-      const response = await fetch(`${BASE_URL}/api/profile`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include',
+      return await apiClient.get<AuthProfileResponse>('/api/profile', {
         cache: 'no-store',
       });
-
-      console.log('AuthService.getProfile: Status da resposta:', response.status);
-
-      if (!response.ok) {
-        console.warn('AuthService.getProfile: Resposta não ok, retornando null');
-        return null; // Usuário não autenticado
+    } catch (error) {
+      if (isApiErrorStatus(error, 401)) {
+        return null;
       }
 
-      const data = await response.json().catch(() => null);
-      console.log('AuthService.getProfile: Perfil carregado com sucesso:', data?.user?.id);
-      return data;
-    } catch (error) {
-      console.error('Erro no AuthService.getProfile:', error);
       return null;
     }
   },
@@ -99,21 +66,13 @@ export const AuthService = {
    */
   async logout() {
     try {
-      const response = await fetch(`${BASE_URL}/api/auth/sign-out`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify({}),
+      await apiClient.post<void>('/api/auth/sign-out', {
+        body: {},
+        parseAs: 'none',
       });
-      if (!response.ok) {
-        console.error('Logout falhou na API', await response.text());
-      }
-      return response.ok;
-    } catch (error) {
-      console.error('Erro no AuthService.logout:', error);
+      return true;
+    } catch {
       return false;
     }
-  }
+  },
 };
