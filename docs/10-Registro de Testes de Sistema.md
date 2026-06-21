@@ -120,13 +120,13 @@ Evidência pendente de atualização.
 
 #### Evidências - Web
 
-<img width="2940" height="1770" alt="image" src="https://github.com/user-attachments/assets/f5b61123-04c4-4cd6-a17f-2dc6ac90352e" />
-<img width="2940" height="1750" alt="image" src="https://github.com/user-attachments/assets/411c47c7-6dc6-4ea5-a825-147113ca5646" />
+<img width="600" alt="image" src="https://github.com/user-attachments/assets/f5b61123-04c4-4cd6-a17f-2dc6ac90352e" />
+<img width="600" alt="image" src="https://github.com/user-attachments/assets/411c47c7-6dc6-4ea5-a825-147113ca5646" />
 
 #### Evidências - Mobile
 
-<img width="670" height="1464" alt="image" src="https://github.com/user-attachments/assets/97e35e8b-c0ab-4f3b-8e10-eaa6fbb225d0" />
-<img width="668" height="1474" alt="image" src="https://github.com/user-attachments/assets/9f5cbede-682a-49be-9bf0-3837ccfc8f38" />
+<img height="500" alt="image" src="https://github.com/user-attachments/assets/97e35e8b-c0ab-4f3b-8e10-eaa6fbb225d0" />
+<img height="500" alt="image" src="https://github.com/user-attachments/assets/9f5cbede-682a-49be-9bf0-3837ccfc8f38" />
 
 ### RF 008 - O sistema deve permitir que o usuário crie pedidos com um ou mais itens de catálogo, cliente opcional e condições comerciais
 
