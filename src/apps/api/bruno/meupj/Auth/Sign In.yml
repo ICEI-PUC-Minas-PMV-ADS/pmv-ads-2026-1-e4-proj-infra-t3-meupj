@@ -1,7 +1,7 @@
 info:
   name: Sign In
   type: http
-  seq: 6
+  seq: 2
 
 http:
   method: POST
@@ -42,6 +42,7 @@ runtime:
           if (!sessionCookie) {
             throw new Error("better-auth.session_token cookie not found in Set-Cookie header");
           }
+
           bru.setEnvVar("sessionCookie", sessionCookie);
         };
 

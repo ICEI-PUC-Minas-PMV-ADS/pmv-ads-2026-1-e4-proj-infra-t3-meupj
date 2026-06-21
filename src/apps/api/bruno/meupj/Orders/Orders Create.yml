@@ -1,23 +1,24 @@
 info:
   name: Orders Create
   type: http
-  seq: 1
+  seq: 2
 
 http:
   method: POST
   url: '{{baseUrl}}/api/orders'
   headers:
     - name: Cookie
-      value: sessionCookie
+      value: '{{sessionCookie}}'
     - name: Content-Type
       value: application/json
   body:
     type: json
     data: |-
       {
+        "clientId": "{{clientId}}",
         "items": [
           {
-            "catalogItemId": "PUT_CATALOG_ITEM_ID_HERE",
+            "catalogItemId": "{{catalogItemId}}",
             "quantity": 2
           }
         ],
@@ -28,14 +29,38 @@ http:
         ],
         "paymentSchedule": [
           {
-            "amount": 20.00,
+            "amount": 20,
             "dueDate": "2026-12-31T23:59:59.000Z",
             "paymentMethod": "pix"
           }
         ],
-        "status": "draft"
+        "status": "draft",
+        "reference": "Pedido criado via Bruno",
+        "paymentTerms": "50% na aprovação",
+        "warrantyTerms": "90 dias",
+        "additionalInfo": "Atendimento em horário comercial",
+        "internalNotes": "Fluxo de teste via Bruno"
       }
   auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        const responseBody = res.getBody();
+
+        if (responseBody === undefined || responseBody === null || responseBody === "") {
+          throw new Error("Missing response body in Orders Create");
+        }
+
+        const body =
+          typeof responseBody === "string" ? JSON.parse(responseBody) : responseBody;
+
+        if (!body || typeof body !== "object" || typeof body._id !== "string") {
+          throw new Error("Order id not found in Orders Create response");
+        }
+
+        bru.setEnvVar("orderId", body._id);
 
 settings:
   encodeUrl: true

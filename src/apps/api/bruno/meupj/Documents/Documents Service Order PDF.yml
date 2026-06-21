@@ -1,14 +1,16 @@
 info:
-  name: Orders Delete
+  name: Documents Service Order PDF
   type: http
-  seq: 5
+  seq: 4
 
 http:
-  method: DELETE
-  url: '{{baseUrl}}/api/orders/{{orderId}}'
+  method: GET
+  url: '{{baseUrl}}/api/documents/service-order/{{orderId}}/pdf'
   headers:
     - name: Cookie
       value: '{{sessionCookie}}'
+    - name: Accept
+      value: application/pdf
   auth: inherit
 
 settings:

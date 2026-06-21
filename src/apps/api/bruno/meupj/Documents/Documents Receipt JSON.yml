@@ -1,11 +1,11 @@
 info:
-  name: Orders Delete
+  name: Documents Receipt JSON
   type: http
   seq: 5
 
 http:
-  method: DELETE
-  url: '{{baseUrl}}/api/orders/{{orderId}}'
+  method: GET
+  url: '{{baseUrl}}/api/documents/receipt/{{transactionId}}'
   headers:
     - name: Cookie
       value: '{{sessionCookie}}'

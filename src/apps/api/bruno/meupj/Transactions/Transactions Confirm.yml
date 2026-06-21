@@ -1,11 +1,11 @@
 info:
-  name: Orders Delete
+  name: Transactions Confirm
   type: http
-  seq: 5
+  seq: 6
 
 http:
-  method: DELETE
-  url: '{{baseUrl}}/api/orders/{{orderId}}'
+  method: POST
+  url: '{{baseUrl}}/api/transactions/{{transactionId}}/confirm'
   headers:
     - name: Cookie
       value: '{{sessionCookie}}'

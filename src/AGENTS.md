@@ -11,6 +11,7 @@
 - `apps/api`: backend Fastify + MongoDB + Better Auth + documentos PDF
 - `apps/front`: app web em Next.js
 - `apps/mobile`: app Expo com suporte web para desenvolvimento
+- `apps/api/bruno/meupj`: coleção Bruno cobrindo as rotas públicas atuais da API, com ambiente local, captura de sessão e encadeamento básico de IDs
 - `packages/eslint-config`: configuração compartilhada de lint
 - `packages/tsconfig`: configuração compartilhada de TypeScript
 
@@ -33,6 +34,7 @@
 - Mobile web: servidor do Expo, normalmente em `http://localhost:8081`
 - `apps/front/.env.local` deve definir `NEXT_PUBLIC_API_URL=http://localhost:3001`
 - `apps/api/.env.example` é a referência de ambiente da API
+- `apps/api/bruno/meupj/environments/local.yml` usa `baseUrl=http://localhost:3001`
 
 ## Comandos Principais
 

@@ -1,11 +1,11 @@
 info:
-  name: Orders Delete
+  name: Transactions Delete
   type: http
-  seq: 5
+  seq: 7
 
 http:
   method: DELETE
-  url: '{{baseUrl}}/api/orders/{{orderId}}'
+  url: '{{baseUrl}}/api/transactions/{{transactionId}}'
   headers:
     - name: Cookie
       value: '{{sessionCookie}}'

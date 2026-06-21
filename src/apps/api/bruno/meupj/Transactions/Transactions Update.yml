@@ -1,11 +1,11 @@
 info:
-  name: Orders Update
+  name: Transactions Update
   type: http
-  seq: 4
+  seq: 5
 
 http:
   method: PUT
-  url: '{{baseUrl}}/api/orders/{{orderId}}'
+  url: '{{baseUrl}}/api/transactions/{{transactionId}}'
   headers:
     - name: Cookie
       value: '{{sessionCookie}}'
@@ -15,9 +15,10 @@ http:
     type: json
     data: |-
       {
-        "status": "pendingApproval",
-        "discount": 5,
-        "reference": "Pedido atualizado via Bruno"
+        "status": "pending",
+        "paymentMethod": "bankTransfer",
+        "reference": "Parcela atualizada via Bruno",
+        "notes": "Atualização de teste via Bruno"
       }
   auth: inherit
 

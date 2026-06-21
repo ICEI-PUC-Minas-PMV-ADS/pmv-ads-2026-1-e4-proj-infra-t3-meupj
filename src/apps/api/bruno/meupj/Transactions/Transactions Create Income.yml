@@ -1,0 +1,54 @@
+info:
+  name: Transactions Create Income
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: '{{baseUrl}}/api/transactions/income'
+  headers:
+    - name: Cookie
+      value: '{{sessionCookie}}'
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "clientId": "{{clientId}}",
+        "orderId": "{{orderId}}",
+        "amount": 400,
+        "transactionDate": "2026-06-21T12:00:00.000Z",
+        "dueDate": "2026-06-25T12:00:00.000Z",
+        "paymentMethod": "pix",
+        "category": "servicos",
+        "reference": "Parcela 1/2",
+        "notes": "Receita criada via Bruno",
+        "status": "pending"
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        const responseBody = res.getBody();
+
+        if (responseBody === undefined || responseBody === null || responseBody === "") {
+          throw new Error("Missing response body in Transactions Create Income");
+        }
+
+        const body =
+          typeof responseBody === "string" ? JSON.parse(responseBody) : responseBody;
+
+        if (!body || typeof body !== "object" || typeof body._id !== "string") {
+          throw new Error("Transaction id not found in Transactions Create Income response");
+        }
+
+        bru.setEnvVar("transactionId", body._id);
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

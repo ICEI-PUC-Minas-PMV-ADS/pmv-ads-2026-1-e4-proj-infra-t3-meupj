@@ -10,11 +10,11 @@ http:
     - name: Content-Type
       value: application/json
     - name: Cookie
-      value: sessionCookie
+      value: '{{sessionCookie}}'
   auth: inherit
   body:
-    mimeType: application/json
-    text: |
+    type: json
+    data: |-
       {
         "name": "João da Silva",
         "type": "individual",
@@ -31,9 +31,29 @@ http:
           "complement": "Apto 5",
           "district": "Santa Efigênia",
           "city": "Belo Horizonte",
-          "state": "MG"
+          "state": "MG",
+          "country": "Brasil"
         }
       }
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        const responseBody = res.getBody();
+
+        if (responseBody === undefined || responseBody === null || responseBody === "") {
+          throw new Error("Missing response body in Clients Create");
+        }
+
+        const body =
+          typeof responseBody === "string" ? JSON.parse(responseBody) : responseBody;
+
+        if (!body || typeof body !== "object" || typeof body._id !== "string") {
+          throw new Error("Client id not found in Clients Create response");
+        }
+
+        bru.setEnvVar("clientId", body._id);
 
 settings:
   encodeUrl: true

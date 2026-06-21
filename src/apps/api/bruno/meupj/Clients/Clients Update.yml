@@ -1,7 +1,7 @@
 info:
   name: Clients Update
   type: http
-  seq: 3
+  seq: 4
 
 http:
   method: PUT
@@ -10,15 +10,16 @@ http:
     - name: Content-Type
       value: application/json
     - name: Cookie
-      value: sessionCookie
+      value: '{{sessionCookie}}'
   auth: inherit
   body:
-    mimeType: application/json
-    text: |
+    type: json
+    data: |-
       {
         "name": "João Silva Updated",
         "email": "joao.updated@example.com",
-        "phone": "31 99999-1234"
+        "phone": "31 99999-1234",
+        "notes": "Cliente atualizado via Bruno"
       }
 
 settings:

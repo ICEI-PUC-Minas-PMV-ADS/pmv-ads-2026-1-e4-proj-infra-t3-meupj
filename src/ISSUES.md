@@ -6,6 +6,7 @@ Este arquivo não funciona mais como backlog local nem como histórico de entreg
 
 - backlog, priorização e rastreabilidade vivem no Linear
 - este repositório deve documentar apenas o estado implementado e verificável
+- entregas concluídas não devem ser registradas aqui como histórico operacional
 - quando houver alguma lacuna técnica relevante e ainda aberta, ela pode ser registrada aqui de forma curta e objetiva
 
 ## Lacunas Atuais
