@@ -50,7 +50,11 @@ pnpm lint
 pnpm test
 ```
 
-## Documentação do Repositório
+# Deploy
+
+<li><a href="https://meupj-api-student.delightfulwave-8b9abc5f.brazilsouth.azurecontainerapps.io/">meupj.azurecontainerapps.io</a></li>
+
+# Apresentação
 
 - [`src/README.md`](src/README.md): documentação técnica canônica do código atual
 - [`docs/`](docs): artefatos acadêmicos organizados por etapa
