@@ -1,52 +1,58 @@
 # MEUPJ
 
-`Análise e Desenvolvimento de Sistemas`
+Projeto acadêmico de um sistema para organização comercial e financeira de pequenos negócios, com backend, web e mobile no mesmo repositório.
 
-`Desenvolvimento de uma Aplicação Distribuída`
+## Curso
 
-`Etapa 4`
-
-O app reúne, em um só lugar, a organização comercial e financeira do negócio, ajuda o profissional a apresentar, registrar e formalizar vendas e serviços, com emissão de proposta, orçamento, pedido e ordem de serviço, além de personalização visual para transmitir mais profissionalismo (adicionar logo e editar cores). Também oferece um controle financeiro prático do caixa, permitindo acompanhar faturamento, recebimentos, valores em aberto ou atrasados, registrar custos e despesas e visualizar gráficos para comparar entradas, saídas e previsões financeiras.
+- Análise e Desenvolvimento de Sistemas
+- Desenvolvimento de uma Aplicação Distribuída
+- Etapa 4
 
 ## Integrantes
 
-* Frederico Furtado Amantino Vieira
-* Guilherme de Andrade Castro Vieira
-* Maria Julia Gonçalves Maia Sales
-* Eric Esteves Martins
-* Amanda Vitor Lopes
-* Bruna Bricio Alvarenga Sampaio
+- Frederico Furtado Amantino Vieira
+- Guilherme de Andrade Castro Vieira
+- Maria Julia Gonçalves Maia Sales
+- Eric Esteves Martins
+- Amanda Vitor Lopes
+- Bruna Bricio Alvarenga Sampaio
 
 ## Orientador
 
-* Carolina Stephanie Jerônimo de Almeida
+- Carolina Stephanie Jerônimo de Almeida
 
-## Instruções de utilização
+## Estado Atual do Projeto
 
-Assim que a primeira versão do sistema estiver disponível, deverá complementar com as instruções de utilização. Descreva como instalar eventuais dependências e como executar a aplicação.
+O código ativo do sistema está centralizado em [`src/`](src/README.md), que hoje reúne:
 
-# Documentação
+- API em Fastify com MongoDB, Better Auth e geração de documentos PDF
+- aplicação web em Next.js
+- aplicação mobile em Expo, com suporte web para desenvolvimento
 
-<ol>
-<li><a href="docs/01-Documentação de Contexto.md"> Documentação de Contexto</a></li>
-<li><a href="docs/02-Especificação do Projeto.md"> Especificação do Projeto</a></li>
-<li><a href="docs/03-Metodologia.md"> Metodologia</a></li>
-<li><a href="docs/04-Projeto de Interface.md"> Projeto de Interface</a></li>
-<li><a href="docs/05-Arquitetura da Solução.md"> Arquitetura da Solução</a></li>
-<li><a href="docs/06-Template Padrão da Aplicação.md"> Template Padrão da Aplicação</a></li>
-<li><a href="docs/07-Programação de Funcionalidades.md"> Programação de Funcionalidades</a></li>
-<li><a href="docs/08-Registro de Testes Unitários.md"> Registro de Testes Unitários</a></li>
-<li><a href="docs/09-Registro de Testes de Integração.md"> Registro de Testes de Integração</a></li>
-<li><a href="docs/10-Registro de Testes de Sistema.md"> Registro de Testes de Sistema</a></li>
-<li><a href="docs/11-Registro de Contribuição.md"> Registro de Contribuição</a></li>
-<li><a href="docs/12-Apresentação do Projeto.md"> Apresentação do Projeto</a></li>
-<li><a href="docs/13-Referências.md"> Referências</a></li>
-</ol>
+As funcionalidades implementadas e verificáveis atualmente estão descritas no README técnico de [`src/`](src/README.md). Esse é o ponto de entrada canônico para entender a solução em funcionamento.
 
-# Código
+## Como Rodar
 
-<li><a href="src/README.md"> Código Fonte</a></li>
+Os comandos do sistema devem ser executados a partir de [`src/`](src/README.md):
 
-# Apresentação
+```bash
+cd src
+pnpm install
+pnpm dev
+```
 
-<li><a href="presentation/README.md"> Apresentação da solução</a></li>
+Comandos principais do monorepo:
+
+```bash
+cd src
+pnpm build
+pnpm lint
+pnpm test
+```
+
+## Documentação do Repositório
+
+- [`src/README.md`](src/README.md): documentação técnica canônica do código atual
+- [`docs/`](docs): artefatos acadêmicos organizados por etapa
+- [`presentation/README.md`](presentation/README.md): orientação sobre os materiais de apresentação
+- [`videos/README.md`](videos/README.md): orientação sobre os registros em vídeo

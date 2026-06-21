@@ -1,91 +1,13 @@
 # ISSUES
 
-## ETAPA 2: MAPEADAS
+Este arquivo não funciona mais como backlog local nem como histórico de entregas.
 
-- [x] MPJ-14 - Inicializar monorepo com Turborepo
-- [x] MPJ-15 - Configurar projeto Fastify em TypeScript ESM
-- [x] MPJ-16 - Configurar conexão com MongoDB
-- [x] MPJ-17 - Criar infraestrutura compartilhada da API
-- [x] MPJ-18 - Configurar base de testes do backend
-- [ ] MPJ-19 - Configurar serviço de upload de arquivos
-- [x] MPJ-20 - Integrar Better Auth com Fastify
-- [x] MPJ-21 - Configurar adapter MongoDB do Better Auth
-- [x] MPJ-22 - Habilitar cadastro e login por email/senha
-- [ ] MPJ-23 - Configurar exclusão de conta autenticada
-- [ ] MPJ-24 - Configurar recuperação e alteração de senha
-- [x] MPJ-25 - Criar schema e model de perfil do negócio
-- [x] MPJ-26 - Criar endpoint de leitura do perfil autenticado
-- [ ] MPJ-27 - Definir política de exclusão em cascata do domínio
-- [x] MPJ-28 - Criar endpoint de edição do perfil do negócio
-- [ ] MPJ-29 - Criar schema e índices da collection clientes
-- [ ] MPJ-30 - Implementar criação de cliente
-- [ ] MPJ-31 - Implementar edição e exclusão de cliente
-- [ ] MPJ-32 - Implementar listagem, busca e filtros de clientes
-- [x] MPJ-33 - Criar schema e índices da collection catalogo
-- [x] MPJ-34 - Implementar criação de item do catálogo
-- [x] MPJ-35 - Implementar edição de item do catálogo
-- [x] MPJ-36 - Implementar exclusão de item do catálogo com validação de vínculo
-- [x] MPJ-37 - Implementar listagem, busca e filtros de catálogo
-- [x] MPJ-38 - Criar schema e índices da collection pedidos
-- [x] MPJ-39 - Implementar criação de pedido com itens e pagamentos
-- [x] MPJ-40 - Implementar edição e exclusão de pedido
-- [x] MPJ-41 - Implementar numeração automática e transições de status
-- [x] MPJ-42 - Implementar listagem, busca e filtros de pedidos
-- [x] MPJ-43 - Criar schema e índices da collection lancamentos
-- [x] MPJ-44 - Implementar criação de lançamento de receita
-- [x] MPJ-45 - Implementar criação de lançamento de custo
-- [x] MPJ-46 - Implementar listagem, busca e filtros de lançamentos
-- [x] MPJ-47 - Implementar edição, exclusão e confirmação de lançamentos
-- [x] MPJ-48 - Criar serviço de montagem de orçamento
-- [x] MPJ-49 - Criar serviço de montagem de ordem de serviço
-- [x] MPJ-50 - Criar serviço de montagem de recibo
-- [x] MPJ-51 - Expor endpoints de documentos comerciais
-- [ ] MPJ-52 - Criar endpoint de resumo de receitas
-- [ ] MPJ-53 - Criar endpoint de resumo de custos
-- [ ] MPJ-54 - Criar endpoint de resultado financeiro
-- [ ] MPJ-55 - Otimizar pipelines e índices do dashboard
-- [ ] MPJ-56 - Criar suíte de testes dos módulos principais
-- [ ] MPJ-57 - Documentar contratos da API
-- [ ] MPJ-58 - Revisar readiness da etapa backend
+## Uso Atual
 
-## GERAL: NÃO MAPEADAS
+- backlog, priorização e rastreabilidade vivem no Linear
+- este repositório deve documentar apenas o estado implementado e verificável
+- quando houver alguma lacuna técnica relevante e ainda aberta, ela pode ser registrada aqui de forma curta e objetiva
 
-- [x] Reforçar testes de tratamento global de erros
-- [x] Reforçar testes de configuração de CORS
-- [x] Melhorar aplicação de LOG_LEVEL no bootstrap da API
-- [x] Corrigir normalização de status code no error handler
-- [x] Ajustar script de desenvolvimento removendo --parallel
-- [x] Refinar AGENTS.md para visão geral estrutural do projeto e recursos disponíveis
-- [x] Adicionar regra no AGENTS.md para atualização obrigatória após mudanças relevantes no projeto
-- [x] Fixar versões exatas das dependências atuais nos package.json e no pnpm-lock.yaml
-- [x] Ajustar regra de dependências no AGENTS.md para usar latest apenas em novas adições
-- [x] Adicionar fallback de indisponibilidade de autenticação retornando 503 no handler técnico de auth
-- [x] Padronizar endpoints de domínio da API para o prefixo `/api/*`
-- [x] Adicionar coleção Bruno no repositório para rastreabilidade de testes da API
-- [x] Criar script sign-in no Bruno para capturar e persistir cookie de sessão
-- [x] Atualizar descrições das issues abertas da Etapa 2 no Linear com lógica técnica em inglês e padronização de contexto atual
-- [x] Configurar validação de formatação com Prettier no pipeline Turborepo (scripts `format` e `format:check`)
-- [x] Padronizar configuração de ambiente local para execução conjunta de frontend (3000) e API (3001)
-- [x] Corrigir paginação da listagem de pedidos para aceitar `page`/`limit` como querystring numérica e adicionar teste de regressão
-- [x] Corrigir abertura de detalhe em clientes e pedidos com inclusão dos endpoints `GET /api/clients/:clientId` e `GET /api/orders/:orderId`, além de ajuste de hook-order em `pedidos/[id]`
-- [x] Implementar módulo de configurações no frontend com edição de usuário/empresa e alteração de senha integrada ao Better Auth
-- [x] Implementar módulo de configurações no mobile com Better Auth Expo (auth guard, sessão por cookie manual, edição de usuário/empresa e alteração de senha)
-- [x] Corrigir falha de lint na API por resolução de `typescript-eslint`, alinhar preset compartilhado de ESLint ao estado atual do projeto e remover símbolos não utilizados bloqueantes
-- [x] Habilitar smoke de execução/build web do app mobile Expo com inclusão de `react-native-web` e alinhamento de versão entre `react` e `react-dom`
-- [x] Corrigir autenticação web no mobile Expo usando Better Auth sem plugin Expo no browser e validar fluxo E2E (cadastro, login, persistência de sessão, logout, novo login) via plugin Navegador
-- [x] Corrigir fetches concorrentes em `Clientes` e `Catálogo` no mobile (debounce/race condition), ajustar fallback de `EXPO_PUBLIC_API_URL` por plataforma e validar navegação autenticada na porta `8081` sem erros HTTP
-- [x] Mapear a configuração atual de autenticação entre API, web e mobile para consolidar o fluxo de sessão e os pontos de integração do Better Auth
-- [x] Remover adaptação de GitHub Pages do frontend Next.js e alinhar o deploy ao runtime Node.js da Vercel com rotas dinâmicas reais em produção
-- [x] Corrigir formulários de criação e edição de pedidos para ignorar linhas vazias de catálogo sem bloquear o submit
-- [x] Reforçar fluxo de lançamentos no frontend com navegação imediata após criação e bloqueio explícito da exclusão de lançamentos confirmados
-- [x] Corrigir reconexão do MongoDB na API para preservar o adapter MongoDB do Better Auth e restabelecer cadastro/login após quedas transitórias da conexão
-- [x] Validar no navegador embutido do Codex os fluxos de cadastro, login e CRUDs principais (clientes, catálogo, pedidos e lançamentos), incluindo a correção de viewport que mascarava o save do financeiro em layout mobile
-- [x] Endurecer a API para uso acadêmico com CORS credenciado apenas por allowlist explícita, bypass de autenticação restrito a `development` e healthcheck sem vazamento de erro interno do MongoDB
-- [x] Padronizar a camada HTTP do frontend com `api-client` compartilhado, remover fallback automático para backend remoto e alinhar paginação da API de lançamentos ao mesmo helper usado pelos demais CRUDs
-- [x] Fechar o lint do frontend, tipar o contexto de autenticação e validar em runtime os fluxos principais web após a padronização final dos CRUDs
-- [x] Padronizar os modais de exclusão do frontend no estilo de clientes, removendo confirmações nativas em pedidos e lançamentos
-- [x] Implementar emissão de PDF real no backend para orçamento, ordem de serviço e recibo, com preview web autenticado e ações contextuais nas listas de pedidos e lançamentos
-- [x] Adicionar contato rápido por telefone e WhatsApp na lista de clientes, com normalização compartilhada de telefone no frontend
-- [x] Estabilizar o workspace Expo do mobile e revalidar o bundle web após corrigir a instalação quebrada do `expo`
-- [x] Implementar contato rápido por telefone/WhatsApp e emissão autenticada de documentos no mobile, com menus contextuais em clientes, pedidos e lançamentos
-- [x] Corrigir resolução de `EXPO_PUBLIC_API_URL` no Expo web local para evitar `Failed to fetch` quando o `.env` do mobile apontar para IP de rede
+## Lacunas Atuais
+
+- Nenhuma lacuna local registrada neste momento.

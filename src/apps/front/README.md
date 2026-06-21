@@ -1,36 +1,92 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Web
 
-## Getting Started
+Aplicação web do projeto em Next.js, usada para operação principal no navegador.
 
-First, run the development server:
+## Stack
+
+- Next.js App Router
+- React
+- TypeScript
+- `lucide-react`
+
+## Módulos Atuais
+
+- autenticação
+- dashboard financeiro
+- clientes
+- catálogo
+- pedidos
+- configurações
+- preview de documentos
+
+## Rotas Principais
+
+Auth:
+
+- `/login`
+- `/cadastro`
+
+Área autenticada:
+
+- `/dashboard`
+- `/dashboard/novo`
+- `/dashboard/editar/[id]`
+- `/clientes`
+- `/clientes/novo`
+- `/clientes/[id]`
+- `/catalogo`
+- `/catalogo/novo`
+- `/catalogo/[itemId]`
+- `/pedidos`
+- `/pedidos/novo`
+- `/pedidos/[id]`
+- `/configuracoes`
+
+Preview de documentos:
+
+- `/documentos/orcamento/[orderId]`
+- `/documentos/ordem-servico/[orderId]`
+- `/documentos/recibo/[transactionId]`
+
+## Comportamento Atual
+
+- chamadas HTTP centralizadas em `services/api-client.ts`
+- `NEXT_PUBLIC_API_URL` obrigatório
+- listagem de pedidos usa `clientName` quando fornecido pela API
+- listas de clientes, pedidos e lançamentos expõem ações operacionais diretamente na UI
+- documentos PDF são abertos a partir da API autenticada
+
+## Execução Local
+
+Instalar dependências na raiz:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Rodar o web:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+pnpm --filter front dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Build e lint:
 
-## Learn More
+```bash
+pnpm --filter front build
+pnpm --filter front lint
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Ambiente
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Arquivo esperado no desenvolvimento local:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `apps/front/.env.local`
 
-## Deploy on Vercel
+Variável obrigatória:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+NEXT_PUBLIC_API_URL=http://localhost:3001
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+No setup local do projeto, a convenção é usar o web em `http://localhost:3000`.

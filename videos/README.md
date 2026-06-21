@@ -1,3 +1,4 @@
-# Videos de acompanhamento/apresentação das etapas
+# Vídeos
 
-Faça um vídeo para cada etapa para demonstrar a participação de cada membro do grupo. Utilize esta pasta para salvar cada arquivo de vídeo ou a url de hospedagem.
+Esta pasta é reservada para os vídeos de acompanhamento e apresentação do projeto, ou para arquivos curtos que apontem para a hospedagem desses materiais.
+
