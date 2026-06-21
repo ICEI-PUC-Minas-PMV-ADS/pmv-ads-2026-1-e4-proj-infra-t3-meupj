@@ -157,7 +157,7 @@ https://github.com/user-attachments/assets/ee31d2fb-6872-4000-aff6-9a7ef8f35f80
 
 #### Evidências - Web
 
-Evidência pendente de atualização.
+https://github.com/user-attachments/assets/2bb8c5bc-ca71-41a6-993d-9ed2dd6dd5d3
 
 #### Evidências - Mobile
 
@@ -174,7 +174,7 @@ https://github.com/user-attachments/assets/3dbe98f1-c568-432d-a753-cc281c3a810a
 
 #### Evidências - Web
 
-Evidência pendente de atualização.
+https://github.com/user-attachments/assets/bf4e3a3c-cb64-4caa-a041-b05d33d3b57e
 
 #### Evidências - Mobile
 
@@ -225,7 +225,7 @@ https://github.com/user-attachments/assets/9761bc3b-145b-46f8-8a31-c1676d3e9c1b
 
 #### Evidências - Web
 
-Evidência pendente de atualização.
+https://github.com/user-attachments/assets/67f32681-09af-4437-a552-14a4f107eda7
 
 #### Evidências - Mobile
 
