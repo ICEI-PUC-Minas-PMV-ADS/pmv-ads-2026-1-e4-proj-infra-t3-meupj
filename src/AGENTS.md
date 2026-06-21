@@ -40,6 +40,8 @@
 - App mobile (`apps/mobile`) com autenticação real via Better Auth Expo, guarda de sessão na navegação e módulo de Configurações (usuário, negócio e senha).
 - App mobile (`apps/mobile`) com suporte de execução web via Expo (`expo start --web` e `expo export --platform web`) com `react-native-web` e versões de `react`/`react-dom` alinhadas.
 - Cliente Better Auth do mobile aplica plugin Expo apenas em plataformas nativas; no web usa cliente padrão para evitar dependência de SecureStore no navegador.
+- App mobile (`apps/mobile`) possui ações rápidas de contato na lista de clientes, com telefone (`tel:`) e WhatsApp quando houver número válido.
+- App mobile (`apps/mobile`) possui ações contextuais de documentos nas listas de pedidos e lançamentos, abrindo PDF autenticado no web e baixando/compartilhando externamente no nativo.
 - Base de qualidade com lint, build, testes automatizados (Vitest) e validação de formatação (Prettier).
 - Regras de formatação padronizadas no monorepo (`.prettierignore` e `.prettierrc.json`).
 
@@ -98,9 +100,12 @@
   - Frontend expõe ações operacionais de contato na listagem de clientes via menu por item, sem necessidade de nova integração backend.
   - Frontend possui páginas autenticadas de preview para `/documentos/orcamento/[orderId]`, `/documentos/ordem-servico/[orderId]` e `/documentos/recibo/[transactionId]`, com abertura em nova aba e download do PDF retornado pela API.
   - Frontend Next.js usa o runtime padrão de servidor em produção (`next build` + `next start` / Vercel), preservando rotas dinâmicas reais como `/clientes/[id]`, `/catalogo/[itemId]`, `/pedidos/[id]` e `/dashboard/editar/[id]`.
-  - Mobile com tela autenticada de configurações para edição de usuário/empresa e alteração de senha.
-  - Mobile usa `EXPO_PUBLIC_API_URL` com fallback local por plataforma para alinhar chamadas HTTP com a API (`http://localhost:3001` em web/iOS e `http://10.0.2.2:3001` no emulador Android).
-  - Mobile usa scheme `meupj` para deep link de autenticação no Better Auth Expo.
+- Mobile com tela autenticada de configurações para edição de usuário/empresa e alteração de senha.
+- Mobile resolve a API por plataforma, com `EXPO_PUBLIC_API_URL_WEB` opcional para browser, `EXPO_PUBLIC_API_URL_NATIVE` opcional para native e fallback local seguro para `http://localhost:3001` no web em `localhost`/`127.0.0.1`, evitando quebra do Expo web por IP de rede em `.env`.
+- Mobile usa scheme `meupj` para deep link de autenticação no Better Auth Expo.
+  - Mobile compartilha utilitário de telefone para máscara, normalização BR, `tel:` e `wa.me`, evitando divergência entre cadastro e ações operacionais.
+  - Mobile usa `expo-file-system` e `expo-sharing` para handoff externo de PDFs autenticados em plataformas nativas.
+  - Mobile expõe menu operacional por item em clientes, pedidos e lançamentos recentes, sem depender de tela de detalhe para contato rápido ou emissão de documento.
   - Padrão local para execução simultânea: frontend em `http://localhost:3000` e API em `http://localhost:3001`.
   - Frontend deve definir `NEXT_PUBLIC_API_URL=http://localhost:3001` em `apps/front/.env.local` para alinhar todas as chamadas HTTP.
   - Execução isolada por filtro: `pnpm --filter <projeto> <comando>`.

@@ -1,16 +1,20 @@
 import React, { useState, useCallback, useRef } from 'react';
 import {
-  View,
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  Linking,
+  StyleSheet,
   Text,
   TextInput,
-  FlatList,
   TouchableOpacity,
-  ActivityIndicator,
-  StyleSheet,
+  View,
 } from 'react-native';
 import { ClientsService } from '../../services/clients.service';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import { Plus, User } from 'lucide-react-native';
+import { EllipsisVertical, Plus, User } from 'lucide-react-native';
+import { ActionMenuModal, ConfirmationModal } from '../../components/ui';
+import { getTelHref, getWhatsAppHref } from '../../utils/phone';
 
 const TABS = [
   { key: 'all', label: 'Todos' },
@@ -34,10 +38,14 @@ function getContactInfo(client) {
 export default function ClientsScreen() {
   const navigation = useNavigation();
   const [clients, setClients] = useState([]);
+  const [deletingClient, setDeletingClient] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [search, setSearch] = useState('');
   const [activeTab, setActiveTab] = useState('all');
+  const [selectedClient, setSelectedClient] = useState(null);
+  const [clientPendingDelete, setClientPendingDelete] = useState(null);
+  const [actionClientId, setActionClientId] = useState(null);
 
   const requestIdRef = useRef(0);
 
@@ -83,29 +91,113 @@ export default function ClientsScreen() {
     setActiveTab(key);
   };
 
+  const handleOpenLink = useCallback(async (clientId, url, fallbackMessage) => {
+    try {
+      setActionClientId(clientId);
+      const supported = await Linking.canOpenURL(url);
+
+      if (!supported) {
+        throw new Error(fallbackMessage);
+      }
+
+      await Linking.openURL(url);
+    } catch (err) {
+      Alert.alert('Erro', err instanceof Error ? err.message : fallbackMessage);
+    } finally {
+      setActionClientId(null);
+    }
+  }, []);
+
+  const handleDeleteClient = useCallback(async () => {
+    if (!clientPendingDelete) {
+      return;
+    }
+
+    try {
+      setDeletingClient(true);
+      await ClientsService.delete(clientPendingDelete._id);
+      setClients((prev) => prev.filter((client) => client._id !== clientPendingDelete._id));
+      setClientPendingDelete(null);
+    } catch (err) {
+      Alert.alert('Erro', err instanceof Error ? err.message : 'Falha ao excluir cliente.');
+    } finally {
+      setDeletingClient(false);
+    }
+  }, [clientPendingDelete]);
+
   const renderItem = ({ item }) => {
     const typeStyle = TYPE_COLORS[item.type] || TYPE_COLORS.individual;
+    const telHref = item.phone ? getTelHref(item.phone) : null;
+    const whatsappHref = item.phone ? getWhatsAppHref(item.phone) : null;
+    const isBusy = actionClientId === item._id;
+
     return (
-      <TouchableOpacity
-        style={styles.card}
-        onPress={() => navigation.navigate('ClientDetail', { clientId: item._id })}
-        activeOpacity={0.7}
-      >
+      <View style={styles.card}>
         <View style={styles.avatar}>
           <User size={18} color="#9CA3AF" />
         </View>
-        <View style={styles.cardInfo}>
-          <Text style={styles.cardTitle}>{item.name}</Text>
-          <Text style={styles.cardContact} numberOfLines={1}>
-            {getContactInfo(item)}
-          </Text>
-        </View>
-        <View style={[styles.badge, { backgroundColor: typeStyle.bg }]}>
-          <Text style={[styles.badgeText, { color: typeStyle.text }]}>
-            {TYPE_LABELS[item.type] || item.type}
-          </Text>
-        </View>
-      </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.cardMain}
+          onPress={() => navigation.navigate('ClientDetail', { clientId: item._id })}
+          activeOpacity={0.7}
+        >
+          <View style={styles.cardInfo}>
+            <Text style={styles.cardTitle}>{item.name}</Text>
+            <Text style={styles.cardContact} numberOfLines={1}>
+              {getContactInfo(item)}
+            </Text>
+          </View>
+          <View style={[styles.badge, { backgroundColor: typeStyle.bg }]}>
+            <Text style={[styles.badgeText, { color: typeStyle.text }]}>
+              {TYPE_LABELS[item.type] || item.type}
+            </Text>
+          </View>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.menuButton}
+          onPress={() => setSelectedClient(item)}
+          activeOpacity={0.7}
+        >
+          {isBusy ? (
+            <ActivityIndicator size="small" color="#4F46E5" />
+          ) : (
+            <EllipsisVertical size={18} color="#6B7280" />
+          )}
+        </TouchableOpacity>
+
+        <ActionMenuModal
+          visible={selectedClient?._id === item._id}
+          onClose={() => setSelectedClient(null)}
+          title={item.name}
+          subtitle="Ações rápidas do cliente"
+          actions={[
+            {
+              key: 'call',
+              label: 'Ligar',
+              hidden: !telHref,
+              onPress: () => handleOpenLink(item._id, telHref, 'Não foi possível abrir a ligação.'),
+            },
+            {
+              key: 'whatsapp',
+              label: 'WhatsApp',
+              hidden: !whatsappHref,
+              onPress: () =>
+                handleOpenLink(item._id, whatsappHref, 'Não foi possível abrir o WhatsApp.'),
+            },
+            {
+              key: 'edit',
+              label: 'Editar',
+              onPress: () => navigation.navigate('NewClient', { clientId: item._id }),
+            },
+            {
+              key: 'delete',
+              label: 'Excluir',
+              destructive: true,
+              onPress: () => setClientPendingDelete(item),
+            },
+          ]}
+        />
+      </View>
     );
   };
 
@@ -155,6 +247,25 @@ export default function ClientsScreen() {
           />
         )}
       </View>
+
+      <ConfirmationModal
+        visible={Boolean(clientPendingDelete)}
+        title="Excluir cliente"
+        message={
+          clientPendingDelete
+            ? `Deseja excluir "${clientPendingDelete.name}"? Esta ação não pode ser desfeita.`
+            : ''
+        }
+        confirmLabel="Excluir"
+        destructive
+        loading={deletingClient}
+        onCancel={() => {
+          if (!deletingClient) {
+            setClientPendingDelete(null);
+          }
+        }}
+        onConfirm={handleDeleteClient}
+      />
     </View>
   );
 }
@@ -195,11 +306,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FFF',
-    padding: 14,
+    paddingLeft: 14,
     borderRadius: 12,
     marginBottom: 10,
     borderWidth: 1,
     borderColor: '#E6E9EE',
+  },
+  cardMain: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 14,
+    paddingRight: 10,
   },
   avatar: {
     width: 40,
@@ -219,6 +337,14 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   badgeText: { fontSize: 11, fontWeight: '700' },
+  menuButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 8,
+  },
   error: { color: '#EF4444', padding: 12 },
   empty: { color: '#6B7280', textAlign: 'center', marginTop: 32 },
 });

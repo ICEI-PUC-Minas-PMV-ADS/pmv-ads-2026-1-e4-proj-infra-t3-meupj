@@ -1,17 +1,19 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
+  ActivityIndicator,
+  Alert,
   View,
   Text,
   StyleSheet,
   FlatList,
   TouchableOpacity,
   TextInput,
-  ActivityIndicator,
-  Alert,
   RefreshControl,
   ScrollView,
 } from 'react-native';
-import { Search, Plus, FileText, X } from 'lucide-react-native';
+import { EllipsisVertical, FileText, Plus, Search, X } from 'lucide-react-native';
+import { ActionMenuModal } from '../../components/ui';
+import { DocumentsService } from '../../services/documents.service';
 import { OrdersService } from '../../services/orders.service';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -26,12 +28,12 @@ const STATUS_LABELS = {
 };
 
 const STATUS_COLORS = {
-  draft:           { dot: '#9CA3AF', badge: '#F3F4F6', text: '#4B5563' },
+  draft: { dot: '#9CA3AF', badge: '#F3F4F6', text: '#4B5563' },
   pendingApproval: { dot: '#F59E0B', badge: '#FFFBEB', text: '#B45309' },
-  inProgress:      { dot: '#3B82F6', badge: '#EFF6FF', text: '#1D4ED8' },
-  completed:       { dot: '#10B981', badge: '#ECFDF5', text: '#065F46' },
-  warranty:        { dot: '#8B5CF6', badge: '#F5F3FF', text: '#5B21B6' },
-  cancelled:       { dot: '#EF4444', badge: '#FEF2F2', text: '#991B1B' },
+  inProgress: { dot: '#3B82F6', badge: '#EFF6FF', text: '#1D4ED8' },
+  completed: { dot: '#10B981', badge: '#ECFDF5', text: '#065F46' },
+  warranty: { dot: '#8B5CF6', badge: '#F5F3FF', text: '#5B21B6' },
+  cancelled: { dot: '#EF4444', badge: '#FEF2F2', text: '#991B1B' },
 };
 
 const TABS = [
@@ -53,14 +55,35 @@ function formatDate(iso) {
   return new Date(iso).toLocaleDateString('pt-BR');
 }
 
+function resolveClientLabel(order) {
+  if (order.clientName) {
+    return order.clientName;
+  }
+
+  if (order.clientId && typeof order.clientId === 'object' && order.clientId.name) {
+    return order.clientId.name;
+  }
+
+  return null;
+}
+
+function canEmitBudget(order) {
+  return order.status !== 'cancelled';
+}
+
+function canEmitServiceOrder(order) {
+  return ['inProgress', 'completed', 'warranty'].includes(order.status);
+}
+
 // ─── Order Card ───────────────────────────────────────────────────────────────
 
-const OrderCard = ({ order, onPress }) => {
+const OrderCard = ({ busy, onMenuPress, onPress, order }) => {
   const colors = STATUS_COLORS[order.status] ?? STATUS_COLORS.draft;
   const label = STATUS_LABELS[order.status] ?? order.status;
+  const clientLabel = resolveClientLabel(order);
 
   return (
-    <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.75}>
+    <View style={styles.card}>
       <View style={[styles.cardAccent, { backgroundColor: colors.dot }]} />
       <View style={styles.cardBody}>
         <View style={styles.cardTop}>
@@ -71,18 +94,29 @@ const OrderCard = ({ order, onPress }) => {
               <Text style={[styles.badgeText, { color: colors.text }]}>{label}</Text>
             </View>
           </View>
+          <TouchableOpacity style={styles.menuButton} onPress={onMenuPress} activeOpacity={0.7}>
+            {busy ? (
+              <ActivityIndicator size="small" color="#4F46E5" />
+            ) : (
+              <EllipsisVertical size={18} color="#6B7280" />
+            )}
+          </TouchableOpacity>
+        </View>
+        <TouchableOpacity style={styles.cardBottom} onPress={onPress} activeOpacity={0.75}>
+          {clientLabel ? (
+            <Text style={styles.clientName} numberOfLines={1}>
+              {clientLabel}
+            </Text>
+          ) : (
+            <View />
+          )}
           <View style={styles.cardAmountCol}>
             <Text style={styles.amount}>{formatCurrency(order.total)}</Text>
             <Text style={styles.date}>{formatDate(order.createdAt)}</Text>
           </View>
-        </View>
-        {order.clientId && (
-          <Text style={styles.clientName} numberOfLines={1}>
-            {typeof order.clientId === 'string' ? order.clientId : order.clientId?.name ?? '—'}
-          </Text>
-        )}
+        </TouchableOpacity>
       </View>
-    </TouchableOpacity>
+    </View>
   );
 };
 
@@ -96,24 +130,29 @@ const OrdersScreen = ({ navigation }) => {
   const [search, setSearch] = useState('');
   const [activeTab, setActiveTab] = useState('all');
   const [showSearch, setShowSearch] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [actionOrderId, setActionOrderId] = useState(null);
 
-  const fetchOrders = useCallback(async (opts = {}) => {
-    try {
-      setError('');
-      const query = {
-        sortBy: 'createdAt',
-        sortOrder: 'desc',
-        limit: 50,
-        ...(activeTab !== 'all' && { status: activeTab }),
-        ...(search.trim() && { q: search.trim() }),
-        ...opts,
-      };
-      const res = await OrdersService.list(query);
-      setOrders(res?.data ?? res ?? []);
-    } catch (err) {
-      setError(err.message || 'Erro ao carregar pedidos.');
-    }
-  }, [activeTab, search]);
+  const fetchOrders = useCallback(
+    async (opts = {}) => {
+      try {
+        setError('');
+        const query = {
+          sortBy: 'createdAt',
+          sortOrder: 'desc',
+          limit: 50,
+          ...(activeTab !== 'all' && { status: activeTab }),
+          ...(search.trim() && { q: search.trim() }),
+          ...opts,
+        };
+        const res = await OrdersService.list(query);
+        setOrders(res?.data ?? res ?? []);
+      } catch (err) {
+        setError(err.message || 'Erro ao carregar pedidos.');
+      }
+    },
+    [activeTab, search],
+  );
 
   // Initial load & tab/search debounce
   useEffect(() => {
@@ -151,6 +190,17 @@ const OrdersScreen = ({ navigation }) => {
     });
   };
 
+  const handleDocumentAction = useCallback(async (orderId, action) => {
+    try {
+      setActionOrderId(orderId);
+      await action();
+    } catch (err) {
+      Alert.alert('Erro', err instanceof Error ? err.message : 'Falha ao emitir documento.');
+    } finally {
+      setActionOrderId(null);
+    }
+  }, []);
+
   const renderEmpty = () => (
     <View style={styles.emptyState}>
       <FileText size={48} color="#D1D5DB" />
@@ -179,10 +229,7 @@ const OrdersScreen = ({ navigation }) => {
               style={[styles.iconBtn, showSearch && styles.iconBtnActive]}
               onPress={handleToggleSearch}
             >
-              {showSearch
-                ? <X size={18} color="#4F46E5" />
-                : <Search size={18} color="#6B7280" />
-              }
+              {showSearch ? <X size={18} color="#4F46E5" /> : <Search size={18} color="#6B7280" />}
             </TouchableOpacity>
           </View>
         </View>
@@ -219,9 +266,7 @@ const OrdersScreen = ({ navigation }) => {
                 onPress={() => handleTabChange(tab.key)}
                 activeOpacity={0.7}
               >
-                <Text style={[styles.tabText, active && styles.tabTextActive]}>
-                  {tab.label}
-                </Text>
+                <Text style={[styles.tabText, active && styles.tabTextActive]}>{tab.label}</Text>
               </TouchableOpacity>
             );
           })}
@@ -241,10 +286,45 @@ const OrdersScreen = ({ navigation }) => {
           data={orders}
           keyExtractor={(item) => item._id}
           renderItem={({ item }) => (
-            <OrderCard
-              order={item}
-              onPress={() => navigation.navigate('OrderDetail', { orderId: item._id })}
-            />
+            <>
+              <OrderCard
+                busy={actionOrderId === item._id}
+                order={item}
+                onMenuPress={() => setSelectedOrder(item)}
+                onPress={() => navigation.navigate('OrderDetail', { orderId: item._id })}
+              />
+              <ActionMenuModal
+                visible={selectedOrder?._id === item._id}
+                onClose={() => setSelectedOrder(null)}
+                title={item.orderNumber}
+                subtitle="Ações do pedido"
+                actions={[
+                  {
+                    key: 'open',
+                    label: 'Abrir pedido',
+                    onPress: () => navigation.navigate('OrderDetail', { orderId: item._id }),
+                  },
+                  {
+                    key: 'budget',
+                    label: 'Emitir orçamento',
+                    hidden: !canEmitBudget(item),
+                    onPress: () =>
+                      handleDocumentAction(item._id, () =>
+                        DocumentsService.openBudgetPdf(item._id),
+                      ),
+                  },
+                  {
+                    key: 'service-order',
+                    label: 'Emitir ordem de serviço',
+                    hidden: !canEmitServiceOrder(item),
+                    onPress: () =>
+                      handleDocumentAction(item._id, () =>
+                        DocumentsService.openServiceOrderPdf(item._id),
+                      ),
+                  },
+                ]}
+              />
+            </>
           )}
           ListEmptyComponent={renderEmpty}
           contentContainerStyle={[
@@ -414,6 +494,12 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: 8,
   },
+  cardBottom: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
   cardTitleRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -430,6 +516,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: 'bold',
     color: '#111827',
+    flexShrink: 1,
   },
   badge: {
     paddingHorizontal: 8,
@@ -442,6 +529,7 @@ const styles = StyleSheet.create({
   },
   cardAmountCol: {
     alignItems: 'flex-end',
+    gap: 2,
     flexShrink: 0,
   },
   amount: {
@@ -458,7 +546,16 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#6B7280',
     fontWeight: '500',
-    paddingLeft: 14,
+    flex: 1,
+    paddingRight: 6,
+  },
+  menuButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#F9FAFB',
   },
 
   // States

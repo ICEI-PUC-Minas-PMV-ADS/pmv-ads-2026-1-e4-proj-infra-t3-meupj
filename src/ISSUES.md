@@ -86,3 +86,6 @@
 - [x] Padronizar os modais de exclusão do frontend no estilo de clientes, removendo confirmações nativas em pedidos e lançamentos
 - [x] Implementar emissão de PDF real no backend para orçamento, ordem de serviço e recibo, com preview web autenticado e ações contextuais nas listas de pedidos e lançamentos
 - [x] Adicionar contato rápido por telefone e WhatsApp na lista de clientes, com normalização compartilhada de telefone no frontend
+- [x] Estabilizar o workspace Expo do mobile e revalidar o bundle web após corrigir a instalação quebrada do `expo`
+- [x] Implementar contato rápido por telefone/WhatsApp e emissão autenticada de documentos no mobile, com menus contextuais em clientes, pedidos e lançamentos
+- [x] Corrigir resolução de `EXPO_PUBLIC_API_URL` no Expo web local para evitar `Failed to fetch` quando o `.env` do mobile apontar para IP de rede

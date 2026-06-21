@@ -1,6 +1,6 @@
 import { CONFIG } from '../config';
-import { authClient } from './auth-client';
 import { Platform } from 'react-native';
+import { authClient } from './auth-client';
 
 let unauthorizedHandler = null;
 
@@ -44,6 +44,8 @@ const notifyUnauthorized = () => {
   }
 };
 
+const buildApiUrl = (endpoint) => `${CONFIG.API_URL}${endpoint}`;
+
 const resolveAuthCookie = async () => {
   if (Platform.OS === 'web') {
     return null;
@@ -62,6 +64,42 @@ const resolveAuthCookie = async () => {
   }
 };
 
+const parseResponse = async (response, parseAs) => {
+  if (parseAs === 'none') {
+    return null;
+  }
+
+  if (parseAs === 'text') {
+    return response.text().catch(() => null);
+  }
+
+  if (parseAs === 'blob') {
+    return response.blob();
+  }
+
+  if (parseAs === 'arrayBuffer') {
+    return response.arrayBuffer();
+  }
+
+  return response.json().catch(() => null);
+};
+
+export const getApiUrl = (endpoint) => buildApiUrl(endpoint);
+
+export const resolveAuthorizedHeaders = async (requestHeaders = {}) => {
+  const headers = {
+    ...requestHeaders,
+  };
+
+  const cookie = await resolveAuthCookie();
+
+  if (cookie && cookie.length > 0 && !hasHeader(headers, 'cookie')) {
+    headers.Cookie = cookie;
+  }
+
+  return headers;
+};
+
 export const setUnauthorizedHandler = (handler) => {
   unauthorizedHandler = typeof handler === 'function' ? handler : null;
 
@@ -77,22 +115,15 @@ export const setUnauthorizedHandler = (handler) => {
  * Centraliza headers, autenticação e tratamento de erros.
  */
 export const apiFetch = async (endpoint, options = {}) => {
-  const url = `${CONFIG.API_URL}${endpoint}`;
   const {
+    parseAs = 'json',
     skipUnauthorizedHandler = false,
     headers: requestHeaders = {},
     ...requestOptions
   } = options;
 
-  const headers = {
-    ...requestHeaders,
-  };
-
-  const cookie = await resolveAuthCookie();
-
-  if (cookie && cookie.length > 0 && !hasHeader(headers, 'cookie')) {
-    headers.Cookie = cookie;
-  }
+  const headers = await resolveAuthorizedHeaders(requestHeaders);
+  const cookie = hasHeader(headers, 'cookie');
 
   if (
     requestOptions.body !== undefined &&
@@ -105,7 +136,7 @@ export const apiFetch = async (endpoint, options = {}) => {
   const credentials = requestOptions.credentials ?? (cookie ? 'omit' : 'include');
 
   try {
-    const response = await fetch(url, {
+    const response = await fetch(buildApiUrl(endpoint), {
       method: requestOptions.method || 'GET',
       ...requestOptions,
       headers,
@@ -122,7 +153,7 @@ export const apiFetch = async (endpoint, options = {}) => {
       throw createApiError(message, response.status, payload);
     }
 
-    return await response.json().catch(() => null);
+    return await parseResponse(response, parseAs);
   } catch (error) {
     console.error(`Erro API [${endpoint}]:`, error);
     throw error;

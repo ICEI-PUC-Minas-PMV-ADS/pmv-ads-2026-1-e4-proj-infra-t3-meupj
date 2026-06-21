@@ -1,17 +1,30 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl } from 'react-native';
-import { Plus } from 'lucide-react-native';
+import {
+  ActivityIndicator,
+  Alert,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { EllipsisVertical, Plus } from 'lucide-react-native';
+import { ActionMenuModal } from '../../components/ui';
+import { DocumentsService } from '../../services/documents.service';
 import { TransactionsService } from '../../services/transactions.service';
 
 const DashboardScreen = ({ navigation }) => {
+  const [actionTransactionId, setActionTransactionId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [selectedTransaction, setSelectedTransaction] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [kpis, setKpis] = useState({
     confirmed: 0,
     pending: 0,
     overdue: 0,
-    result: 0
+    result: 0,
   });
 
   const fetchData = async () => {
@@ -21,23 +34,26 @@ const DashboardScreen = ({ navigation }) => {
       setTransactions(allData);
 
       // Calcular KPIs básicos baseados nos lançamentos
-      const stats = allData.reduce((acc, curr) => {
-        const amount = curr.amount || 0;
-        if (curr.displayStatus === 'confirmed') {
-          if (curr.type === 'income') acc.confirmed += amount;
-          else acc.confirmed -= amount; // Custos confirmados reduzem a receita confirmada
-        } else if (curr.displayStatus === 'pending') {
-          acc.pending += amount;
-        } else if (curr.displayStatus === 'overdue') {
-          acc.overdue += amount;
-        }
-        
-        // Resultado (Receitas - Custos)
-        if (curr.type === 'income') acc.result += amount;
-        else acc.result -= amount;
+      const stats = allData.reduce(
+        (acc, curr) => {
+          const amount = curr.amount || 0;
+          if (curr.displayStatus === 'confirmed') {
+            if (curr.type === 'income') acc.confirmed += amount;
+            else acc.confirmed -= amount; // Custos confirmados reduzem a receita confirmada
+          } else if (curr.displayStatus === 'pending') {
+            acc.pending += amount;
+          } else if (curr.displayStatus === 'overdue') {
+            acc.overdue += amount;
+          }
 
-        return acc;
-      }, { confirmed: 0, pending: 0, overdue: 0, result: 0 });
+          // Resultado (Receitas - Custos)
+          if (curr.type === 'income') acc.result += amount;
+          else acc.result -= amount;
+
+          return acc;
+        },
+        { confirmed: 0, pending: 0, overdue: 0, result: 0 },
+      );
 
       setKpis(stats);
     } catch (error) {
@@ -64,47 +80,92 @@ const DashboardScreen = ({ navigation }) => {
     }).format(value);
   };
 
+  const handleReceipt = async (transaction) => {
+    try {
+      setActionTransactionId(transaction._id);
+      await DocumentsService.openReceiptPdf(transaction._id);
+    } catch (error) {
+      Alert.alert('Erro', error instanceof Error ? error.message : 'Falha ao emitir recibo.');
+    } finally {
+      setActionTransactionId(null);
+    }
+  };
+
   const renderTransactionItem = (item) => (
     <View key={item._id} style={styles.transactionItem}>
       <View style={styles.transactionInfo}>
         <Text style={styles.transactionReference}>{item.reference || 'Sem referência'}</Text>
         <Text style={styles.transactionCategory}>{item.category || 'Geral'}</Text>
       </View>
-      <View style={styles.transactionAmountContainer}>
-        <Text style={[
-          styles.transactionAmount, 
-          { color: item.type === 'income' ? '#065F46' : '#991B1B' }
-        ]}>
-          {item.type === 'income' ? '+' : '-'} {formatCurrency(item.amount)}
-        </Text>
-        <Text style={styles.transactionDate}>
-          {new Date(item.transactionDate).toLocaleDateString('pt-BR')}
-        </Text>
+      <View style={styles.transactionRight}>
+        <View style={styles.transactionAmountContainer}>
+          <Text
+            style={[
+              styles.transactionAmount,
+              { color: item.type === 'income' ? '#065F46' : '#991B1B' },
+            ]}
+          >
+            {item.type === 'income' ? '+' : '-'} {formatCurrency(item.amount)}
+          </Text>
+          <Text style={styles.transactionDate}>
+            {new Date(item.transactionDate).toLocaleDateString('pt-BR')}
+          </Text>
+        </View>
+        {item.displayStatus === 'confirmed' ? (
+          <>
+            <TouchableOpacity
+              style={styles.menuButton}
+              onPress={() => setSelectedTransaction(item)}
+              activeOpacity={0.7}
+            >
+              {actionTransactionId === item._id ? (
+                <ActivityIndicator size="small" color="#4F46E5" />
+              ) : (
+                <EllipsisVertical size={18} color="#6B7280" />
+              )}
+            </TouchableOpacity>
+            <ActionMenuModal
+              visible={selectedTransaction?._id === item._id}
+              onClose={() => setSelectedTransaction(null)}
+              title={item.reference || 'Lançamento'}
+              subtitle="Ações do lançamento"
+              actions={[
+                {
+                  key: 'receipt',
+                  label: 'Emitir recibo',
+                  onPress: () => handleReceipt(item),
+                },
+              ]}
+            />
+          </>
+        ) : null}
       </View>
     </View>
   );
 
   return (
-    <ScrollView 
-      style={styles.container} 
+    <ScrollView
+      style={styles.container}
       contentContainerStyle={styles.content}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-      }
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
       <View style={styles.kpiGrid}>
         <View style={[styles.kpiCard, { borderLeftColor: '#10B981' }]}>
           <Text style={styles.kpiLabel}>RECEITA CONFIRMADA</Text>
-          <Text style={[styles.kpiValue, { color: '#065F46' }]}>{formatCurrency(kpis.confirmed)}</Text>
+          <Text style={[styles.kpiValue, { color: '#065F46' }]}>
+            {formatCurrency(kpis.confirmed)}
+          </Text>
           <View style={styles.kpiStatus}>
             <View style={[styles.statusDot, { backgroundColor: '#10B981' }]} />
             <Text style={styles.statusText}>confirmado</Text>
           </View>
         </View>
-        
+
         <View style={[styles.kpiCard, { borderLeftColor: '#3B82F6' }]}>
           <Text style={styles.kpiLabel}>A RECEBER</Text>
-          <Text style={[styles.kpiValue, { color: '#1E40AF' }]}>{formatCurrency(kpis.pending)}</Text>
+          <Text style={[styles.kpiValue, { color: '#1E40AF' }]}>
+            {formatCurrency(kpis.pending)}
+          </Text>
           <View style={styles.kpiStatus}>
             <View style={[styles.statusDot, { backgroundColor: '#3B82F6' }]} />
             <Text style={styles.statusText}>pendente</Text>
@@ -113,7 +174,9 @@ const DashboardScreen = ({ navigation }) => {
 
         <View style={[styles.kpiCard, { borderLeftColor: '#EF4444' }]}>
           <Text style={styles.kpiLabel}>EM ATRASO</Text>
-          <Text style={[styles.kpiValue, { color: '#991B1B' }]}>{formatCurrency(kpis.overdue)}</Text>
+          <Text style={[styles.kpiValue, { color: '#991B1B' }]}>
+            {formatCurrency(kpis.overdue)}
+          </Text>
           <View style={styles.kpiStatus}>
             <View style={[styles.statusDot, { backgroundColor: '#EF4444' }]} />
             <Text style={styles.statusText}>atrasado</Text>
@@ -150,10 +213,7 @@ const DashboardScreen = ({ navigation }) => {
         )}
       </View>
 
-      <TouchableOpacity 
-        style={styles.fab}
-        onPress={() => navigation.navigate('NewTransaction')}
-      >
+      <TouchableOpacity style={styles.fab} onPress={() => navigation.navigate('NewTransaction')}>
         <Plus size={24} color="#FFFFFF" />
       </TouchableOpacity>
     </ScrollView>
@@ -224,10 +284,10 @@ const styles = StyleSheet.create({
     color: '#111827',
   },
   summaryLink: {
-  fontSize: 14,
-  color: '#4F46E5',
-  fontWeight: 'bold',
-  marginTop: 6,
+    fontSize: 14,
+    color: '#4F46E5',
+    fontWeight: 'bold',
+    marginTop: 6,
   },
   transactionList: {
     flex: 1,
@@ -244,7 +304,13 @@ const styles = StyleSheet.create({
     borderColor: '#F3F4F6',
   },
   transactionInfo: {
+    flex: 1,
     gap: 2,
+  },
+  transactionRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
   transactionReference: {
     fontSize: 14,
@@ -258,6 +324,16 @@ const styles = StyleSheet.create({
   transactionAmountContainer: {
     alignItems: 'flex-end',
     gap: 2,
+  },
+  menuButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
   },
   transactionAmount: {
     fontSize: 14,

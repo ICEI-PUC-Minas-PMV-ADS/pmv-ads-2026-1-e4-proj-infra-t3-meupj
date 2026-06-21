@@ -19,8 +19,11 @@ Read the exact versioned docs at https://docs.expo.dev/versions/v56.0.0/ before 
 
 ## Configuração de Ambiente
 
-- Definir `EXPO_PUBLIC_API_URL` para apontar para a API alvo.
+- `EXPO_PUBLIC_API_URL_WEB` sobrescreve a API usada no browser.
+- `EXPO_PUBLIC_API_URL_NATIVE` sobrescreve a API usada em `ios`/`android`.
+- `EXPO_PUBLIC_API_URL` continua como fallback genérico para native e ambientes não-locais.
 - Fallback local padrão por plataforma:
-  - Web/iOS: `http://localhost:3001`.
+  - Web em `localhost`/`127.0.0.1`: `http://localhost:3001`.
+  - iOS local: `http://localhost:3001`.
   - Android Emulator: `http://10.0.2.2:3001`.
 - Scheme do app: `meupj`.
