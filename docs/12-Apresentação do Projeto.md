@@ -36,6 +36,7 @@ Os frameworks e tecnologias escolhidos atenderam às necessidades do projeto, of
 
 ### Comentários sobre a participação individual de cada integrante
 Acredito que o grupo foi bem colaborativo e unido
+
 ### ⁠Análise crítica do projeto desenvolvido
 Acredito que o projeto atingiu os objetivos propostos no início do semestre. Entregamos uma interface web e um aplicativo mobile capazes de atender às principais necessidades do nosso público-alvo: profissionais autônomos e pequenos prestadores de serviço. A aplicação busca centralizar processos simples que fazem parte da rotina desses usuários, oferecendo um sistema de gestão de fácil usabilidade e acesso.
 
@@ -46,3 +47,73 @@ Como limitações, o sistema ainda não possui integração com meios de pagamen
 Como evolução do projeto, podem ser implementadas integrações com gateways de pagamento, envio automático de documentos por e-mail ou WhatsApp e emissão de notas fiscais por meio de serviços externos. Também é possível expandir as funcionalidades de gestão, incluindo controle de estoque, dashboards mais completos e geração de relatórios mais detalhados.
 
 Do ponto de vista da arquitetura, seria interessante adotar mecanismos de cache para otimizar consultas mais frequentes, além de processamento assíncrono para geração de documentos e envio de notificações.
+
+## Bruna Bricio Alvarenga Sampaio
+### **Avaliação dos frameworks e tecnologias utilizados**
+-
+### Quadro visual atualizado de gestão do trabalho no GitHub
+-
+
+### Comentários sobre a participação individual de cada integrante
+-
+
+### ⁠Análise crítica do projeto desenvolvido
+-
+### Propostas de melhorias para a arquitetura e implementação da solução
+-
+
+## Eric Esteves Martins
+### **Avaliação dos frameworks e tecnologias utilizados**
+-
+### Quadro visual atualizado de gestão do trabalho no GitHub
+-
+
+### Comentários sobre a participação individual de cada integrante
+-
+
+### ⁠Análise crítica do projeto desenvolvido
+-
+### Propostas de melhorias para a arquitetura e implementação da solução
+-
+
+## Frederico Furtado Amantino Vieira
+### **Avaliação dos frameworks e tecnologias utilizados**
+-
+### Quadro visual atualizado de gestão do trabalho no GitHub
+-
+
+### Comentários sobre a participação individual de cada integrante
+-
+
+### ⁠Análise crítica do projeto desenvolvido
+-
+### Propostas de melhorias para a arquitetura e implementação da solução
+-
+
+## Guilherme de Andrade Castro Vieira
+### **Avaliação dos frameworks e tecnologias utilizados**
+-
+### Quadro visual atualizado de gestão do trabalho no GitHub
+-
+
+### Comentários sobre a participação individual de cada integrante
+-
+
+### ⁠Análise crítica do projeto desenvolvido
+-
+### Propostas de melhorias para a arquitetura e implementação da solução
+-
+
+## Maria Julia Gonçalves Maia Sales
+### **Avaliação dos frameworks e tecnologias utilizados**
+-
+### Quadro visual atualizado de gestão do trabalho no GitHub
+-
+
+### Comentários sobre a participação individual de cada integrante
+-
+
+### ⁠Análise crítica do projeto desenvolvido
+-
+### Propostas de melhorias para a arquitetura e implementação da solução
+-
