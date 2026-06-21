@@ -14,6 +14,7 @@ import {
 } from '../lib/orders.js';
 import type { ProfileStore } from '../lib/profile.js';
 import type { TransactionsStore } from '../lib/transactions.js';
+import { resolveAuthenticatedProfileId } from './auth-session.js';
 
 export type OrdersRouteDependencies = {
   authService: AuthService;
@@ -282,6 +283,10 @@ export const registerOrdersRoutes = (
   app: FastifyInstance,
   dependencies: OrdersRouteDependencies,
 ): void => {
+  const getAuthenticatedProfileId = (
+    headers: Parameters<AuthService['getSessionFromHeaders']>[0],
+  ) => resolveAuthenticatedProfileId(app, dependencies, headers);
+
   app.get(
     '/api/orders',
     {
@@ -294,21 +299,12 @@ export const registerOrdersRoutes = (
       },
     },
     async (request, reply) => {
-      const session = await dependencies.authService.getSessionFromHeaders(request.headers);
+      const profileId = await getAuthenticatedProfileId(request.headers);
 
-      // Temporary bypass for local development testing
-      let profileId: string;
-      if (!session) {
-        if (app.env.ENABLE_DEV_BYPASS === 'true') {
-          const fallbackProfile = await dependencies.profileStore.ensureByAuthUserId('dev-user-id');
-          profileId = fallbackProfile._id.toHexString();
-        } else {
-          return reply.status(401).send(UnauthorizedPayload);
-        }
-      } else {
-        const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
-        profileId = profile._id.toHexString();
+      if (!profileId) {
+        return reply.status(401).send(UnauthorizedPayload);
       }
+
       const query = request.query as OrderListQuery;
 
       const page = toBoundedPositiveInteger(query.page, PAGE_DEFAULT, MAX_PAGE);
@@ -385,21 +381,12 @@ export const registerOrdersRoutes = (
       },
     },
     async (request, reply) => {
-      const session = await dependencies.authService.getSessionFromHeaders(request.headers);
+      const profileId = await getAuthenticatedProfileId(request.headers);
 
-      // Temporary bypass for local development testing
-      let profileId: string;
-      if (!session) {
-        if (app.env.ENABLE_DEV_BYPASS === 'true') {
-          const fallbackProfile = await dependencies.profileStore.ensureByAuthUserId('dev-user-id');
-          profileId = fallbackProfile._id.toHexString();
-        } else {
-          return reply.status(401).send(UnauthorizedPayload);
-        }
-      } else {
-        const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
-        profileId = profile._id.toHexString();
+      if (!profileId) {
+        return reply.status(401).send(UnauthorizedPayload);
       }
+
       const body = request.body as OrderCreateBody;
 
       const itemIds = body.items.map((i) => new ObjectId(i.catalogItemId));
@@ -489,7 +476,9 @@ export const registerOrdersRoutes = (
           orderId: insertedOrderId,
           type: 'income' as const,
           status: 'pending' as const,
-          amount: schedule.amount,          transactionDate: new Date(schedule.dueDate),          dueDate: new Date(schedule.dueDate),
+          amount: schedule.amount,
+          transactionDate: new Date(schedule.dueDate),
+          dueDate: new Date(schedule.dueDate),
           createdAt: now,
           updatedAt: now,
           ...(schedule.paymentMethod !== undefined && { paymentMethod: schedule.paymentMethod }),
@@ -526,19 +515,10 @@ export const registerOrdersRoutes = (
       },
     },
     async (request, reply) => {
-      const session = await dependencies.authService.getSessionFromHeaders(request.headers);
+      const profileId = await getAuthenticatedProfileId(request.headers);
 
-      let profileId: string;
-      if (!session) {
-        if (app.env.ENABLE_DEV_BYPASS === 'true') {
-          const fallbackProfile = await dependencies.profileStore.ensureByAuthUserId('dev-user-id');
-          profileId = fallbackProfile._id.toHexString();
-        } else {
-          return reply.status(401).send(UnauthorizedPayload);
-        }
-      } else {
-        const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
-        profileId = profile._id.toHexString();
+      if (!profileId) {
+        return reply.status(401).send(UnauthorizedPayload);
       }
 
       const params = request.params as OrderParams;
@@ -579,21 +559,12 @@ export const registerOrdersRoutes = (
       },
     },
     async (request, reply) => {
-      const session = await dependencies.authService.getSessionFromHeaders(request.headers);
+      const profileId = await getAuthenticatedProfileId(request.headers);
 
-      // Temporary bypass for local development testing
-      let profileId: string;
-      if (!session) {
-        if (app.env.ENABLE_DEV_BYPASS === 'true') {
-          const fallbackProfile = await dependencies.profileStore.ensureByAuthUserId('dev-user-id');
-          profileId = fallbackProfile._id.toHexString();
-        } else {
-          return reply.status(401).send(UnauthorizedPayload);
-        }
-      } else {
-        const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
-        profileId = profile._id.toHexString();
+      if (!profileId) {
+        return reply.status(401).send(UnauthorizedPayload);
       }
+
       const params = request.params as OrderParams;
       const orderObjectId = new ObjectId(params.orderId);
       const body = request.body as OrderUpdateBody;

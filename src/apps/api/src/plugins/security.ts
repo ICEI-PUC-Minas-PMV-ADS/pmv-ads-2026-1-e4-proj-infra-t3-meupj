@@ -17,24 +17,28 @@ const parseCorsOrigins = (origins?: string): string[] => {
 export const registerSecurityPlugins = async (app: FastifyInstance): Promise<void> => {
   await app.register(helmet);
 
-  const corsOrigins = parseCorsOrigins(app.env.CORS_ORIGIN);
-  // Adicionar 127.0.0.1 se localhost estiver presente, e vice-versa, para evitar problemas de mismatch
-  if (corsOrigins.some(o => o.includes('localhost:3000'))) {
+  const configuredCorsOrigins = parseCorsOrigins(app.env.CORS_ORIGIN);
+
+  if (configuredCorsOrigins.includes('*')) {
+    app.log.warn(
+      'Ignoring wildcard CORS_ORIGIN because credentialed requests require explicit origins',
+    );
+  }
+
+  const corsOrigins = configuredCorsOrigins.filter((origin) => origin !== '*');
+
+  if (corsOrigins.includes('http://localhost:3000')) {
     corsOrigins.push('http://127.0.0.1:3000');
   }
-  
-  const isWildcard = corsOrigins.includes('*');
-  
+
+  if (corsOrigins.includes('http://127.0.0.1:3000')) {
+    corsOrigins.push('http://localhost:3000');
+  }
+
+  const allowedOrigins = Array.from(new Set(corsOrigins));
+
   await app.register(cors, {
-    origin: isWildcard 
-      ? (origin, cb) => {
-          // If wildcard is set, allow any origin by mirroring it
-          // This is necessary for credentials: true to work
-          cb(null, origin || true);
-        }
-      : corsOrigins.length > 0 
-        ? corsOrigins 
-        : false,
+    origin: allowedOrigins.length > 0 ? allowedOrigins : false,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],

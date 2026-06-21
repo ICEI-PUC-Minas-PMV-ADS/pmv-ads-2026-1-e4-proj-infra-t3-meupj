@@ -6,6 +6,7 @@ import type { AuthService } from '../lib/auth.js';
 import type { ClientStore } from '../lib/clients.js';
 import type { ProfileStore } from '../lib/profile.js';
 import type { TransactionsStore, Transaction } from '../lib/transactions.js';
+import { resolveAuthenticatedProfileId } from './auth-session.js';
 
 const PaymentMethodSchema = Type.Union([
   Type.Literal('pix'),
@@ -126,11 +127,9 @@ const TransactionUpdateSchema = Type.Object(
     category: Type.Optional(Type.String()),
     reference: Type.Optional(Type.String()),
     notes: Type.Optional(Type.String()),
-    status: Type.Optional(Type.Union([
-      Type.Literal('pending'),
-      Type.Literal('confirmed'),
-      Type.Literal('cancelled'),
-    ])),
+    status: Type.Optional(
+      Type.Union([Type.Literal('pending'), Type.Literal('confirmed'), Type.Literal('cancelled')]),
+    ),
   },
   {
     additionalProperties: false,
@@ -185,11 +184,9 @@ const TransactionListQuerySchema = Type.Object(
     limit: Type.Optional(Type.Any()),
     q: Type.Optional(Type.String()),
     type: Type.Optional(Type.Union([Type.Literal('income'), Type.Literal('expense')])),
-    status: Type.Optional(Type.Union([
-      Type.Literal('pending'),
-      Type.Literal('confirmed'),
-      Type.Literal('cancelled'),
-    ])),
+    status: Type.Optional(
+      Type.Union([Type.Literal('pending'), Type.Literal('confirmed'), Type.Literal('cancelled')]),
+    ),
     clientId: Type.Optional(Type.String({ pattern: '^[a-fA-F0-9]{24}$' })),
     orderId: Type.Optional(Type.String({ pattern: '^[a-fA-F0-9]{24}$' })),
     paymentMethod: Type.Optional(PaymentMethodSchema),
@@ -277,7 +274,7 @@ const transactionToResponse = (transaction: WithId<Transaction>) => {
     dueDate: transaction.dueDate ? transaction.dueDate.toISOString() : undefined,
     createdAt: transaction.createdAt.toISOString(),
     updatedAt: transaction.updatedAt.toISOString(),
-    displayStatus: isOverdue ? 'overdue' as const : transaction.status,
+    displayStatus: isOverdue ? ('overdue' as const) : transaction.status,
   };
 };
 
@@ -333,6 +330,10 @@ export const registerTransactionsRoutes = (
   app: FastifyInstance,
   dependencies: TransactionsRouteDependencies,
 ): void => {
+  const getAuthenticatedProfileId = (
+    headers: Parameters<AuthService['getSessionFromHeaders']>[0],
+  ) => resolveAuthenticatedProfileId(app, dependencies, headers);
+
   app.post(
     '/api/transactions/income',
     {
@@ -346,27 +347,20 @@ export const registerTransactionsRoutes = (
       },
     },
     async (request, reply) => {
-      const session = await dependencies.authService.getSessionFromHeaders(request.headers);
+      const profileId = await getAuthenticatedProfileId(request.headers);
 
-      // Temporary bypass for local development testing
-      let profileId: string;
-      if (!session) {
-        if (app.env.ENABLE_DEV_BYPASS === 'true') {
-          // Fallback to a fixed profile or ensure one exists for development
-          const fallbackProfile = await dependencies.profileStore.ensureByAuthUserId('dev-user-id');
-          profileId = fallbackProfile._id.toHexString();
-          app.log.warn('Bypassing authentication for local transaction testing');
-        } else {
-          return reply.status(401).send(UnauthorizedPayload);
-        }
-      } else {
-        const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
-        profileId = profile._id.toHexString();
+      if (!profileId) {
+        return reply.status(401).send(UnauthorizedPayload);
       }
+
       const body = request.body as TransactionCreateBody;
 
       if (body.clientId) {
-        const validClient = await validateClientOwnership(body.clientId, profileId, dependencies.clientsStore);
+        const validClient = await validateClientOwnership(
+          body.clientId,
+          profileId,
+          dependencies.clientsStore,
+        );
 
         if (!validClient) {
           return reply.status(400).send({
@@ -405,27 +399,20 @@ export const registerTransactionsRoutes = (
       },
     },
     async (request, reply) => {
-      const session = await dependencies.authService.getSessionFromHeaders(request.headers);
+      const profileId = await getAuthenticatedProfileId(request.headers);
 
-      // Temporary bypass for local development testing
-      let profileId: string;
-      if (!session) {
-        if (app.env.ENABLE_DEV_BYPASS === 'true') {
-          // Fallback to a fixed profile or ensure one exists for development
-          const fallbackProfile = await dependencies.profileStore.ensureByAuthUserId('dev-user-id');
-          profileId = fallbackProfile._id.toHexString();
-          app.log.warn('Bypassing authentication for local transaction testing');
-        } else {
-          return reply.status(401).send(UnauthorizedPayload);
-        }
-      } else {
-        const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
-        profileId = profile._id.toHexString();
+      if (!profileId) {
+        return reply.status(401).send(UnauthorizedPayload);
       }
+
       const body = request.body as TransactionCreateBody;
 
       if (body.clientId) {
-        const validClient = await validateClientOwnership(body.clientId, profileId, dependencies.clientsStore);
+        const validClient = await validateClientOwnership(
+          body.clientId,
+          profileId,
+          dependencies.clientsStore,
+        );
 
         if (!validClient) {
           return reply.status(400).send({
@@ -464,22 +451,10 @@ export const registerTransactionsRoutes = (
       },
     },
     async (request, reply) => {
-      const session = await dependencies.authService.getSessionFromHeaders(request.headers);
+      const profileId = await getAuthenticatedProfileId(request.headers);
 
-      // Temporary bypass for local development testing
-      let profileId: string;
-      if (!session) {
-        if (app.env.ENABLE_DEV_BYPASS === 'true') {
-          // Fallback to a fixed profile or ensure one exists for development
-          const fallbackProfile = await dependencies.profileStore.ensureByAuthUserId('dev-user-id');
-          profileId = fallbackProfile._id.toHexString();
-          app.log.warn('Bypassing authentication for local transaction testing');
-        } else {
-          return reply.status(401).send(UnauthorizedPayload);
-        }
-      } else {
-        const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
-        profileId = profile._id.toHexString();
+      if (!profileId) {
+        return reply.status(401).send(UnauthorizedPayload);
       }
 
       const params = request.params as TransactionParams;
@@ -511,22 +486,10 @@ export const registerTransactionsRoutes = (
       },
     },
     async (request, reply) => {
-      const session = await dependencies.authService.getSessionFromHeaders(request.headers);
+      const profileId = await getAuthenticatedProfileId(request.headers);
 
-      // Temporary bypass for local development testing
-      let profileId: string;
-      if (!session) {
-        if (app.env.ENABLE_DEV_BYPASS === 'true') {
-          // Fallback to a fixed profile or ensure one exists for development
-          const fallbackProfile = await dependencies.profileStore.ensureByAuthUserId('dev-user-id');
-          profileId = fallbackProfile._id.toHexString();
-          app.log.warn('Bypassing authentication for local transaction testing');
-        } else {
-          return reply.status(401).send(UnauthorizedPayload);
-        }
-      } else {
-        const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
-        profileId = profile._id.toHexString();
+      if (!profileId) {
+        return reply.status(401).send(UnauthorizedPayload);
       }
 
       const query = request.query as any;
@@ -630,22 +593,10 @@ export const registerTransactionsRoutes = (
       },
     },
     async (request, reply) => {
-      const session = await dependencies.authService.getSessionFromHeaders(request.headers);
+      const profileId = await getAuthenticatedProfileId(request.headers);
 
-      // Temporary bypass for local development testing
-      let profileId: string;
-      if (!session) {
-        if (app.env.ENABLE_DEV_BYPASS === 'true') {
-          // Fallback to a fixed profile or ensure one exists for development
-          const fallbackProfile = await dependencies.profileStore.ensureByAuthUserId('dev-user-id');
-          profileId = fallbackProfile._id.toHexString();
-          app.log.warn('Bypassing authentication for local transaction testing');
-        } else {
-          return reply.status(401).send(UnauthorizedPayload);
-        }
-      } else {
-        const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
-        profileId = profile._id.toHexString();
+      if (!profileId) {
+        return reply.status(401).send(UnauthorizedPayload);
       }
 
       const params = request.params as TransactionParams;
@@ -653,7 +604,11 @@ export const registerTransactionsRoutes = (
       const transactionObjectId = new ObjectId(params.transactionId);
 
       if (body.clientId) {
-        const validClient = await validateClientOwnership(body.clientId, profileId, dependencies.clientsStore);
+        const validClient = await validateClientOwnership(
+          body.clientId,
+          profileId,
+          dependencies.clientsStore,
+        );
 
         if (!validClient) {
           return reply.status(400).send({
@@ -680,7 +635,9 @@ export const registerTransactionsRoutes = (
         ...(body.clientId !== undefined && { clientId: body.clientId }),
         ...(body.orderId !== undefined && { orderId: body.orderId }),
         ...(body.amount !== undefined && { amount: body.amount }),
-        ...(body.transactionDate !== undefined && { transactionDate: new Date(body.transactionDate) }),
+        ...(body.transactionDate !== undefined && {
+          transactionDate: new Date(body.transactionDate),
+        }),
         ...(body.dueDate !== undefined && { dueDate: new Date(body.dueDate) }),
         ...(body.paymentMethod !== undefined && { paymentMethod: body.paymentMethod }),
         ...(body.category !== undefined && { category: body.category }),
@@ -726,22 +683,10 @@ export const registerTransactionsRoutes = (
       },
     },
     async (request, reply) => {
-      const session = await dependencies.authService.getSessionFromHeaders(request.headers);
+      const profileId = await getAuthenticatedProfileId(request.headers);
 
-      // Temporary bypass for local development testing
-      let profileId: string;
-      if (!session) {
-        if (app.env.ENABLE_DEV_BYPASS === 'true') {
-          // Fallback to a fixed profile or ensure one exists for development
-          const fallbackProfile = await dependencies.profileStore.ensureByAuthUserId('dev-user-id');
-          profileId = fallbackProfile._id.toHexString();
-          app.log.warn('Bypassing authentication for local transaction testing');
-        } else {
-          return reply.status(401).send(UnauthorizedPayload);
-        }
-      } else {
-        const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
-        profileId = profile._id.toHexString();
+      if (!profileId) {
+        return reply.status(401).send(UnauthorizedPayload);
       }
 
       const params = request.params as TransactionParams;
@@ -787,22 +732,10 @@ export const registerTransactionsRoutes = (
       },
     },
     async (request, reply) => {
-      const session = await dependencies.authService.getSessionFromHeaders(request.headers);
+      const profileId = await getAuthenticatedProfileId(request.headers);
 
-      // Temporary bypass for local development testing
-      let profileId: string;
-      if (!session) {
-        if (app.env.ENABLE_DEV_BYPASS === 'true') {
-          // Fallback to a fixed profile or ensure one exists for development
-          const fallbackProfile = await dependencies.profileStore.ensureByAuthUserId('dev-user-id');
-          profileId = fallbackProfile._id.toHexString();
-          app.log.warn('Bypassing authentication for local transaction testing');
-        } else {
-          return reply.status(401).send(UnauthorizedPayload);
-        }
-      } else {
-        const profile = await dependencies.profileStore.ensureByAuthUserId(session.user.id);
-        profileId = profile._id.toHexString();
+      if (!profileId) {
+        return reply.status(401).send(UnauthorizedPayload);
       }
 
       const params = request.params as TransactionParams;

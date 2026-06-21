@@ -114,9 +114,7 @@ export const createOnUserCreatedHook = (
 ): ((user: unknown) => Promise<void>) => {
   return async (user: unknown): Promise<void> => {
     const authUserId = resolveAuthUserId(user);
-    console.log('[AuthService] Novo usuário detectado pelo hook! Criando perfil para:', authUserId);
     await profileStore.ensureByAuthUserId(authUserId);
-    console.log('[AuthService] Perfil criado com sucesso para:', authUserId);
   };
 };
 
@@ -176,12 +174,6 @@ export const createAuthService = (options: CreateAuthServiceOptions): AuthServic
       const session = await auth.api.getSession({
         headers: nodeHeaders,
       });
-
-      if (!session) {
-        console.log(`[AuthService] Sessão NÃO encontrada para os headers enviados.`);
-      } else {
-        console.log('[AuthService] Sessão validada para:', (session as any).user?.email);
-      }
 
       return parseAuthSession(session);
     },

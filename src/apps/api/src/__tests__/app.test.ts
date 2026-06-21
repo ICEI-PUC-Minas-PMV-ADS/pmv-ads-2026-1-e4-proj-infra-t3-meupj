@@ -224,7 +224,7 @@ describe('health route', () => {
     expect(response.statusCode).toBe(503);
     expect(response.json()).toEqual({
       error: 'ServiceUnavailable',
-      message: 'MongoDB is unavailable: connection refused',
+      message: 'MongoDB is unavailable',
       statusCode: 503,
     });
   });
@@ -334,7 +334,7 @@ describe('CORS config', () => {
     expect(blocked.headers['access-control-allow-credentials']).toBeUndefined();
   });
 
-  it('allows all origins when wildcard is used, supporting credentials by mirroring', async () => {
+  it('ignores wildcard CORS origins for credentialed requests', async () => {
     app = await buildTestApp({
       envData: {
         CORS_ORIGIN: '*',
@@ -350,8 +350,8 @@ describe('CORS config', () => {
       },
     });
 
-    expect(response.headers['access-control-allow-origin']).toBe(origin);
-    expect(response.headers['access-control-allow-credentials']).toBe('true');
+    expect(response.headers['access-control-allow-origin']).toBeUndefined();
+    expect(response.headers['access-control-allow-credentials']).toBeUndefined();
   });
 });
 

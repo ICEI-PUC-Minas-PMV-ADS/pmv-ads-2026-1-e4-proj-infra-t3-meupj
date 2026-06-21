@@ -57,9 +57,7 @@ export default function NovoLancamentoPage() {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const submitTransaction = async () => {
     if (!amount || parseFloat(amount.replace(',', '.')) <= 0) {
       addToast('Por favor, insira um valor válido.', 'warning');
       return;
@@ -85,19 +83,18 @@ export default function NovoLancamentoPage() {
       if (status === 'confirmed' && transaction.status !== 'confirmed') {
         await TransactionsService.confirm(transaction._id);
       }
-
-      addToast('Lançamento realizado com sucesso!', 'success');
-      
-      setTimeout(() => {
-        router.push('/dashboard');
-        router.refresh();
-      }, 1500);
+      router.replace('/dashboard');
     } catch (err) {
       console.error('Erro ao salvar lançamento:', err);
       addToast(err instanceof Error ? err.message : 'Ocorreu um erro ao salvar o lançamento.', 'error');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await submitTransaction();
   };
 
   return (
@@ -124,8 +121,9 @@ export default function NovoLancamentoPage() {
         </div>
       </div>
 
-      <div className="flex-1 p-6 md:p-10 max-w-3xl mx-auto w-full animate-in fade-in slide-in-from-bottom-4 duration-500 overflow-y-auto pb-48 md:pb-32">
-        <form id="transaction-form" onSubmit={handleSubmit} className="flex flex-col gap-8">
+      <form id="transaction-form" onSubmit={handleSubmit} className="contents">
+        <div className="flex-1 p-6 md:p-10 max-w-3xl mx-auto w-full animate-in fade-in slide-in-from-bottom-4 duration-500 overflow-y-auto pb-48 md:pb-32">
+          <div className="flex flex-col gap-8">
           
           {/* Tipo */}
           <div className="flex bg-gray-100/80 p-1 rounded-xl h-[48px]">
@@ -290,24 +288,25 @@ export default function NovoLancamentoPage() {
             />
           </div>
 
-        </form>
-      </div>
+          </div>
+        </div>
 
-      {/* Footer Actions */}
-      <div className="bg-white border-t border-gray-100 px-6 py-4 flex items-center justify-end gap-3 fixed bottom-0 left-0 md:left-[72px] right-0 z-30 pb-safe">
-        <Link href="/dashboard" className="px-5 py-2.5 rounded-xl text-sm font-semibold text-gray-600 bg-white border border-gray-200 hover:bg-gray-50 hover:text-gray-900 transition-all active:scale-95">
-          Cancelar
-        </Link>
-        <button 
-          type="submit" 
-          form="transaction-form"
-          disabled={loading}
-          className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-600/20 transition-all active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2"
-        >
-          {loading && <Loader2 size={16} className="animate-spin" />}
-          Salvar lançamento
-        </button>
-      </div>
+        {/* Footer Actions */}
+        <div className="bg-white border-t border-gray-100 px-6 py-4 flex items-center justify-end gap-3 fixed bottom-0 left-0 md:left-[72px] right-0 z-30 pb-safe">
+          <Link href="/dashboard" className="px-5 py-2.5 rounded-xl text-sm font-semibold text-gray-600 bg-white border border-gray-200 hover:bg-gray-50 hover:text-gray-900 transition-all active:scale-95">
+            Cancelar
+          </Link>
+          <button 
+            type="button"
+            onClick={() => void submitTransaction()}
+            disabled={loading}
+            className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-600/20 transition-all active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2"
+          >
+            {loading && <Loader2 size={16} className="animate-spin" />}
+            Salvar lançamento
+          </button>
+        </div>
+      </form>
     </div>
   );
 }

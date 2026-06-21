@@ -26,6 +26,7 @@ export default function EditTransactionClient({ params }: EditTransactionClientP
   const [submitting, setSubmitting] = useState(false);
   const [orders, setOrders] = useState<Order[]>([]);
   const [toasts, setToasts] = useState<ToastState[]>([]);
+  const [transaction, setTransaction] = useState<Transaction | null>(null);
   
   // Form States
   const [tipo, setTipo] = useState<'income' | 'expense'>('income');
@@ -38,6 +39,18 @@ export default function EditTransactionClient({ params }: EditTransactionClientP
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | ''>('');
   const [reference, setReference] = useState('');
   const [notes, setNotes] = useState('');
+
+  const addToast = (message: string, variant: 'success' | 'error' | 'warning') => {
+    const toastId = Date.now();
+    setToasts((prev) => [...prev, { id: toastId, message, variant }]);
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((toast) => toast.id !== toastId));
+    }, 5000);
+  };
+
+  const removeToast = (toastId: number) => {
+    setToasts((prev) => prev.filter((toast) => toast.id !== toastId));
+  };
 
   // Fetch initial data
   useEffect(() => {
@@ -52,6 +65,7 @@ export default function EditTransactionClient({ params }: EditTransactionClientP
         ]);
 
         setOrders(ordersResponse.data || []);
+        setTransaction(transaction);
         
         // Fill form
         setTipo(transaction.type);
@@ -76,21 +90,7 @@ export default function EditTransactionClient({ params }: EditTransactionClientP
     fetchData();
   }, [id]);
 
-  const addToast = (message: string, variant: 'success' | 'error' | 'warning') => {
-    const toastId = Date.now();
-    setToasts((prev) => [...prev, { id: toastId, message, variant }]);
-    setTimeout(() => {
-      setToasts((prev) => prev.filter((t) => t.id !== toastId));
-    }, 5000);
-  };
-
-  const removeToast = (toastId: number) => {
-    setToasts((prev) => prev.filter((t) => t.id !== toastId));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const submitTransaction = async () => {
     if (!amount || parseFloat(amount.replace(',', '.')) <= 0) {
       addToast('Por favor, insira um valor válido.', 'warning');
       return;
@@ -111,14 +111,9 @@ export default function EditTransactionClient({ params }: EditTransactionClientP
         status: status,
       };
 
-      await TransactionsService.update(id, payload);
-      
-      addToast('Lançamento atualizado com sucesso!', 'success');
-      
-      setTimeout(() => {
-        router.push('/dashboard');
-        router.refresh();
-      }, 1500);
+      const updatedTransaction = await TransactionsService.update(id, payload);
+      setTransaction(updatedTransaction);
+      router.replace('/dashboard');
     } catch (err) {
       console.error('Erro ao atualizar lançamento:', err);
       addToast(err instanceof Error ? err.message : 'Ocorreu um erro ao atualizar o lançamento.', 'error');
@@ -127,17 +122,23 @@ export default function EditTransactionClient({ params }: EditTransactionClientP
     }
   };
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await submitTransaction();
+  };
+
   const handleDelete = async () => {
+    if (transaction?.status === 'confirmed') {
+      addToast('Lançamentos confirmados não podem ser excluídos.', 'warning');
+      return;
+    }
+
     if (!confirm('Tem certeza que deseja excluir este lançamento?')) return;
     
     setSubmitting(true);
     try {
       await TransactionsService.delete(id);
-      addToast('Lançamento excluído com sucesso!', 'success');
-      setTimeout(() => {
-        router.push('/dashboard');
-        router.refresh();
-      }, 1500);
+      router.replace('/dashboard');
     } catch (err) {
       console.error('Erro ao excluir lançamento:', err);
       addToast(err instanceof Error ? err.message : 'Não foi possível excluir este lançamento.', 'error');
@@ -179,15 +180,17 @@ export default function EditTransactionClient({ params }: EditTransactionClientP
         </div>
         <button 
           onClick={handleDelete}
-          className="text-red-500 hover:text-red-700 p-2 rounded-lg hover:bg-red-50 transition-colors"
-          title="Excluir lançamento"
+          disabled={submitting || transaction?.status === 'confirmed'}
+          className="text-red-500 hover:text-red-700 p-2 rounded-lg hover:bg-red-50 transition-colors disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-red-500"
+          title={transaction?.status === 'confirmed' ? 'Lançamentos confirmados não podem ser excluídos' : 'Excluir lançamento'}
         >
           <Trash2 size={20} />
         </button>
       </div>
 
-      <div className="flex-1 p-6 md:p-10 max-w-3xl mx-auto w-full animate-in fade-in slide-in-from-bottom-4 duration-500 overflow-y-auto pb-48 md:pb-32">
-        <form id="transaction-form" onSubmit={handleSubmit} className="flex flex-col gap-8">
+      <form id="transaction-form" onSubmit={handleSubmit} className="contents">
+        <div className="flex-1 p-6 md:p-10 max-w-3xl mx-auto w-full animate-in fade-in slide-in-from-bottom-4 duration-500 overflow-y-auto pb-48 md:pb-32">
+          <div className="flex flex-col gap-8">
           
           {/* Tipo (Exibição apenas, geralmente não se muda o tipo de um lançamento pronto) */}
           <div className="flex bg-gray-100/80 p-1 rounded-xl h-[48px] opacity-70 cursor-not-allowed">
@@ -345,24 +348,25 @@ export default function EditTransactionClient({ params }: EditTransactionClientP
             />
           </div>
 
-        </form>
-      </div>
+          </div>
+        </div>
 
-      {/* Footer Actions */}
-      <div className="bg-white border-t border-gray-100 px-6 py-4 flex items-center justify-end gap-3 fixed bottom-0 left-0 md:left-[72px] right-0 z-30 pb-safe">
-        <Link href="/dashboard" className="px-5 py-2.5 rounded-xl text-sm font-semibold text-gray-600 bg-white border border-gray-200 hover:bg-gray-50 hover:text-gray-900 transition-all active:scale-95">
-          Cancelar
-        </Link>
-        <button 
-          type="submit" 
-          form="transaction-form"
-          disabled={submitting}
-          className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-600/20 transition-all active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2"
-        >
-          {submitting && <Loader2 size={16} className="animate-spin" />}
-          Salvar alterações
-        </button>
-      </div>
+        {/* Footer Actions */}
+        <div className="bg-white border-t border-gray-100 px-6 py-4 flex items-center justify-end gap-3 fixed bottom-0 left-0 md:left-[72px] right-0 z-30 pb-safe">
+          <Link href="/dashboard" className="px-5 py-2.5 rounded-xl text-sm font-semibold text-gray-600 bg-white border border-gray-200 hover:bg-gray-50 hover:text-gray-900 transition-all active:scale-95">
+            Cancelar
+          </Link>
+          <button 
+            type="button"
+            onClick={() => void submitTransaction()}
+            disabled={submitting}
+            className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-600/20 transition-all active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2"
+          >
+            {submitting && <Loader2 size={16} className="animate-spin" />}
+            Salvar alterações
+          </button>
+        </div>
+      </form>
     </div>
   );
 }

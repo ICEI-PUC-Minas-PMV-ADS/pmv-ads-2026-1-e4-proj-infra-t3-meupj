@@ -11,7 +11,7 @@
 - Configuração compartilhada de engenharia em `packages/tsconfig` e `packages/eslint-config`.
 - Configuração compartilhada de ESLint em `packages/eslint-config` usa preset `typescript-eslint` `recommended` (sem type-check estrito), compatível com o estado atual do `tsconfig` da API.
 - Configuração de ambiente tipada e validada com `@fastify/env` + TypeBox.
-- Camada de dados com MongoDB centralizada em `lib/mongo.ts`, incluindo healthcheck e reconexão.
+- Camada de dados com MongoDB centralizada em `lib/mongo.ts`, incluindo healthcheck, reconexão e preservação da instância do client para manter Better Auth funcional após quedas transitórias.
 - Autenticação centralizada com Better Auth (`/api/auth/*`) integrada ao Fastify.
 - Adapter MongoDB oficial do Better Auth com persistência de usuários/sessões no banco principal.
 - Fluxo de autenticação por email/senha habilitado com sessão via cookie.
@@ -29,6 +29,9 @@
 - Endpoint autenticado `GET /api/orders` com paginação robusta (aceita `page` e `limit` como string numérica de querystring ou inteiro).
 - Endpoint autenticado `GET /api/orders/:orderId` para detalhamento de pedido no escopo do perfil.
 - Camada base HTTP com CORS, error handler global e endpoint de health (`GET /api/health`).
+- CORS credenciado da API aceita apenas origens explícitas; `CORS_ORIGIN=*` é ignorado por segurança.
+- Bypass de autenticação da API só é efetivo com `NODE_ENV=development`.
+- App web (`apps/front`) alinhado ao deploy Node.js da Vercel, sem `output: 'export'`, sem `basePath` de GitHub Pages e com rotas dinâmicas de detalhe/edição servidas sob demanda.
 - App mobile (`apps/mobile`) com autenticação real via Better Auth Expo, guarda de sessão na navegação e módulo de Configurações (usuário, negócio e senha).
 - App mobile (`apps/mobile`) com suporte de execução web via Expo (`expo start --web` e `expo export --platform web`) com `react-native-web` e versões de `react`/`react-dom` alinhadas.
 - Cliente Better Auth do mobile aplica plugin Expo apenas em plataformas nativas; no web usa cliente padrão para evitar dependência de SecureStore no navegador.
@@ -76,13 +79,14 @@
   - Coleção Bruno (`apps/api/bruno/meupj`) com requests de health, sign-up, sign-in, profile e catalog.
   - Variáveis obrigatórias de auth: `BETTER_AUTH_SECRET` e `BETTER_AUTH_URL`.
   - Endpoint de health para status de aplicação e dependências.
-  - Segurança/CORS e tratamento global de erros.
-  - Integração MongoDB com monitoramento de conectividade.
+  - Segurança/CORS e tratamento global de erros, com CORS credenciado restrito a origens explícitas.
+  - Integração MongoDB com monitoramento de conectividade e reconexão compatível com o adapter MongoDB do Better Auth.
   - Testes automatizados com Vitest.
 - Recursos operacionais:
   - Scripts de desenvolvimento, build, lint e teste por workspace.
   - Scripts de formatação e validação de formatação (`format` e `format:check`) por workspace.
   - Frontend com rota autenticada `/configuracoes` para edição de perfil do usuário, dados da empresa e alteração de senha.
+  - Frontend Next.js usa o runtime padrão de servidor em produção (`next build` + `next start` / Vercel), preservando rotas dinâmicas reais como `/clientes/[id]`, `/catalogo/[itemId]`, `/pedidos/[id]` e `/dashboard/editar/[id]`.
   - Mobile com tela autenticada de configurações para edição de usuário/empresa e alteração de senha.
   - Mobile usa `EXPO_PUBLIC_API_URL` com fallback local por plataforma para alinhar chamadas HTTP com a API (`http://localhost:3001` em web/iOS e `http://10.0.2.2:3001` no emulador Android).
   - Mobile usa scheme `meupj` para deep link de autenticação no Better Auth Expo.

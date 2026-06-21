@@ -74,3 +74,10 @@
 - [x] Habilitar smoke de execução/build web do app mobile Expo com inclusão de `react-native-web` e alinhamento de versão entre `react` e `react-dom`
 - [x] Corrigir autenticação web no mobile Expo usando Better Auth sem plugin Expo no browser e validar fluxo E2E (cadastro, login, persistência de sessão, logout, novo login) via plugin Navegador
 - [x] Corrigir fetches concorrentes em `Clientes` e `Catálogo` no mobile (debounce/race condition), ajustar fallback de `EXPO_PUBLIC_API_URL` por plataforma e validar navegação autenticada na porta `8081` sem erros HTTP
+- [x] Mapear a configuração atual de autenticação entre API, web e mobile para consolidar o fluxo de sessão e os pontos de integração do Better Auth
+- [x] Remover adaptação de GitHub Pages do frontend Next.js e alinhar o deploy ao runtime Node.js da Vercel com rotas dinâmicas reais em produção
+- [x] Corrigir formulários de criação e edição de pedidos para ignorar linhas vazias de catálogo sem bloquear o submit
+- [x] Reforçar fluxo de lançamentos no frontend com navegação imediata após criação e bloqueio explícito da exclusão de lançamentos confirmados
+- [x] Corrigir reconexão do MongoDB na API para preservar o adapter MongoDB do Better Auth e restabelecer cadastro/login após quedas transitórias da conexão
+- [x] Validar no navegador embutido do Codex os fluxos de cadastro, login e CRUDs principais (clientes, catálogo, pedidos e lançamentos), incluindo a correção de viewport que mascarava o save do financeiro em layout mobile
+- [x] Endurecer a API para uso acadêmico com CORS credenciado apenas por allowlist explícita, bypass de autenticação restrito a `development` e healthcheck sem vazamento de erro interno do MongoDB

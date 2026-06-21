@@ -42,6 +42,14 @@ interface LineItem {
   unitPrice: number;
 }
 
+const createEmptyLineItem = (): LineItem => ({
+  id: Date.now() + Math.floor(Math.random() * 1000),
+  catalogItemId: '',
+  name: '',
+  quantity: 1,
+  unitPrice: 0,
+});
+
 const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
   pix: 'Pix',
   cash: 'Dinheiro',
@@ -77,9 +85,7 @@ export default function NovoPedidoPage() {
   const [paymentTerms, setPaymentTerms] = useState('');
   const [discount, setDiscount] = useState(0);
   const [fees, setFees] = useState(0);
-  const [items, setItems] = useState<LineItem[]>([
-    { id: Date.now(), catalogItemId: '', name: '', quantity: 1, unitPrice: 0 },
-  ]);
+  const [items, setItems] = useState<LineItem[]>([createEmptyLineItem()]);
 
   // UI state
   const [loading, setLoading] = useState(false);
@@ -91,10 +97,14 @@ export default function NovoPedidoPage() {
 
   // ─── Item helpers ───────────────────────────────────────────────────────────
   const addItem = () =>
-    setItems((prev) => [
-      ...prev,
-      { id: Date.now(), catalogItemId: '', name: '', quantity: 1, unitPrice: 0 },
-    ]);
+    setItems((prev) => {
+      const hasIncompleteItem = prev.some((item) => item.catalogItemId.trim().length === 0);
+      if (hasIncompleteItem) {
+        return prev;
+      }
+
+      return [...prev, createEmptyLineItem()];
+    });
 
   const removeItem = (id: number) =>
     setItems((prev) => prev.filter((i) => i.id !== id));
@@ -124,6 +134,8 @@ export default function NovoPedidoPage() {
   const handleSubmit = useCallback(async (targetStatus: OrderStatus) => {
     setError('');
 
+    const sanitizedItems = items.filter((item) => item.catalogItemId.trim().length > 0);
+
     const payload = {
       clientId: clientId || null,
       status: targetStatus,
@@ -132,7 +144,10 @@ export default function NovoPedidoPage() {
       paymentTerms: paymentTerms || undefined,
       discount: discount > 0 ? discount : undefined,
       fees: fees > 0 ? fees : undefined,
-      items: items.map((i) => ({ catalogItemId: i.catalogItemId, quantity: i.quantity })),
+      items: sanitizedItems.map((item) => ({
+        catalogItemId: item.catalogItemId,
+        quantity: item.quantity,
+      })),
     };
 
     const validation = orderSchema.safeParse(payload);
@@ -151,7 +166,7 @@ export default function NovoPedidoPage() {
     } finally {
       setLoading(false);
     }
-  }, [clientId, status, reference, paymentMethods, paymentTerms, discount, fees, items, router]);
+  }, [clientId, reference, paymentMethods, paymentTerms, discount, fees, items, router]);
 
   return (
     <div className="flex flex-col h-full bg-white">
@@ -394,4 +409,3 @@ export default function NovoPedidoPage() {
     </div>
   );
 }
-

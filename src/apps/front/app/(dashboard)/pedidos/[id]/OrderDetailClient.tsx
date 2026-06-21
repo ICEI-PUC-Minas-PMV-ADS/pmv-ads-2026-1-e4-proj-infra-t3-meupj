@@ -34,6 +34,14 @@ interface LineItem {
   unitPrice: number;
 }
 
+const createEmptyLineItem = (): LineItem => ({
+  id: Date.now() + Math.floor(Math.random() * 1000),
+  catalogItemId: '',
+  name: '',
+  quantity: 1,
+  unitPrice: 0,
+});
+
 // ─── Mocks ────────────────────────────────────────────────────────────────────
 // Removidos mocks, utilizando contexts e serviços reais
 
@@ -90,9 +98,7 @@ export default function PedidoDetalhePage() {
   const [paymentTerms, setPaymentTerms] = useState('');
   const [discount, setDiscount] = useState(0);
   const [fees, setFees] = useState(0);
-  const [items, setItems] = useState<LineItem[]>([
-    { id: Date.now(), catalogItemId: '', name: '', quantity: 1, unitPrice: 0 }
-  ]);
+  const [items, setItems] = useState<LineItem[]>([createEmptyLineItem()]);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -139,7 +145,14 @@ export default function PedidoDetalhePage() {
   const total = subtotal - discount + fees;
 
   const addItem = () =>
-    setItems((p) => [...p, { id: Date.now(), catalogItemId: '', name: '', quantity: 1, unitPrice: 0 }]);
+    setItems((currentItems) => {
+      const hasIncompleteItem = currentItems.some((item) => item.catalogItemId.trim().length === 0);
+      if (hasIncompleteItem) {
+        return currentItems;
+      }
+
+      return [...currentItems, createEmptyLineItem()];
+    });
 
   const removeItem = (itemId: number) =>
     setItems((p) => p.filter((i) => i.id !== itemId));
@@ -165,6 +178,8 @@ export default function PedidoDetalhePage() {
     setError('');
     setSuccess(false);
 
+    const sanitizedItems = items.filter((item) => item.catalogItemId.trim().length > 0);
+
     const payload = {
       clientId: clientId || null,
       status,
@@ -173,7 +188,10 @@ export default function PedidoDetalhePage() {
       paymentTerms: paymentTerms || undefined,
       discount: discount > 0 ? discount : undefined,
       fees: fees > 0 ? fees : undefined,
-      items: items.map((i) => ({ catalogItemId: i.catalogItemId, quantity: i.quantity })),
+      items: sanitizedItems.map((item) => ({
+        catalogItemId: item.catalogItemId,
+        quantity: item.quantity,
+      })),
     };
 
     const validation = orderSchema.safeParse(payload);
