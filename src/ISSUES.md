@@ -12,3 +12,4 @@ Este arquivo não funciona mais como backlog local nem como histórico de entreg
 ## Lacunas Atuais
 
 - Artefatos visuais acadêmicos em `../docs/` ainda dependem de atualização manual de diagramas, wireframes e evidências de tela para refletir integralmente o estado atual da implementação.
+- O ambiente local precisa usar Node.js `24.x` para validar paridade completa com o runtime alvo de deploy em Vercel e Render.

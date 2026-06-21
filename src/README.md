@@ -62,7 +62,7 @@ src/
 
 Pré-requisitos:
 
-- Node.js `>= 25`
+- Node.js `24.x`
 - `pnpm`
 - MongoDB acessível localmente
 

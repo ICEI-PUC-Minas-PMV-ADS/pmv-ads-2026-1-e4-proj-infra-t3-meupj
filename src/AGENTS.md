@@ -29,6 +29,7 @@
 
 ## Convenções Locais
 
+Node.js `24.x`
 - Web: `http://localhost:3000`
 - API: `http://localhost:3001`
 - Mobile web: servidor do Expo, normalmente em `http://localhost:8081`
