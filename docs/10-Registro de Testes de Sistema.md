@@ -143,7 +143,8 @@ Evidência pendente de atualização.
 
 #### Evidências - Mobile
 
-Evidência pendente de atualização.
+https://github.com/user-attachments/assets/ee31d2fb-6872-4000-aff6-9a7ef8f35f80
+
 
 ### RF 009 - O sistema deve permitir que o usuário edite pedidos, incluindo status válidos e composição dos itens
 
@@ -160,7 +161,7 @@ Evidência pendente de atualização.
 
 #### Evidências - Mobile
 
-Evidência pendente de atualização.
+https://github.com/user-attachments/assets/3dbe98f1-c568-432d-a753-cc281c3a810a
 
 ### RF 010 - O sistema deve permitir que o usuário exclua pedidos quando não houver impedimento pelas regras do negócio
 
@@ -177,7 +178,7 @@ Evidência pendente de atualização.
 
 #### Evidências - Mobile
 
-Evidência pendente de atualização.
+https://github.com/user-attachments/assets/1c2b0215-5bc4-4c6b-b51e-1f67f2fc67e2
 
 ### RF 011 - O sistema deve permitir que o usuário busque e filtre pedidos por texto, cliente e status
 
@@ -194,7 +195,7 @@ https://github.com/user-attachments/assets/51dacbd0-d68f-4290-a695-77978db0d038
 
 #### Evidências - Mobile
 
-Evidência pendente de atualização.
+https://github.com/user-attachments/assets/907dd767-43c9-42fe-8598-e4834248c234
 
 ### RF 012 - O sistema deve permitir que o usuário cadastre serviços e produtos no catálogo
 
@@ -211,7 +212,7 @@ https://github.com/user-attachments/assets/3685b74e-f29f-429d-b0d6-35937a4a9e10
 
 #### Evidências - Mobile
 
-Evidência pendente de atualização.
+https://github.com/user-attachments/assets/9761bc3b-145b-46f8-8a31-c1676d3e9c1b
 
 ### RF 013 - O sistema deve permitir que o usuário edite os dados de um item do catálogo
 
@@ -228,7 +229,7 @@ Evidência pendente de atualização.
 
 #### Evidências - Mobile
 
-Evidência pendente de atualização.
+https://github.com/user-attachments/assets/6f4a4c22-d7ea-4724-a1e9-feaa7535de77
 
 ### RF 014 - O sistema deve permitir que o usuário exclua um item de catálogo, respeitando os vínculos existentes
 
@@ -245,7 +246,7 @@ https://github.com/user-attachments/assets/82b67a19-33b2-4194-8948-8a22269e678c
 
 #### Evidências - Mobile
 
-Evidência pendente de atualização.
+https://github.com/user-attachments/assets/3628a747-42bb-4a0c-b254-dbdb2b17bc89
 
 ### RF 015 - O sistema deve permitir que o usuário busque e filtre itens do catálogo
 
@@ -262,7 +263,8 @@ https://github.com/user-attachments/assets/7a56e824-83dd-495f-8091-e1fee51bb9ef
 
 #### Evidências - Mobile
 
-Evidência pendente de atualização.
+https://github.com/user-attachments/assets/1ad77f4c-0bf7-41ed-a2fd-f9a8f4c0c2d7
+
 
 ### RF 016 - O sistema deve permitir que o usuário registre lançamentos financeiros de receita e custo
 
