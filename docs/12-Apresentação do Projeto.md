@@ -35,7 +35,14 @@ Os frameworks e tecnologias escolhidos atenderam às necessidades do projeto, of
 <img width="1670" height="641" alt="image" src="https://github.com/user-attachments/assets/e0249241-6ad5-4ecb-b3a2-26c656ba76e8" />
 
 ### Comentários sobre a participação individual de cada integrante
-Acredito que o grupo foi bem colaborativo e unido
+Acredito que o grupo foi bem colaborativo e unido, com boa comunicação entre os integrantes e divisão equilibrada das atividades ao longo do desenvolvimento do trabalho.
+
+- **Frederico Furtado Amantino Vieira:**
+  Teve uma participação muito ativa, contribuindo de forma consistente em todas as etapas do projeto, demonstrando comprometimento e responsabilidade com as entregas.
+- **Guilherme de Andrade Castro Vieira:** Teve uma participação muito ativa, contribuindo de forma consistente em todas as etapas do projeto, demonstrando comprometimento e responsabilidade com as entregas.
+- **Maria Julia Gonçalves Maia Sales:** Teve uma participação muito ativa, contribuindo de forma consistente em todas as etapas do projeto, demonstrando comprometimento e responsabilidade com as entregas.
+- **Eric Esteves Martins:** Teve uma participação muito ativa, contribuindo de forma consistente em todas as etapas do projeto, demonstrando comprometimento e responsabilidade com as entregas.
+- **Bruna Bricio Alvarenga Sampaio:** Teve uma participação muito ativa, contribuindo de forma consistente em todas as etapas do projeto, demonstrando comprometimento e responsabilidade com as entregas.
 
 ### ⁠Análise crítica do projeto desenvolvido
 Acredito que o projeto atingiu os objetivos propostos no início do semestre. Entregamos uma interface web e um aplicativo mobile capazes de atender às principais necessidades do nosso público-alvo: profissionais autônomos e pequenos prestadores de serviço. A aplicação busca centralizar processos simples que fazem parte da rotina desses usuários, oferecendo um sistema de gestão de fácil usabilidade e acesso.
