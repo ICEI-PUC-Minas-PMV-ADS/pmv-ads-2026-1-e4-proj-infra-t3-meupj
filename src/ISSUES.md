@@ -10,4 +10,4 @@ Este arquivo não funciona mais como backlog local nem como histórico de entreg
 
 ## Lacunas Atuais
 
-- Nenhuma lacuna local registrada neste momento.
+- Artefatos visuais acadêmicos em `../docs/` ainda dependem de atualização manual de diagramas, wireframes e evidências de tela para refletir integralmente o estado atual da implementação.

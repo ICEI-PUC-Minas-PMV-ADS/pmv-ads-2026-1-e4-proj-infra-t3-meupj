@@ -1,87 +1,66 @@
-
 # Metodologia
 
-<span style="color:red">Pré-requisitos: <a href="2-Especificação do Projeto.md"> Documentação de Especificação</a></span>
+<span style="color:red">Pré-requisitos: <a href="02-Especificação do Projeto.md"> Documentação de Especificação</a></span>
 
-Descreva aqui a metodologia de trabalho do grupo para atacar o problema. Definições sobre os ambiente de trabalho utilizados pela  equipe para desenvolver o projeto. Abrange a relação de ambientes utilizados, a estrutura para gestão do código fonte, além da definição do processo e ferramenta através dos quais a equipe se organiza (Gestão de Times).
+Este documento descreve a metodologia de trabalho utilizada pela equipe para desenvolver o projeto, incluindo os ambientes de trabalho, a organização do código, o processo de execução e as ferramentas adotadas ao longo do desenvolvimento.
 
 ## Relação de Ambientes de Trabalho
 
-Os artefatos do projeto são desenvolvidos a partir de diversas plataformas e a relação dos ambientes com seu respectivo propósito deverá ser apresentada em uma tabela que especifica que detalha Ambiente, Plataforma e Link de Acesso. 
-Nota: Vide documento modelo do estudo de caso "Portal de Notícias" e defina também os ambientes e frameworks que serão utilizados no desenvolvimento de aplicações móveis.
+Os artefatos do projeto foram desenvolvidos em ambientes distintos, cada um com um propósito específico dentro da solução distribuída.
+
+| Ambiente                    | Plataforma          | Finalidade                                                     |
+| --------------------------- | ------------------- | -------------------------------------------------------------- |
+| Repositório do projeto      | GitHub              | Hospedagem do código-fonte, versionamento e colaboração        |
+| Monorepo da aplicação       | `pnpm` + `turbo`    | Organização conjunta de API, web e mobile                      |
+| Backend                     | Fastify + MongoDB   | Regras de negócio, autenticação, persistência e documentos PDF |
+| Frontend web                | Next.js             | Interface principal no navegador                               |
+| Aplicação mobile            | Expo + React Native | Interface mobile com suporte web para desenvolvimento          |
+| Gestão das tarefas          | Linear              | Organização do backlog e acompanhamento das entregas           |
+| Prototipação e apoio visual | Figma               | Referência para fluxos, telas e organização visual             |
 
 ## Controle de Versão
 
-A ferramenta de controle de versão adotada no projeto foi o
-[Git](https://git-scm.com/), sendo que o [Github](https://github.com)
-foi utilizado para hospedagem do repositório.
+A ferramenta de controle de versão adotada no projeto foi o [Git](https://git-scm.com/), com o [GitHub](https://github.com) utilizado para hospedagem do repositório.
 
-O projeto segue a seguinte convenção para o nome de branches:
+Durante o desenvolvimento, o time trabalhou com uma branch principal do projeto e ramificações de apoio para evolução de funcionalidades, correções e documentação, sempre preservando o histórico das mudanças realizadas no código-fonte.
 
-- `main`: versão estável já testada do software
-- `unstable`: versão já testada do software, porém instável
-- `testing`: versão em testes do software
-- `dev`: versão de desenvolvimento do software
-
-Quanto à gerência de issues, o projeto adota a seguinte convenção para
-etiquetas:
-
-- `documentation`: melhorias ou acréscimos à documentação
-- `bug`: uma funcionalidade encontra-se com problemas
-- `enhancement`: uma funcionalidade precisa ser melhorada
-- `feature`: uma nova funcionalidade precisa ser introduzida
-
-Discuta como a configuração do projeto foi feita na ferramenta de versionamento escolhida. Exponha como a gerência de tags, merges, commits e branchs é realizada. Discuta como a gerência de issues foi realizada.
-
-> **Links Úteis**:
-> - [Microfundamento: Gerência de Configuração](https://pucminas.instructure.com/courses/87878/)
-> - [Tutorial GitHub](https://guides.github.com/activities/hello-world/)
-> - [Git e Github](https://www.youtube.com/playlist?list=PLHz_AreHm4dm7ZULPAmadvNhH6vk9oNZA)
->  - [Comparando fluxos de trabalho](https://www.atlassian.com/br/git/tutorials/comparing-workflows)
-> - [Understanding the GitHub flow](https://guides.github.com/introduction/flow/)
-> - [The gitflow workflow - in less than 5 mins](https://www.youtube.com/watch?v=1SXpE08hvGs)
+Quanto ao acompanhamento das atividades, o projeto utilizou organização externa de tarefas para registrar frentes de trabalho, priorização e andamento da implementação.
 
 ## Gerenciamento de Projeto
 
 ### Divisão de Papéis
 
-Apresente a divisão de papéis entre os membros do grupo.
+A equipe adotou uma divisão prática por frentes de desenvolvimento, com participação cruzada entre backend, web, mobile, testes e documentação.
 
-Exemplificação: A equipe utiliza metodologias ágeis, tendo escolhido o Scrum como base para definição do processo de desenvolvimento. A equipe está organizada da seguinte maneira:
-- Scrum Master: Felipe Domingos;
-- Product Owner: Rommel Carneiro;
-- Equipe de Desenvolvimento: Pedro Penna, Pedro Ivo, Rodrigo Richard;
-- Equipe de Design: Simone Nogueira.
-
-> **Links Úteis**:
-> - [11 Passos Essenciais para Implantar Scrum no seu Projeto](https://mindmaster.com.br/scrum-11-passos/)
-> - [Scrum em 9 minutos](https://www.youtube.com/watch?v=XfvQWnRgxG0)
-> - [Os papéis do Scrum e a verdade sobre cargos nessa técnica](https://www.atlassian.com/br/agile/scrum/roles)
+- Coordenação técnica e integração do monorepo: Frederico
+- Frentes de autenticação, perfil e validação funcional: Frederico
+- Frentes de clientes, documentação e organização dos artefatos:
+- Frentes de pedidos, documentos comerciais e regras de negócio associadas: 
+- Frentes de lançamentos financeiros, dashboard e apoio técnico geral: 
+- Frentes de catálogo, revisão de qualidade e apoio à validação: 
 
 ### Processo
 
-Coloque  informações sobre detalhes da implementação do Scrum seguido pelo grupo. O grupo deverá fazer uso do recurso de gerenciamento de projeto oferecido pelo GitHub, que permite acompanhar o andamento do projeto, a execução das tarefas e o status de desenvolvimento da solução.
- 
-> **Links Úteis**:
-> - [Planejamento e Gestáo Ágil de Projetos](https://pucminas.instructure.com/courses/87878/pages/unidade-2-tema-2-utilizacao-de-ferramentas-para-controle-de-versoes-de-software)
-> - [Sobre quadros de projeto](https://docs.github.com/pt/issues/organizing-your-work-with-project-boards/managing-project-boards/about-project-boards)
-> - [Project management, made simple](https://github.com/features/project-management/)
-> - [Sobre quadros de projeto](https://docs.github.com/pt/github/managing-your-work-on-github/about-project-boards)
-> - [Como criar Backlogs no Github](https://www.youtube.com/watch?v=RXEy6CFu9Hk)
-> - [Tutorial Slack](https://slack.com/intl/en-br/)
+O processo adotado foi incremental e colaborativo. A equipe iniciou com levantamento e modelagem, avançou para a construção do backend e, na sequência, integrou as interfaces web e mobile ao mesmo núcleo de regras de negócio.
+
+Ao longo da execução, o fluxo de trabalho foi orientado por:
+
+- definição das funcionalidades prioritárias por etapa;
+- implementação por módulos de domínio;
+- validação contínua das integrações entre API, web e mobile;
+- registro dos testes e da documentação conforme a evolução do sistema;
+- ajustes finais de consistência, desempenho e aderência ao escopo acadêmico.
 
 ### Ferramentas
 
-As ferramentas empregadas no projeto são:
+As ferramentas empregadas no projeto foram:
 
-- Editor de código.
-- Ferramentas de comunicação
-- Ferramentas de desenho de tela (_wireframing_)
+- `Visual Studio Code` como editor de código principal;
+- `Git` e `GitHub` para versionamento e colaboração;
+- `Linear` para organização das tarefas;
+- `Figma` para apoio à estrutura visual e fluxos de interface;
+- `MongoDB` como banco de dados do sistema;
+- `Bruno` e navegadores para validação de endpoints e fluxos da aplicação;
+- `pnpm` e `turbo` para orquestração do monorepo.
 
-O editor de código foi escolhido porque ele possui uma integração com o sistema de versão. As ferramentas de comunicação utilizadas possuem integração semelhante e por isso foram selecionadas. Por fim, para criar diagramas utilizamos essa ferramenta por melhor captar as necessidades da nossa solução.
-
-Liste quais ferramentas foram empregadas no desenvolvimento do projeto, justificando a escolha delas, sempre que possível.
- 
-> **Possíveis Ferramentas que auxiliarão no gerenciamento**: 
-> - [Slack](https://slack.com/)
-> - [Github](https://github.com/)
+As escolhas foram motivadas pela compatibilidade com a stack adotada, facilidade de colaboração e aderência ao contexto acadêmico do projeto.

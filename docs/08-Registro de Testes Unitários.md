@@ -2,44 +2,69 @@
 
 ## O que são Testes Unitários?
 
-Testes unitários são testes automatizados escritos e executados para garantir que pequenas partes individuais do código (unidades) funcionem conforme esperado. No contexto do desenvolvimento backend, isso geralmente significa testar funções, métodos, ou classes de maneira isolada, sem dependências externas como bancos de dados ou serviços web.
+Testes unitários são testes automatizados executados para validar partes específicas do código de forma isolada, como funções, regras de negócio, stores e comportamento de rotas sob dependências controladas.
 
 ## Por que são Importantes?
 
 Testes unitários ajudam a:
 
-- Identificar problemas de maneira precoce no ciclo de desenvolvimento.
-- Garantir que o código continue funcionando após alterações (regressões).
-- Facilitar o processo de refatoração.
-- Melhorar a confiabilidade e a qualidade do software.
+- identificar problemas mais cedo no ciclo de desenvolvimento;
+- evitar regressões após alterações;
+- dar segurança para refatorações;
+- validar regras de negócio críticas do sistema.
 
 ## Configuração do Ambiente
 
-Este projeto utiliza Node.js, pnpm e Vitest para testes unitários no backend.
+Este projeto utiliza Node.js, `pnpm` e Vitest para os testes automatizados do backend.
 
-1. **Instalar dependências do workspace**
+1. **Instalar dependências do monorepo**
 
    ```bash
+   cd src
    pnpm install
    ```
 
-2. **Acessar a aplicação de API**
+2. **Executar os testes do backend**
 
    ```bash
-   cd src/apps/api
+   pnpm --filter @repo/api test
    ```
 
-3. **Comando de teste da API (referência)**
+3. **Executar a suíte completa do monorepo**
 
    ```bash
    pnpm test
    ```
 
-4. **Comando para executar somente o arquivo de catálogo (referência)**
+## App / Profile
 
-   ```bash
-   pnpm test src/__tests__/catalog.test.ts
-   ```
+### Arquivo de Teste
+
+- `src/apps/api/src/__tests__/app.test.ts`
+
+### Cobertura Registrada
+
+Os testes de `app` e `profile` cobrem:
+
+1. **Bootstrap da aplicação**
+
+- criação da aplicação com dependências injetadas;
+- carregamento dos módulos principais;
+- resposta do healthcheck e estruturas básicas da API.
+
+2. **GET /api/profile**
+
+- retorno `401` sem sessão;
+- recuperação do perfil do usuário autenticado;
+- criação automática do perfil quando necessário;
+- serialização correta dos dados retornados.
+
+3. **PUT /api/profile**
+
+- retorno `401` sem autenticação;
+- atualização dos dados do negócio;
+- persistência de `updatedAt`;
+- validação do payload segundo o schema definido.
 
 ## Catalog
 
@@ -49,42 +74,39 @@ Este projeto utiliza Node.js, pnpm e Vitest para testes unitários no backend.
 
 ### Cobertura Registrada
 
-Os testes de catalog cobrem:
+Os testes de `catalog` cobrem:
 
 1. **Store do catálogo**
-- Criação de índices esperados (`profileId`, `profileId + type`, `profileId + name`).
-- Garantia de que índices não são recriados desnecessariamente na mesma instância de banco.
-- Validação de retorno da collection e uso correto do `getDb` injetado.
+
+- criação dos índices esperados;
+- garantia de que índices não sejam recriados indevidamente;
+- obtenção correta da collection vinculada ao banco.
 
 2. **GET /api/catalog**
-- Retorno `401` para requisição sem sessão.
-- Paginação padrão e paginação via query string.
-- Limites máximos de paginação (`page` e `limit`).
-- Filtro por tipo (`product`/`service`).
-- Busca textual em `name` e `description`.
-- Ordenação padrão por data de criação.
-- Isolamento de dados por `profileId` autenticado.
-- Serialização de `_id` e datas para string.
-- Presença condicional de campos opcionais (`description`, `costPrice`).
+
+- retorno `401` sem sessão;
+- paginação padrão e paginação via query string;
+- filtros por tipo;
+- busca textual;
+- ordenação e serialização dos dados.
 
 3. **POST /api/catalog**
-- Retorno `401` sem autenticação.
-- Criação com sucesso (`201`) para payload válido.
-- Inclusão e omissão de campos opcionais.
-- Validação de payload inválido (`type`, `unitPrice`, `unitMeasure`) com retorno `400`.
+
+- criação com sucesso para payload válido;
+- inclusão condicional de campos opcionais;
+- validação de payload inválido com retorno `400`.
 
 4. **PUT /api/catalog/:itemId**
-- Retorno `401` sem autenticação.
-- Retorno `404` para item inexistente no escopo do perfil.
-- Atualização parcial de campos.
-- Validação de corpo vazio (`400`).
-- Validação de formato inválido de `itemId` (`400`).
+
+- atualização parcial do item;
+- retorno `404` para item inexistente;
+- validação de corpo vazio e identificador inválido.
 
 5. **DELETE /api/catalog/:itemId**
-- Retorno `401` sem autenticação.
-- Retorno `404` para item inexistente.
-- Exclusão com sucesso (`204`).
-- Validação de formato inválido de `itemId` (`400`).
+
+- exclusão com sucesso quando elegível;
+- retorno `404` para item inexistente;
+- proteção contra formato inválido de identificador.
 
 ## Clients
 
@@ -94,77 +116,148 @@ Os testes de catalog cobrem:
 
 ### Cobertura Registrada
 
-Os testes de clients cobrem:
+Os testes de `clients` cobrem:
 
 1. **Store de clientes**
-- Criação e validação dos índices esperados (`profileId`, `profileId + name`, acesso único no `documento` e `email`).
-- Garantia de que os índices não sejam gerados repetidamente em sub-invocações no mesmo DB.
-- Validação de retorno da função padrão `getCollection()`.
+
+- criação de índices por `profileId`, `name`, `document` e `email`;
+- remoção de índice legado incompatível quando presente;
+- retorno consistente da collection.
 
 2. **GET /api/clients**
-- Restrição global `401` sem a presença de uma sessão ativa autenticada.
-- Respostas paginadas por padrão.
-- Checagem funcional da listagem com termo de busca text-based em nomes, endereços de email ou identificadores usando `$regex`.
+
+- retorno `401` sem autenticação;
+- respostas paginadas;
+- busca textual;
+- isolamento dos dados por perfil autenticado.
 
 3. **POST /api/clients**
-- Restrição global de autenticação com status de verificação `401`.
-- Bloqueio com erro de BadRequest (`400`) se houver injeção de documentos incorretos (ex: CPF/CNPJ com formatação de repetição de caracteres).
-- Submissão correta `201` para a criação lícita de indivíduos (tipo `individual`) e companhias comerciais (tipo `company`).
+
+- criação de cliente do tipo `individual` e `company`;
+- validação de documento inválido;
+- proteção por autenticação.
 
 4. **PUT /api/clients/:clientId**
-- Alterações em propriedades variadas de um cliente existente de forma bem-sucedida.
-- Recusa com erro `400` para documentação sub-padrão no ato do update.
-- Falha apropriada (`404`) quando a rota mira um objeto de id inexistente no escopo em questão.
+
+- atualização de campos variados;
+- retorno `400` para dados inválidos;
+- retorno `404` para cliente inexistente.
 
 5. **DELETE /api/clients/:clientId**
-- Retorno correto (`204`) quando executa a limpeza sem problemas de um cliente válido.
-- Segurança de dados com falha estrutural por `Conflict` (Erro `409`) quando interligado na tabela virtual temporária de *`orders`*.
-- Erro relacional ao tentar deletar clientes inválidos.
 
-- ## Profile
+- exclusão com retorno `204` quando elegível;
+- bloqueio com `409` quando houver vínculo impeditivo;
+- proteção contra exclusão fora do escopo do perfil.
 
-### Arquivo de Teste
+## Orders
 
-- `src/apps/api/src/__tests__/app.test.ts`
+### Arquivos de Teste
+
+- `src/apps/api/src/__tests__/orders.test.ts`
+- `src/apps/api/src/__tests__/orders-rules.test.ts`
 
 ### Cobertura Registrada
 
-Os testes de profile cobrem:
+Os testes de `orders` cobrem:
 
-1. **Store de perfil**
-- Criação do perfil automaticamente caso não exista (`ensureByAuthUserId`).
-- Garantia de unicidade do perfil por `authUserId`.
-- Atualização dos dados do negócio com persistência em banco (`updateBusinessByAuthUserId`).
-- Atualização do campo `updatedAt` após modificação.
-- Clonagem segura dos dados para evitar mutações inesperadas.
+1. **Store e regras do módulo**
 
-2. **GET /api/profile**
-- Retorno `401` para requisições sem autenticação.
-- Recuperação do perfil do usuário autenticado.
-- Criação automática do perfil caso não exista.
-- Serialização correta dos dados (`Date` → `string`).
-- Isolamento dos dados por usuário autenticado (`authUserId`).
+- criação dos índices esperados para pedidos;
+- geração e persistência de pedidos por perfil;
+- validação das transições de status permitidas.
 
-3. **PUT /api/profile**
-- Retorno `401` para requisições sem autenticação.
-- Atualização completa dos dados do negócio.
-- Persistência correta no banco MongoDB.
-- Atualização do campo `updatedAt`.
-- Validação do payload conforme schema definido.
-- Retorno do perfil atualizado com dados normalizados.
+2. **GET /api/orders**
 
-4. **Validação de dados**
-- Estrutura obrigatória do objeto `business`.
-- Validação de campos opcionais como `logo`, `footer` e `color`.
-- Validação da estrutura de endereço (`address`).
-- Bloqueio de propriedades adicionais fora do schema (`additionalProperties: false`).
+- retorno `401` sem autenticação;
+- paginação, filtros e ordenação;
+- retorno de `clientName` quando houver vínculo com cliente;
+- serialização correta de datas e totais.
 
-5. **Isolamento e segurança**
-- Garantia de que um usuário não acessa dados de outro (`authUserId`).
-- Execução com mocks de autenticação para simular sessões válidas.
-- Uso de mocks de banco para evitar dependência de infraestrutura externa.
+3. **GET /api/orders/:orderId**
 
+- leitura de pedido por id no escopo do perfil;
+- retorno `404` para pedido inexistente.
+
+4. **POST /api/orders**
+
+- criação de pedido com itens de catálogo;
+- cálculo de subtotal, desconto, taxas e total;
+- validação de payload e de relações com catálogo/cliente.
+
+5. **PUT /api/orders/:orderId**
+
+- atualização do pedido;
+- alteração de status respeitando as regras do domínio;
+- retorno apropriado para inconsistências e falta de escopo.
+
+6. **DELETE /api/orders/:orderId**
+
+- exclusão quando não há impedimento;
+- bloqueio quando existem lançamentos confirmados associados.
+
+## Transactions
+
+### Arquivo de Teste
+
+- `src/apps/api/src/__tests__/transactions.test.ts`
+
+### Cobertura Registrada
+
+Os testes de `transactions` cobrem:
+
+1. **Store de lançamentos**
+
+- criação dos índices esperados;
+- segmentação por `profileId`, `type`, `status`, `orderId` e `clientId`.
+
+2. **Rotas de criação**
+
+- criação de receitas e custos;
+- validação de payload;
+- proteção por autenticação.
+
+3. **Listagem e leitura**
+
+- retorno `401` sem sessão;
+- filtros por tipo, status, datas e vínculos;
+- cálculo do `displayStatus`, incluindo atraso.
+
+4. **Atualização e exclusão**
+
+- edição de lançamento existente;
+- retorno `404` para registro inexistente;
+- bloqueio de exclusão para lançamento confirmado.
+
+## Documents
+
+### Arquivo de Teste
+
+- `src/apps/api/src/__tests__/documents.test.ts`
+
+### Cobertura Registrada
+
+Os testes de `documents` cobrem:
+
+1. **Builders de documento**
+
+- montagem dos dados de orçamento, ordem de serviço e recibo;
+- serialização dos blocos de perfil, cliente, pedido e lançamento.
+
+2. **Rotas JSON de documentos**
+
+- retorno `401` sem autenticação;
+- retorno `404` para pedido ou lançamento inexistente;
+- retorno `409` para status incompatível com a emissão.
+
+3. **Rotas PDF**
+
+- geração de `application/pdf`;
+- emissão de orçamento para pedido elegível;
+- emissão de ordem de serviço para pedido elegível;
+- emissão de recibo para lançamento confirmado;
+- conteúdo não vazio e cabeçalhos apropriados da resposta.
 
 ## Observações
 
-- Os testes são executados com mocks/stubs de dependências (autenticação, profile store e acesso a banco), garantindo isolamento da unidade testada.
+- Os testes utilizam mocks e dependências controladas para isolar autenticação, stores e persistência quando necessário.
+- As suítes registradas aqui representam os arquivos de teste presentes no repositório no estado atual da implementação.

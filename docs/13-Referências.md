@@ -1,27 +1,33 @@
 # Referências
 
-Inclua todas as referências (livros, artigos, sites, etc) utilizados no desenvolvimento do trabalho.
+FIELDING, Roy Thomas. _Architectural Styles and the Design of Network-based Software Architectures_. 2000. Disponível em: <https://www.ics.uci.edu/~fielding/pubs/dissertation/top.htm>. Acesso em: 21 jun. 2026.
 
-FIELDING, Roy Thomas. *Architectural Styles and the Design of Network-based Software Architectures*. 2000. Disponível em: <https://www.ics.uci.edu/~fielding/pubs/dissertation/top.htm>. Acesso em: 12 abr. 2026.
+RICHARDSON, Leonard; RUBY, Sam. _RESTful Web Services_. Sebastopol: O’Reilly Media, 2007.
 
-RICHARDSON, Leonard; RUBY, Sam. *RESTful Web Services*. Sebastopol: O’Reilly Media, 2007.
+SOMMERVILLE, Ian. _Engenharia de Software_. 10. ed. São Paulo: Pearson, 2018.
 
-TILKOV, Stefan; VINO, Steve. *Node.js: Using JavaScript to Build High-Performance Network Programs*. IEEE Internet Computing, 2010.
+BASS, Len; CLEMENTS, Paul; KAZMAN, Rick. _Software Architecture in Practice_. 3. ed. Boston: Addison-Wesley, 2012.
 
-NODE.JS FOUNDATION. *Node.js Documentation*. Disponível em: <https://nodejs.org/en/docs>. Acesso em: 12 abr. 2026.
+FOWLER, Martin. _Patterns of Enterprise Application Architecture_. Boston: Addison-Wesley, 2002.
 
-FASTIFY. *Fastify Documentation*. Disponível em: <https://www.fastify.io/docs>. Acesso em: 12 abr. 2026.
+NODE.JS FOUNDATION. _Node.js Documentation_. Disponível em: <https://nodejs.org/en/docs>. Acesso em: 21 jun. 2026.
 
-MONGODB INC. *MongoDB Manual*. Disponível em: <https://www.mongodb.com/docs>. Acesso em: 12 abr. 2026.
+FASTIFY. _Fastify Documentation_. Disponível em: <https://fastify.dev/docs/latest/>. Acesso em: 21 jun. 2026.
 
-BANKER, Kyle. *MongoDB in Action*. 2. ed. Shelter Island: Manning Publications, 2016.
+MONGODB INC. _MongoDB Manual_. Disponível em: <https://www.mongodb.com/docs>. Acesso em: 21 jun. 2026.
 
-MICROSOFT. *TypeScript Documentation*. Disponível em: <https://www.typescriptlang.org/docs>. Acesso em: 12 abr. 2026.
+MICROSOFT. _TypeScript Documentation_. Disponível em: <https://www.typescriptlang.org/docs>. Acesso em: 21 jun. 2026.
 
-GAMMA, Erich et al. *Design Patterns: Elements of Reusable Object-Oriented Software*. Boston: Addison-Wesley, 1994.
+VERCEL. _Next.js Documentation_. Disponível em: <https://nextjs.org/docs>. Acesso em: 21 jun. 2026.
 
-SOMMERVILLE, Ian. *Engenharia de Software*. 10. ed. São Paulo: Pearson, 2018.
+META. _React Documentation_. Disponível em: <https://react.dev/>. Acesso em: 21 jun. 2026.
 
-BASS, Len; CLEMENTS, Paul; KAZMAN, Rick. *Software Architecture in Practice*. 3. ed. Boston: Addison-Wesley, 2012.
+EXPO. _Expo Documentation_. Disponível em: <https://docs.expo.dev/>. Acesso em: 21 jun. 2026.
 
-FOWLER, Martin. *Patterns of Enterprise Application Architecture*. Boston: Addison-Wesley, 2002.
+REACT NAVIGATION. _React Navigation Documentation_. Disponível em: <https://reactnavigation.org/docs/getting-started>. Acesso em: 21 jun. 2026.
+
+BETTER AUTH. _Better Auth Documentation_. Disponível em: <https://www.better-auth.com/docs>. Acesso em: 21 jun. 2026.
+
+DIEGO MURA. _@react-pdf/renderer Documentation_. Disponível em: <https://react-pdf.org/>. Acesso em: 21 jun. 2026.
+
+TURBOREPO. _Turborepo Documentation_. Disponível em: <https://turborepo.com/docs>. Acesso em: 21 jun. 2026.
