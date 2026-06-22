@@ -85,17 +85,23 @@ Do ponto de vista da arquitetura, seria interessante adotar mecanismos de cache 
 
 ## Frederico Furtado Amantino Vieira
 ### **Avaliação dos frameworks e tecnologias utilizados**
--
+Considero que os frameworks e tecnologias adotados foram adequados ao escopo do projeto e ao perfil da equipe. A organização em monorepo com `pnpm` e `turbo` facilitou a padronização entre backend, web e mobile, reduzindo retrabalho e melhorando a consistência entre os módulos. No backend, o uso de `Fastify`, `TypeBox` e `MongoDB` permitiu construir uma API enxuta, com validação explícita dos contratos e boa separação entre rotas, serviços e persistência. Para autenticação, o `Better Auth` atendeu bem à necessidade de sessão por cookie no web e integração com o app mobile. No frontend, `Next.js` e `Expo` ofereceram uma base produtiva para entrega das duas interfaces com velocidade e reutilização de padrões de implementação.
 ### Quadro visual atualizado de gestão do trabalho no GitHub
--
+<img width="700" alt="image" src="" />
 
 ### Comentários sobre a participação individual de cada integrante
--
+O grupo conseguiu trabalhar de forma colaborativa ao longo das etapas, com divisão prática por frentes e apoio cruzado quando surgiam integrações entre módulos. Na minha percepção, a evolução do projeto aconteceu de forma consistente porque cada integrante assumiu responsabilidades claras e contribuiu também para a validação das entregas dos demais.
+
+- Amanda Vitor Lopes: teve participação importante na organização do trabalho e no módulo de clientes, contribuindo para a estruturação dos requisitos e para a integridade dos dados tratados no sistema.
+- Guilherme de Andrade Castro Vieira: atuou de forma versátil em documentos, transações e integrações entre as camadas do sistema, ajudando a consolidar fluxos importantes da solução.
+- Maria Julia Gonçalves Maia Sales: contribuiu com atenção à experiência do usuário, revisão funcional e organização das telas e fluxos, colaborando para uma interface mais consistente.
+- Eric Esteves Martins: teve papel relevante nas regras ligadas a pedidos e na estruturação de comportamentos centrais do domínio do sistema.
+- Bruna Bricio Alvarenga Sampaio: apoiou a documentação, testes e entregas complementares do projeto, contribuindo para o fechamento acadêmico e funcional da solução.
 
 ### ⁠Análise crítica do projeto desenvolvido
--
+Avalio que o projeto alcançou um resultado sólido dentro da proposta acadêmica. A solução entregue cobre os fluxos principais de gestão para pequenos prestadores de serviço, incluindo autenticação, perfil do negócio, clientes, catálogo, pedidos, lançamentos financeiros e emissão de documentos comerciais. Um ponto positivo foi a consolidação de uma base técnica única para web, mobile e API, o que facilitou tanto a implementação quanto a manutenção. Como limitações, ainda vejo espaço para amadurecimento em aspectos de operação real, como observabilidade, automações externas, rotinas assíncronas e aprofundamento de relatórios gerenciais.
 ### Propostas de melhorias para a arquitetura e implementação da solução
--
+Como evolução da arquitetura, considero interessante introduzir processamento assíncrono para tarefas como emissão de documentos, notificações e futuras integrações externas, reduzindo acoplamento com a API principal. Também seria útil avançar em observabilidade, com logs estruturados mais detalhados, métricas operacionais e monitoramento de erros. Do ponto de vista funcional, o projeto poderia evoluir com integrações de pagamento, emissão fiscal, comunicação automatizada com clientes e dashboards financeiros mais completos. Em uma etapa posterior, seria válido ainda revisar estratégias de cache, auditoria de alterações e endurecimento adicional do ambiente de produção.
 
 ## Guilherme de Andrade Castro Vieira
 ### **Avaliação dos frameworks e tecnologias utilizados**
