@@ -63,17 +63,35 @@ Como evolução do projeto, podem ser implementadas integrações com gateways d
 Do ponto de vista da arquitetura, seria interessante adotar mecanismos de cache para otimizar consultas mais frequentes, além de processamento assíncrono para geração de documentos e envio de notificações.
 
 ## Bruna Bricio Alvarenga Sampaio
+
 ### **Avaliação dos frameworks e tecnologias utilizados**
--
+
+As tecnologias utilizadas no projeto atenderam adequadamente aos requisitos da solução, permitindo o desenvolvimento integrado das aplicações web, mobile e backend. O uso de frameworks modernos contribuiu para a organização do código, reutilização de componentes e facilidade de manutenção. Além disso, a arquitetura baseada em API REST facilitou a comunicação entre os diferentes módulos da aplicação, proporcionando maior flexibilidade e escalabilidade para futuras evoluções do sistema.
+
 ### Quadro visual atualizado de gestão do trabalho no GitHub
--
+
+![Quadro de gestão do projeto](img/evidencia.png)
 
 ### Comentários sobre a participação individual de cada integrante
--
+
+O grupo trabalhou de forma colaborativa durante todas as etapas do projeto, mantendo boa comunicação e divisão equilibrada das atividades.
+
+- **Amanda Vitor Lopes:** contribuiu para a organização do projeto e para o desenvolvimento do módulo de clientes, auxiliando na definição dos requisitos e validações do sistema.
+- **Frederico Furtado Amantino Vieira:** teve papel fundamental na estruturação da arquitetura e infraestrutura do projeto, oferecendo suporte técnico e auxiliando na resolução de problemas.
+- **Guilherme de Andrade Castro Vieira:** participou do desenvolvimento dos módulos de documentos e transações, além de contribuir para integrações e documentação da solução.
+- **Maria Julia Gonçalves Maia Sales:** colaborou no desenvolvimento do catálogo, experiência do usuário e documentação do projeto, demonstrando atenção aos detalhes e organização.
+- **Eric Esteves Martins:** desenvolveu funcionalidades relacionadas aos pedidos e regras de negócio da aplicação, contribuindo para a implementação de recursos importantes do sistema.
 
 ### ⁠Análise crítica do projeto desenvolvido
--
+
+O projeto atingiu os objetivos propostos ao longo da disciplina, resultando em uma solução funcional voltada para profissionais autônomos e pequenos prestadores de serviço. A aplicação reúne funcionalidades importantes em uma única plataforma, permitindo o gerenciamento de clientes, catálogo, pedidos, documentos e informações financeiras tanto pela versão web quanto pela versão mobile.
+
+
 ### Propostas de melhorias para a arquitetura e implementação da solução
+
+Como evolução futura, a aplicação pode incorporar integrações com gateways de pagamento, emissão de notas fiscais eletrônicas e envio automatizado de documentos por e-mail ou WhatsApp. Também podem ser adicionados dashboards mais completos, relatórios gerenciais, controle de estoque e recursos avançados de análise financeira.
+
+Do ponto de vista técnico, a adoção de mecanismos de cache, processamento assíncrono para tarefas de longa duração, monitoramento da aplicação e ampliação da cobertura de testes automatizados contribuiria para melhorar o desempenho, a escalabilidade e a confiabilidade da solução.
 -
 
 ## Eric Esteves Martins
