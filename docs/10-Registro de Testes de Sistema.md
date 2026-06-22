@@ -353,11 +353,15 @@ Figura 02 - Dashboard mobile
 
 #### Evidências - Web
 
-<video src="../videos/recibo-web.mp4" height="500" controls></video>
+Figura 01 - Recibo gerado no web
+
+<img height="500" alt="image" src="./img/rf19-web-recibo.png" />
 
 #### Evidências - Mobile
 
-<video src="../videos/recibo-mob.mp4" height="500" controls></video>
+Figura 02 - Ação de emissão de recibo no mobile web
+
+<img width="600" alt="image" src="./img/rf19-mobile-recibo.png" />
 
 ### RF 020 - O sistema deve permitir gerar um orçamento em PDF a partir de um pedido elegível
 
