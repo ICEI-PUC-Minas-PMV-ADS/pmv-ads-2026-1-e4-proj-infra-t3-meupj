@@ -52,7 +52,7 @@ pnpm test
 
 # Deploy
 
-<li><a href="https://pmv-ads-2026-1-e4-proj-infra-t3-meu.vercel.app"></a></li>
+<li><a href="https://pmv-ads-2026-1-e4-proj-infra-t3-meu.vercel.app">https://pmv-ads-2026-1-e4-proj-infra-t3-meu.vercel.app</a></li>
 
 # Apresentação
 
