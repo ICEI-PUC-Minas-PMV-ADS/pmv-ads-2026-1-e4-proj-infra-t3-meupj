@@ -54,7 +54,7 @@ Desenvolver a lógica de negócio e os serviços de backend do projeto, garantin
 - **Maria Júlia Sales**: Implementação do CRUD de catálogo de serviços/produtos e testes unitários, incluindo validação de paginação e filtros.
 - **Eric Martins**: Implementação das funcionalidades relacionadas a pedidos.
 - **Guilherme Andrade**: Implementação dos módulos de lançamentos financeiros e documentos comerciais.
-- **Rico Amantino**: Configuração da fundação do backend, incluindo arquitetura inicial, integração com MongoDB e autenticação com Better Auth.
+- **Frederico Amantino**: Configuração da fundação do backend, incluindo arquitetura inicial, integração com MongoDB e autenticação com Better Auth.
 
 ### Prazo
 
