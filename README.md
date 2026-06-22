@@ -52,7 +52,7 @@ pnpm test
 
 # Deploy
 
-<li><a href="https://meupj-api-student.delightfulwave-8b9abc5f.brazilsouth.azurecontainerapps.io/">meupj.azurecontainerapps.io</a></li>
+<li><a href="https://pmv-ads-2026-1-e4-proj-infra-t3-meu.vercel.app"></a></li>
 
 # Apresentação
 
