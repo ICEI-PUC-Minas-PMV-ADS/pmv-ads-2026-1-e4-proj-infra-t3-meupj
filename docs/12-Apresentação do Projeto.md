@@ -80,11 +80,11 @@ As tecnologias escolhidas atenderam bem às necessidades do projeto. O uso de fr
 ### Comentários sobre a participação individual de cada integrante
 O grupo trabalhou de forma colaborativa, com boa comunicação e divisão das atividades durante o desenvolvimento do projeto.
 
-Amanda Vitor Lopes: teve participação importante na organização do trabalho e no módulo de clientes, contribuindo para a definição dos requisitos e para a integridade dos dados do sistema.
-Frederico Furtado Amantino Vieira: participou das decisões técnicas e da resolução de problemas, contribuindo para o desenvolvimento e a evolução das funcionalidades do projeto.
-Guilherme de Andrade Castro Vieira: atuou nos documentos, transações e integrações entre as camadas do sistema, ajudando a estruturar fluxos importantes da solução.
-Maria Julia Gonçalves Maia Sales: contribuiu para a experiência do usuário, revisão das funcionalidades e organização das telas e fluxos da aplicação.
-Bruna Bricio Alvarenga Sampaio: apoiou a documentação, os testes e as entregas complementares, contribuindo para a finalização acadêmica e funcional do projeto.
+- Amanda Vitor Lopes: teve participação importante na organização do trabalho e no módulo de clientes, contribuindo para a definição dos requisitos e para a integridade dos dados do sistema.
+- Frederico Furtado Amantino Vieira: participou das decisões técnicas e da resolução de problemas, contribuindo para o desenvolvimento e a evolução das funcionalidades do projeto.
+- Guilherme de Andrade Castro Vieira: atuou nos documentos, transações e integrações entre as camadas do sistema, ajudando a estruturar fluxos importantes da solução.
+- Maria Julia Gonçalves Maia Sales: contribuiu para a experiência do usuário, revisão das funcionalidades e organização das telas e fluxos da aplicação.
+- Bruna Bricio Alvarenga Sampaio: apoiou a documentação, os testes e as entregas complementares, contribuindo para a finalização acadêmica e funcional do projeto.
 
 ### ⁠Análise crítica do projeto desenvolvido
 O projeto atingiu os principais objetivos definidos no início do semestre. A solução permite centralizar informações importantes para profissionais autônomos e pequenos prestadores de serviços, oferecendo acesso por meio de uma aplicação web e mobile.
