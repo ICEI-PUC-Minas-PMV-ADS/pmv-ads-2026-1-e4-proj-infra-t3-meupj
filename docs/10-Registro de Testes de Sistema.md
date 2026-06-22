@@ -48,11 +48,11 @@
 
 #### Evidências - Web
 
-Evidência pendente de atualização.
+<video src="../videos/edição-perfil-desk.mp4" width="600" controls></video>
 
 #### Evidências - Mobile
 
-Evidência pendente de atualização.
+<video src="../videos/edicao-perfil-mob.mp4" height="500" controls></video>
 
 ### RF 004 - O sistema deve permitir que o usuário cadastre clientes com nome, tipo, documento, telefone, email e endereço
 
@@ -86,11 +86,11 @@ Evidência pendente de atualização.
 
 #### Evidências - Web
 
-Evidência pendente de atualização.
+<video src="../videos/edicao-cliente-desk.mp4" width="600" controls></video>
 
 #### Evidências - Mobile
 
-Evidência pendente de atualização.
+<video src="../videos/edicao-cliente-mob.mp4" height="500" controls></video>
 
 ### RF 006 - O sistema deve permitir que o usuário exclua um cliente, respeitando as validações de vínculo do sistema
 
@@ -103,11 +103,11 @@ Evidência pendente de atualização.
 
 #### Evidências - Web
 
-Evidência pendente de atualização.
+<video src="../videos/delecao-cliente-desk.mp4" width="600" controls></video>
 
 #### Evidências - Mobile
 
-Evidência pendente de atualização.
+<video src="../videos/delecao-cliente-mob.mp4" height="500" controls></video>
 
 ### RF 007 - O sistema deve permitir que o usuário busque e filtre clientes cadastrados
 
@@ -350,11 +350,11 @@ Figura 02 - Dashboard mobile
 
 #### Evidências - Web
 
-Evidência pendente de atualização.
+<video src="../videos/recibo-web.mp4" height="500" controls></video>
 
 #### Evidências - Mobile
 
-Evidência pendente de atualização.
+<video src="../videos/recibo-mob.mp4" height="500" controls></video>
 
 ### RF 020 - O sistema deve permitir gerar um orçamento em PDF a partir de um pedido elegível
 
