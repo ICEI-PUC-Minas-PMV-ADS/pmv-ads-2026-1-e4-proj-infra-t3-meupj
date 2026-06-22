@@ -10,10 +10,7 @@ import {
   ChevronLeft,
   ChevronRight,
   MoreVertical,
-  Pencil,
   Trash2,
-  Phone,
-  MessageCircle,
 } from 'lucide-react';
 import { useEffect, useState, useCallback } from 'react';
 import { ClientsService, type Client, type PersonType } from '@/services/clients.service';
@@ -233,7 +230,7 @@ export default function ClientesPage() {
       </header>
 
       {/* Backdrop transparente para fechar o menu ao clicar fora */}
-      {openMenuId && <div className="fixed inset-0 z-40" onClick={() => setOpenMenuId(null)} />}
+      {openMenuId && <div className="fixed inset-0 z-30" onClick={() => setOpenMenuId(null)} />}
 
       <main className="flex-1 p-4 md:p-10 bg-gray-50/30 overflow-y-auto">
         {/* Loading */}
@@ -286,7 +283,7 @@ export default function ClientesPage() {
                 return (
                   <div
                     key={client._id}
-                    className="relative bg-white p-4 sm:p-5 rounded-2xl transition-all flex items-center gap-4 sm:gap-5 group cursor-pointer border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:border-indigo-400"
+                    className="relative overflow-visible bg-white p-4 sm:p-5 rounded-2xl transition-all flex items-center gap-4 sm:gap-5 group cursor-pointer border border-gray-200 shadow-sm hover:shadow-md hover:border-gray-300"
                     onClick={() => router.push(`/clientes/${client._id}`)}
                   >
                     <div className="w-12 h-12 bg-gray-100 rounded-full shrink-0 flex items-center justify-center text-gray-400 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors shadow-sm">
@@ -305,76 +302,77 @@ export default function ClientesPage() {
                     >
                       {style.label}
                     </span>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setOpenMenuId(openMenuId === client._id ? null : client._id);
-                      }}
-                      aria-label={`Abrir ações de ${client.name}`}
-                      title={`Abrir ações de ${client.name}`}
-                      className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors flex-shrink-0"
-                    >
-                      <MoreVertical size={16} />
-                    </button>
+                    <div className="relative">
+                      <button
+                        type="button"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          setOpenMenuId((currentId) =>
+                            currentId === client._id ? null : client._id,
+                          );
+                        }}
+                        aria-label={`Abrir ações de ${client.name}`}
+                        title={`Abrir ações de ${client.name}`}
+                        className="w-9 h-9 rounded-lg border border-gray-200 text-gray-400 hover:text-gray-700 hover:bg-gray-50 transition-colors flex items-center justify-center flex-shrink-0"
+                      >
+                        <MoreVertical size={18} />
+                      </button>
 
-                    {/* Dropdown menu */}
-                    {openMenuId === client._id && (
-                      <div className="absolute top-2 right-12 bg-white border border-gray-200 rounded-xl shadow-lg z-50 min-w-[150px] py-1 animate-in fade-in slide-in-from-top-2 duration-150">
-                        {telHref && (
+                      {openMenuId === client._id && (
+                        <div
+                          className="absolute right-0 top-11 z-40 min-w-[220px] rounded-xl border border-gray-200 bg-white py-1 shadow-lg"
+                          onClick={(event) => event.stopPropagation()}
+                        >
+                          {telHref && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setOpenMenuId(null);
+                                openContactLink(telHref, '_self');
+                              }}
+                              className="w-full cursor-pointer px-4 py-2.5 text-left text-sm text-gray-700 transition-colors hover:bg-gray-50 focus:bg-gray-50 active:bg-gray-100"
+                            >
+                              Ligar
+                            </button>
+                          )}
+
+                          {whatsappHref && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setOpenMenuId(null);
+                                openContactLink(whatsappHref, '_blank');
+                              }}
+                              className="w-full cursor-pointer px-4 py-2.5 text-left text-sm text-gray-700 transition-colors hover:bg-gray-50 focus:bg-gray-50 active:bg-gray-100"
+                            >
+                              WhatsApp
+                            </button>
+                          )}
+
                           <button
                             type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
+                            onClick={() => {
                               setOpenMenuId(null);
-                              openContactLink(telHref, '_self');
+                              router.push(`/clientes/${client._id}`);
                             }}
-                            className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                            className="w-full cursor-pointer px-4 py-2.5 text-left text-sm text-gray-700 transition-colors hover:bg-gray-50 focus:bg-gray-50 active:bg-gray-100"
                           >
-                            <Phone size={14} className="text-gray-500" />
-                            Ligar
+                            Editar
                           </button>
-                        )}
-                        {whatsappHref && (
+
                           <button
                             type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
+                            onClick={() => {
                               setOpenMenuId(null);
-                              openContactLink(whatsappHref, '_blank');
+                              setConfirmDelete(client);
                             }}
-                            className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                            className="w-full cursor-pointer px-4 py-2.5 text-left text-sm text-red-600 transition-colors hover:bg-red-50 focus:bg-red-50 active:bg-red-100"
                           >
-                            <MessageCircle size={14} className="text-gray-500" />
-                            WhatsApp
+                            Excluir
                           </button>
-                        )}
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setOpenMenuId(null);
-                            router.push(`/clientes/${client._id}`);
-                          }}
-                          className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                        >
-                          <Pencil size={14} className="text-gray-500" />
-                          Editar
-                        </button>
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setOpenMenuId(null);
-                            setConfirmDelete(client);
-                          }}
-                          className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
-                        >
-                          <Trash2 size={14} />
-                          Excluir
-                        </button>
-                      </div>
-                    )}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 );
               })}

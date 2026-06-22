@@ -390,7 +390,7 @@ export default function FinanceiroPage() {
                               setOpenMenuId(null);
                               handleOpenTransaction(tx._id);
                             }}
-                            className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                            className="w-full cursor-pointer px-4 py-2.5 text-left text-sm text-gray-700 transition-colors hover:bg-gray-50 focus:bg-gray-50 active:bg-gray-100"
                           >
                             Abrir lançamento
                           </button>
@@ -400,7 +400,7 @@ export default function FinanceiroPage() {
                               type="button"
                               disabled={openingDocumentKey === actionKey}
                               onClick={() => handleDocumentAction(tx._id, 'receipt')}
-                              className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-60"
+                              className="w-full cursor-pointer px-4 py-2.5 text-left text-sm text-gray-700 transition-colors hover:bg-gray-50 focus:bg-gray-50 active:bg-gray-100 disabled:opacity-60"
                             >
                               {openingDocumentKey === actionKey
                                 ? 'Abrindo recibo...'
@@ -420,7 +420,7 @@ export default function FinanceiroPage() {
             href="/dashboard/novo"
             aria-label="Novo lançamento"
             title="Novo lançamento"
-            className="fixed bottom-20 right-6 w-14 h-14 bg-indigo-600 text-white rounded-full flex items-center justify-center shadow-lg shadow-indigo-600/30 hover:bg-indigo-700 transition-colors active:scale-95 z-40"
+            className="sm:hidden fixed bottom-20 right-6 w-14 h-14 bg-indigo-600 text-white rounded-full flex items-center justify-center shadow-lg shadow-indigo-600/30 hover:bg-indigo-700 transition-colors active:scale-95 z-40"
           >
             <Plus size={24} />
           </Link>
