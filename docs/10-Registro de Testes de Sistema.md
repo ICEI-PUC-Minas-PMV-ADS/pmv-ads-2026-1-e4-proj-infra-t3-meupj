@@ -278,6 +278,7 @@ https://github.com/user-attachments/assets/1ad77f4c-0bf7-41ed-a2fd-f9a8f4c0c2d7
 #### Evidências - Web
 
 Figura 01 - Criando lançamento
+
 <img width="1246" height="630" alt="image" src="https://github.com/user-attachments/assets/82be1789-19df-412a-8189-4d4ad2532ed5" />
 
 Figura 02 - Lançamento criado
@@ -287,10 +288,12 @@ Figura 02 - Lançamento criado
 #### Evidências - Mobile
 
 Figura 03 - Criando lançamento
+
 <img width="371" height="573" alt="image" src="https://github.com/user-attachments/assets/9bf63407-bc08-4e41-9d85-834be8f51c7f" />
 
 
 Figura 04 - Lançamento criado
+
 <img width="275" height="565" alt="image" src="https://github.com/user-attachments/assets/35df0b64-75b3-4653-99d1-920dcf54eb6d" />
 
 ### RF 017 - O sistema deve permitir que o usuário edite lançamentos financeiros e aplique as restrições de exclusão previstas
@@ -367,11 +370,15 @@ Figura 02 - Dashboard mobile
 
 #### Evidências - Web
 
-Evidência pendente de atualização.
+Figura 01 - Emissão de orçamento no web
+
+<img height="500" alt="image" src="./img/rf20-web-orcamento.png" />
 
 #### Evidências - Mobile
 
-Evidência pendente de atualização.
+Figura 02 - Ação de emissão de orçamento no mobile web
+
+<img width="600" alt="image" src="./img/rf20-mobile-orcamento.png" />
 
 ### RF 021 - O sistema deve permitir gerar uma ordem de serviço em PDF a partir de um pedido elegível
 
@@ -384,11 +391,15 @@ Evidência pendente de atualização.
 
 #### Evidências - Web
 
-Evidência pendente de atualização.
+Figura 01 - Emissão de ordem de serviço no web
+
+<img height="500" alt="image" src="./img/rf21-web-ordem-servico.png" />
 
 #### Evidências - Mobile
 
-Evidência pendente de atualização.
+Figura 02 - Ação de emissão de ordem de serviço no mobile web
+
+<img width="600" alt="image" src="./img/rf21-mobile-ordem-servico.png" />
 
 ### RF 022 - O sistema deve permitir que o usuário inicie uma chamada telefônica para um cliente com telefone válido
 
@@ -401,11 +412,15 @@ Evidência pendente de atualização.
 
 #### Evidências - Web
 
-Evidência pendente de atualização.
+Figura 01 - Menu de ações rápidas com opção de ligação no web
+
+<img height="500" alt="image" src="./img/rf22-rf23-web-contato.png" />
 
 #### Evidências - Mobile
 
-Evidência pendente de atualização.
+Figura 02 - Menu de ações rápidas com opção de ligação no mobile web
+
+<img width="600" alt="image" src="./img/rf22-rf23-mobile-contato.png" />
 
 ### RF 023 - O sistema deve permitir que o usuário abra uma conversa no WhatsApp para um cliente com telefone válido
 
@@ -418,8 +433,12 @@ Evidência pendente de atualização.
 
 #### Evidências - Web
 
-Evidência pendente de atualização.
+Figura 01 - Menu de ações rápidas com opção de WhatsApp no web
+
+<img height="500" alt="image" src="./img/rf22-rf23-web-contato.png" />
 
 #### Evidências - Mobile
 
-Evidência pendente de atualização.
+Figura 02 - Menu de ações rápidas com opção de WhatsApp no mobile web
+
+<img width="600" alt="image" src="./img/rf22-rf23-mobile-contato.png" />
