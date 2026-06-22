@@ -1,31 +1,38 @@
 # Apresentação
 
-<span style="color:red">Pré-requisitos: Todos os demais artefatos</span>
+O projeto propõe e entrega uma aplicação distribuída para organização comercial e financeira de profissionais autônomos e pequenos prestadores de serviço. A solução reúne, em um único ecossistema, recursos para cadastro de clientes, gestão de catálogo, controle de pedidos, registro de receitas e custos, emissão de documentos comerciais em PDF e acompanhamento do negócio tanto na versão web quanto na versão mobile.
 
-Conjunto de slides em um arquivo PowerPoint ou PDF com a apresentação do projeto contemplando todos os itens trabalhados nos demais artefatos.
+Na prática, a aplicação foi construída para reduzir a fragmentação de informações que normalmente ficam espalhadas entre anotações, planilhas, mensagens e documentos soltos. Ao centralizar essas rotinas em uma API com interfaces web e mobile, o sistema melhora a formalização de serviços, a visualização financeira e a organização operacional do usuário.
+
+## Materiais da Apresentação
+
+Os materiais utilizados na apresentação final do projeto estão disponíveis nos links abaixo.
+
+### Vídeo da Apresentação
+
+📹 **Vídeo de demonstração da solução:**
+
+[meupj - Etapa 5 Apresentacao.zip](../videos/meupj%20-%20Etapa%205%20Apresentacao.zip)
+
+> Após baixar o arquivo ZIP, extraia seu conteúdo para assistir ao vídeo da apresentação.
 
 ## Título do Projeto
 
-Nome e marca do projeto
+MEUPJ
 
 ## Identidade Visual (Marca, Design)
 
-O grupo deve ter o cuidado em utilizar figuras, imagens, e cores dentro do contexto da solução proposta, de forma a manter a temática do problema.
+A identidade visual do sistema foi desenvolvida com foco em profissionalismo, usabilidade e legibilidade. A interface utiliza uma paleta de cores clara, composta por fundo em tom off-white (#fbfffa), textos em tons de cinza escuro e cores de destaque para facilitar a identificação das ações do usuário.
 
-> **Links Úteis**:
-> - [10 dicas de design para slides](https://rockcontent.com/blog/design-para-slides/)
-> - [7 dicas de design para criar apresentações de PowerPoint incríveis e eficientes](https://www.shutterstock.com/pt/blog/7-dicas-de-design-para-criar-apresentacoes-de-powerpoint-incriveis-e-eficientes)
-> - [Especialista do TED dá 10 dicas para criar slides eficazes e bonitos](https://soap.com.br/blog/especialista-do-ted-da-10-dicas-para-criar-slides-eficazes-e-bonitos)
+As ações principais da aplicação são representadas pela cor roxa (rgb(105,99,207)), enquanto confirmações e feedbacks positivos utilizam a cor verde (rgb(47,114,73)). Elementos secundários, bordas e divisões visuais utilizam tons de cinza para manter a organização da interface sem gerar poluição visual.
+
+A tipografia adotada prioriza a leitura em diferentes tamanhos de tela, com hierarquia visual bem definida entre títulos, subtítulos e conteúdos. Além disso, o sistema utiliza ícones intuitivos para ações como adicionar, editar, excluir e pesquisar, proporcionando uma navegação mais rápida e acessível tanto na versão web quanto na aplicação mobile.
 
 ## Conjunto de Slides (Estrutura)
 
-O grupo deve distribuir de forma coerente o conteúdo a ser apresentado, dentro do tempo determinado. Importante ressaltar a importância da descrição clara de todo o andamento do projeto, insumos gerados e requisitos atendidos.
- 
-> **Links Úteis**:
-> - [A regra 10-20-30 para apresentações de sucesso](https://revistapegn.globo.com/Noticias/noticia/2014/07/regra-10-20-30-para-apresentacoes-de-sucesso.html)
-> - [Top Tips for Effective Presentations](https://www.skillsyouneed.com/present/presentation-tips.html)
-> - [How to make a great presentation](https://www.ted.com/playlists/574/how_to_make_a_great_presentation)
+📑 **Arquivo PDF dos slides:**
 
+[meupj_apresentacao.pptx.pdf](../slides/meupj_apresentacao.pptx.pdf)
 # Considerações Finais
 
 ## Amanda Vitor Lopes
