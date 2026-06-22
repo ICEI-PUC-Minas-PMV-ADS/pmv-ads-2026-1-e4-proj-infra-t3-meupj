@@ -87,7 +87,7 @@ Do ponto de vista da arquitetura, seria interessante adotar mecanismos de cache 
 ### **Avaliação dos frameworks e tecnologias utilizados**
 Considero que os frameworks e tecnologias adotados foram adequados ao escopo do projeto e ao perfil da equipe. A organização em monorepo com `pnpm` e `turbo` facilitou a padronização entre backend, web e mobile, reduzindo retrabalho e melhorando a consistência entre os módulos. No backend, o uso de `Fastify`, `TypeBox` e `MongoDB` permitiu construir uma API enxuta, com validação explícita dos contratos e boa separação entre rotas, serviços e persistência. Para autenticação, o `Better Auth` atendeu bem à necessidade de sessão por cookie no web e integração com o app mobile. No frontend, `Next.js` e `Expo` ofereceram uma base produtiva para entrega das duas interfaces com velocidade e reutilização de padrões de implementação.
 ### Quadro visual atualizado de gestão do trabalho no GitHub
-<img width="700" alt="image" src="" />
+<img width="700" alt="image" src="https://github.com/user-attachments/assets/7cc13d54-b187-4077-892c-a2be9e538fc2"/>
 
 ### Comentários sobre a participação individual de cada integrante
 O grupo conseguiu trabalhar de forma colaborativa ao longo das etapas, com divisão prática por frentes e apoio cruzado quando surgiam integrações entre módulos. Na minha percepção, a evolução do projeto aconteceu de forma consistente porque cada integrante assumiu responsabilidades claras e contribuiu também para a validação das entregas dos demais.
