@@ -1,29 +1,25 @@
-message: Please cite this software using these metadata.
-title:
+message: Projeto acadêmico de um sistema para organização comercial e financeira de pequenos negócios, com backend, web e mobile no mesmo repositório.
+title: MEUPJ
 authors:
-  - family-names: 
-    given-names: 
-  - family-names: 
-    given-names: 
-  - family-names: 
-    given-names: 
-  - family-names: 
-    given-names: 
-  - family-names: 
-    given-names: 
-  - family-names: 
-    given-names: 
+  - family-names: Furtado Amantino Vieira
+    given-names: Frederico
+  - family-names: Andrade Castro Vieira
+    given-names: Guilherme
+  - family-names: Gonçalves Maia Sales
+    given-names: Maria Julia
+  - family-names: Esteves Martins
+    given-names: Eric
+  - family-names: Vitor Lopes
+    given-names: Amanda
+  - family-names: Bricio Alvarenga Sampaio
+    given-names: Bruna
   - name-suffix: Professor
     affiliation: PUC Minas
-    family-names: 
-    given-names: 
-  - name-suffix: Professor
-    affiliation: PUC Minas
-    family-names: 
-    given-names: 
+    family-names: Jerônimo de Almeida
+    given-names: Carolina Stephanie
 keywords:
-  - 
-  - 
-repository-code: 
+  - negócios
+  - financeiro
+repository-code: https://github.com/ICEI-PUC-Minas-PMV-ADS/pmv-ads-2026-1-e4-proj-infra-t3-meupj
 version: 1.0.0
-date-released: 2023-10-31
+date-released: 2026-07-01
